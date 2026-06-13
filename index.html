@@ -170,14 +170,14 @@
   <div id="videoZone">
     <div class="vz-frame">
       <div class="vz-video">
-        <iframe src="https://www.youtube-nocookie.com/embed/oODPT0Gq-XA?rel=0"
+        <iframe id="lessonVideo" src="https://www.youtube-nocookie.com/embed/oODPT0Gq-XA?rel=0&playsinline=1"
                 title="Luas Prisma 1" loading="lazy"
                 allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
       </div>
-      <div class="vz-title">Luas Prisma 1</div>
+      <div class="vz-title" id="lessonVideoTitle">Luas Prisma 1</div>
     </div>
-    <!-- VIDEO: tukar ID '52p9iy_hSk0' dalam URL iframe di atas untuk guna video lain -->
+    <!-- Video 1 dipaparkan pada skrin mula dan Babak 2–9; Video 2 dipaparkan khusus dalam Babak 1. -->
   </div>
   <div id="contentWrap">
   <div id="progress" style="display:none">
@@ -387,8 +387,23 @@ function playDing(p){tone(620*(p||1),0.22,'sine',0.16);tone(930*(p||1),0.3,'sine
 function playFanfare(){[523,659,784,1047].forEach((f,i)=>tone(f,0.32,'triangle',0.16,i*0.12));}
 function playBoing(){tone(300,0.25,'sawtooth',0.1);tone(180,0.3,'sawtooth',0.08,0.1);}
 
+const VIDEO_1={id:'oODPT0Gq-XA',title:'Luas Prisma 1'};
+const VIDEO_2={id:'tTMSnaKFL3s',title:'Luas Prisma 2'};
+let activeVideoId=VIDEO_1.id;
+function setLessonVideoForScene(sceneNumber){
+  const selected=sceneNumber===1?VIDEO_2:VIDEO_1;
+  if(activeVideoId===selected.id)return;
+  const frame=document.getElementById('lessonVideo');
+  const label=document.getElementById('lessonVideoTitle');
+  frame.src='https://www.youtube-nocookie.com/embed/'+selected.id+'?rel=0&playsinline=1';
+  frame.title=selected.title;
+  label.textContent=selected.title;
+  activeVideoId=selected.id;
+}
+
 const TOTAL=9;let current=0;
 function go(n){
+  setLessonVideoForScene(n);
   document.querySelectorAll('.scene').forEach(e=>e.classList.remove('active'));
   const sc=document.getElementById('s'+n);if(sc)sc.classList.add('active');
   current=n;
