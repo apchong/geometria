@@ -177,7 +177,7 @@
       </div>
       <div class="vz-title" id="lessonVideoTitle">Luas Prisma 1</div>
     </div>
-    <!-- Video 1 dipaparkan pada skrin mula dan Babak 2–9; Video 2 dipaparkan khusus dalam Babak 1. -->
+    <!-- Video 1 dipaparkan pada skrin mula; Video 2–10 dipaparkan masing-masing pada Babak 1–9. -->
   </div>
   <div id="contentWrap">
   <div id="progress" style="display:none">
@@ -389,9 +389,25 @@ function playBoing(){tone(300,0.25,'sawtooth',0.1);tone(180,0.3,'sawtooth',0.08,
 
 const VIDEO_1={id:'oODPT0Gq-XA',title:'Luas Prisma 1'};
 const VIDEO_2={id:'tTMSnaKFL3s',title:'Luas Prisma 2'};
+const VIDEO_3={id:'TkSt9KA6rbY',title:'Luas Prisma 3'};
+const VIDEO_4={id:'zoY_KR4eB2k',title:'Luas Prisma 4'};
+const VIDEO_5={id:'70znhHcZ778',title:'Luas Prisma 5'};
+const VIDEO_6={id:'X4AOnsr_-e4',title:'Luas Prisma 6'};
+const VIDEO_7={id:'3KO7OaYg-FM',title:'Luas Prisma 7'};
+const VIDEO_8={id:'I1iSL6FhMTw',title:'Luas Prisma 8'};
+const VIDEO_9={id:'bRrNihSb9Lw',title:'Luas Prisma 9'};
+const VIDEO_10={id:'3Fo25guIQ-U',title:'Luas Prisma 10'};
 let activeVideoId=VIDEO_1.id;
 function setLessonVideoForScene(sceneNumber){
-  const selected=sceneNumber===1?VIDEO_2:VIDEO_1;
+  const selected=sceneNumber===1?VIDEO_2:
+                 sceneNumber===2?VIDEO_3:
+                 sceneNumber===3?VIDEO_4:
+                 sceneNumber===4?VIDEO_5:
+                 sceneNumber===5?VIDEO_6:
+                 sceneNumber===6?VIDEO_7:
+                 sceneNumber===7?VIDEO_8:
+                 sceneNumber===8?VIDEO_9:
+                 sceneNumber===9?VIDEO_10:VIDEO_1;
   if(activeVideoId===selected.id)return;
   const frame=document.getElementById('lessonVideo');
   const label=document.getElementById('lessonVideoTitle');
