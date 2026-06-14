@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luas Permukaan Gabungan 3D</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f4f0;
+    --paper: #ffffff;
+    --ink: #1c1c2e;
+    --ink-mid: #555570;
+    --ink-light: #888899;
+    --rule: #e0ddd6;
+    --red: #c0392b;
+    --red-light: #fdf0ef;
+    --blue: #1a3a6b;
+    --blue-light: #eef2fb;
+    --green: #1e6b3a;
+    --green-light: #edf7f1;
+    --orange: #b85c00;
+    --orange-light: #fef5ec;
+    --step-num: #e8e6e0;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 32px 16px 64px;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    max-width: 860px;
+    margin: 0 auto 36px;
+  }
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 6px;
+  }
+  .page-header h1 {
+    font-family: 'Noto Serif', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.25;
+    margin-bottom: 6px;
+  }
+  .page-header p {
+    font-size: 13px;
+    color: var(--ink-mid);
+  }
+  .divider {
+    height: 2px;
+    background: var(--ink);
+    margin-top: 16px;
+  }
+
+  /* ── Formula strip ── */
+  .formula-strip {
+    max-width: 860px;
+    margin: 0 auto 28px;
+    background: var(--blue-light);
+    border: 1px solid #c5d3ee;
+    border-radius: 6px;
+    padding: 12px 18px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .formula-strip .f-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blue);
+    white-space: nowrap;
+  }
+  .formula-strip .f-items {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 12.5px;
+    color: var(--blue);
+    font-family: 'Noto Serif', serif;
+  }
+  .formula-strip .f-item { white-space: nowrap; }
+
+  /* ── Tab nav ── */
+  .tabs-wrap {
+    max-width: 860px;
+    margin: 0 auto 0;
+  }
+  .tab-nav {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--rule);
+  }
+  .tab-btn {
+    padding: 12px 24px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-light);
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s, border-color 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn.active { color: var(--red); border-bottom-color: var(--red); }
+
+  /* ── Tab panels ── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Question card ── */
+  .q-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    overflow: hidden;
+  }
+
+  .q-card-header {
+    padding: 20px 28px 16px;
+    border-bottom: 1px solid var(--rule);
+    background: #fafaf8;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .q-badge {
+    background: var(--red);
+    color: white;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 4px 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .q-title {
+    font-family: 'Noto Serif', serif;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+
+  .q-body {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 0;
+  }
+
+  /* ── Diagram panel ── */
+  .diagram-panel {
+    padding: 24px 16px;
+    border-right: 1px solid var(--rule);
+    background: #fafaf8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .diagram-panel svg { display: block; }
+  .shape-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-mid);
+    text-align: center;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* ── Solution panel ── */
+  .solution-panel { padding: 24px 28px; }
+
+  /* Strategy note */
+  .strategy-note {
+    background: var(--orange-light);
+    border-left: 3px solid var(--orange);
+    padding: 10px 14px;
+    border-radius: 0 4px 4px 0;
+    margin-bottom: 20px;
+    font-size: 12.5px;
+    color: var(--orange);
+    line-height: 1.5;
+  }
+  .strategy-note strong { display: block; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 3px; }
+
+  /* Steps */
+  .steps { display: flex; flex-direction: column; gap: 0; }
+
+  .step {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 12px;
+    align-items: start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--step-num);
+  }
+  .step:last-child { border-bottom: none; }
+
+  .step-num {
+    width: 24px;
+    height: 24px;
+    background: var(--step-num);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-mid);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step.highlight .step-num { background: var(--green); color: white; }
+
+  .step-content {}
+  .step-desc {
+    font-size: 12.5px;
+    color: var(--ink-mid);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  .step-eq {
+    font-family: 'Noto Serif', serif;
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.7;
+  }
+  .step-eq .indent { display: block; padding-left: 28px; }
+  .step-eq .eq-line { display: flex; align-items: baseline; gap: 8px; }
+  .step-eq .op { color: var(--ink-mid); min-width: 16px; }
+
+  /* sub/sup inline */
+  sup { font-size: 0.72em; vertical-align: super; }
+  sub { font-size: 0.72em; vertical-align: sub; }
+
+  /* Answer box */
+  .answer-box {
+    margin-top: 18px;
+    background: var(--green-light);
+    border: 1.5px solid var(--green);
+    border-radius: 6px;
+    padding: 14px 18px;
+  }
+  .answer-box .a-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 4px;
+  }
+  .answer-box .a-value {
+    font-family: 'Noto Serif', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--green);
+  }
+
+  /* Parts breakdown */
+  .parts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 10px 0 14px;
+  }
+  .part-chip {
+    background: var(--blue-light);
+    border: 1px solid #c5d3ee;
+    border-radius: 5px;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  .part-chip .p-name { font-weight: 600; color: var(--blue); margin-bottom: 2px; }
+  .part-chip .p-val { color: var(--ink); font-family: 'Noto Serif', serif; font-size: 13px; }
+
+  /* Fraction helper */
+  .frac {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: middle;
+    font-size: 0.85em;
+    margin: 0 2px;
+    line-height: 1.1;
+  }
+  .frac .n { border-bottom: 1px solid currentColor; padding: 0 2px; }
+  .frac .d { padding: 0 2px; }
+
+  @media (max-width: 640px) {
+    .q-body { grid-template-columns: 1fr; }
+    .diagram-panel { border-right: none; border-bottom: 1px solid var(--rule); }
+    .parts-grid { grid-template-columns: 1fr; }
+    .formula-strip .f-items { gap: 10px; }
+    .tab-btn { padding: 10px 14px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <p class="eyebrow">Matematik — Geometri Tiga Dimensi</p>
+  <h1>Luas Permukaan Gabungan Bentuk 3D</h1>
+  <p>Soalan 3 &nbsp;|&nbsp; Guna π = ²²⁄₇ &nbsp;|&nbsp; Tunjukkan langkah penyelesaian lengkap</p>
+  <div class="divider"></div>
+</div>
+
+<div class="formula-strip">
+  <span class="f-label">Formula</span>
+  <div class="f-items">
+    <span class="f-item">Hemisfera: ½ × 4πj² = 2πj²</span>
+    <span class="f-item">Silinder sisi: 2πjt</span>
+    <span class="f-item">Tapak bulat: πj²</span>
+    <span class="f-item">Kon sisi: πjs</span>
+    <span class="f-item">Muka segiempat: p × l</span>
+  </div>
+</div>
+
+<div class="tabs-wrap">
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('a', this)">Soalan (a) — Silinder + Hemisfera</button>
+    <button class="tab-btn" onclick="switchTab('b', this)">Soalan (b) — Kon Terbalik</button>
+    <button class="tab-btn" onclick="switchTab('c', this)">Soalan (c) — Kuboid + Hemisfera</button>
+  </div>
+
+  <!-- ══════════════ SOALAN A ══════════════ -->
+  <div id="tab-a" class="tab-panel active">
+    <div class="q-card">
+      <div class="q-card-header">
+        <span class="q-badge">3(a)</span>
+        <p class="q-title">Silinder tegak dengan hemisfera di bahagian atas. Jejari = 5 cm, tinggi silinder = 12 cm. Hitung luas permukaan gabungan.</p>
+      </div>
+      <div class="q-body">
+
+        <!-- SVG Diagram -->
+        <div class="diagram-panel">
+          <svg width="160" height="210" viewBox="0 0 160 210">
+            <!-- Cylinder body -->
+            <rect x="40" y="100" width="80" height="80" fill="#d0e8f5" stroke="#1a3a6b" stroke-width="1.5"/>
+            <!-- Bottom ellipse -->
+            <ellipse cx="80" cy="180" rx="40" ry="11" fill="#b0d0e8" stroke="#1a3a6b" stroke-width="1.5"/>
+            <!-- Top ellipse (hidden under hemisphere base) -->
+            <ellipse cx="80" cy="100" rx="40" ry="11" fill="#d0e8f5" stroke="#1a3a6b" stroke-width="1" stroke-dasharray="4,3"/>
+            <!-- Hemisphere -->
+            <path d="M 40 100 A 40 40 0 0 1 120 100" fill="#a8d5f0" stroke="#1a3a6b" stroke-width="1.5"/>
+            <ellipse cx="80" cy="100" rx="40" ry="11" fill="#a8d5f0" stroke="#1a3a6b" stroke-width="1.5"/>
+
+            <!-- Dashed centre line -->
+            <line x1="80" y1="60" x2="80" y2="180" stroke="#888" stroke-width="0.8" stroke-dasharray="3,3"/>
+
+            <!-- Height arrow (cylinder) -->
+            <line x1="130" y1="100" x2="130" y2="180" stroke="#1a3a6b" stroke-width="1"/>
+            <polygon points="130,100 127,107 133,107" fill="#1a3a6b"/>
+            <polygon points="130,180 127,173 133,173" fill="#1a3a6b"/>
+            <text x="135" y="144" font-size="10" fill="#1a3a6b" font-family="Inter,sans-serif">12 cm</text>
+
+            <!-- Radius arrow -->
+            <line x1="80" y1="192" x2="120" y2="192" stroke="#1a3a6b" stroke-width="1"/>
+            <polygon points="80,192 87,189 87,195" fill="#1a3a6b"/>
+            <polygon points="120,192 113,189 113,195" fill="#1a3a6b"/>
+            <text x="88" y="205" font-size="10" fill="#1a3a6b" font-family="Inter,sans-serif">5 cm</text>
+
+            <!-- Labels -->
+            <text x="52" y="92" font-size="9" fill="#555" font-family="Inter,sans-serif">Hemisfera</text>
+            <text x="56" y="148" font-size="9" fill="#555" font-family="Inter,sans-serif">Silinder</text>
+          </svg>
+          <p class="shape-label">Silinder + Hemisfera</p>
+        </div>
+
+        <!-- Solution -->
+        <div class="solution-panel">
+          <div class="strategy-note">
+            <strong>Strategi</strong>
+            Luas permukaan = Sisi silinder + Tapak bawah silinder + Permukaan hemisfera<br>
+            <em>Tapak atas silinder TIDAK dikira — disambung hemisfera.</em>
+          </div>
+
+          <div class="steps">
+
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <p class="step-desc">Kenal pasti nilai</p>
+                <div class="step-eq">
+                  Jejari, j = 5 cm &nbsp;|&nbsp; Tinggi silinder, t = 12 cm
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <p class="step-desc">Luas sisi silinder = 2πjt</p>
+                <div class="step-eq">
+                  <div class="eq-line"><span class="op">=</span><span>2 × <span class="frac"><span class="n">22</span><span class="d">7</span></span> × 5 × 12</span></div>
+                  <div class="eq-line"><span class="op">=</span><span>377.14 cm²</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <p class="step-desc">Luas tapak bawah silinder = πj²</p>
+                <div class="step-eq">
+                  <div class="eq-line"><span class="op">=</span><span><span class="frac"><span class="n">22</span><span class="d">7</span></span> × 5²</span></div>
+                  <div class="eq-line"><span class="op">=</span><span><span class="frac"><span class="n">22</span><span class="d">7</span></span> × 25</span></div>
+                  <div class="eq-line"><span class="op">=</span><span>78.57 cm²</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">4</div>
+              <div class="step-content">
+                <p class="step-desc">Luas permukaan hemisfera = 2πj²</p>
+                <div class="step-eq">
+                  <div class="eq-line"><span class="op">=</span><span>2 × <span class="frac"><span class="n">22</span><span class="d">7</span></span> × 5²</span></div>
+                  <div class="eq-line"><span class="op">=</span><span>2 × <span class="frac"><span class="n">22</span><span class="d">7</span></span> × 25</span></div>
+                  <div class="eq-line"><span class="op">=</span><span>157.14 cm²</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step highlight">
+              <div class="step-num">5</div>
+              <div class="step-content">
+                <p class="step-desc">Jumlahkan semua bahagian</p>
+                <div class="step-eq">
+                  <div class="eq-line"><span class="op">=</span><span>377.14 + 78.57 + 157.14</span></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="parts-grid">
+            <div class="part-chip"><div class="p-name">Sisi silinder</div><div class="p-val">377.14 cm²</div></div>
+            <div class="part-chip"><div class="p-name">Tapak bawah</div><div class="p-val">78.57 cm²</div></div>
+            <div class="part-chip"><div class="p-name">Hemisfera</div><div class="p-val">157.14 cm²</div></div>
+            <div class="part-chip"><div class="p-name">Tapak atas</div><div class="p-val">❌ tidak dikira</div></div>
+          </div>
+
+          <div class="answer-box">
+            <p class="a-label">Luas permukaan gabungan</p>
+            <p class="a-value">= 612.85 cm²</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ SOALAN B ══════════════ -->
+  <div id="tab-b" class="tab-panel">
+    <div class="q-card">
+      <div class="q-card-header">
+        <span class="q-badge">3(b)</span>
+        <p class="q-title">Kon terbalik. Panjang slant, j = 5 cm. Tinggi kon = 12 cm. Hitung luas permukaan gabungan.</p>
+      </div>
+      <div class="q-body">
+
+        <!-- SVG Diagram -->
+        <div class="diagram-panel">
+          <svg width="160" height="200" viewBox="0 0 160 200">
+            <!-- Inverted cone: apex at bottom, base ellipse at top -->
+            <!-- Base ellipse at top -->
+            <ellipse cx="80" cy="50" rx="40" ry="11" fill="#f5c6a0" stroke="#b85c00" stroke-width="1.5"/>
+            <!-- Cone body -->
+            <line x1="40" y1="50" x2="80" y2="160" stroke="#b85c00" stroke-width="1.5"/>
+            <line x1="120" y1="50" x2="80" y2="160" stroke="#b85c00" stroke-width="1.5"/>
+            <path d="M 40 50 L 80 160 L 120 50" fill="#f5d5b8" stroke="none"/>
+            <!-- Redraw ellipse on top -->
+            <ellipse cx="80" cy="50" rx="40" ry="11" fill="#f5c6a0" stroke="#b85c00" stroke-width="1.5"/>
+
+            <!-- Height dashed line -->
+            <line x1="80" y1="50" x2="80" y2="160" stroke="#888" stroke-width="0.8" stroke-dasharray="3,3"/>
+            <!-- Right angle -->
+            <rect x="80" y="149" width="7" height="7" fill="none" stroke="#888" stroke-width="0.8"/>
+
+            <!-- Slant label -->
+            <line x1="78" y1="50" x2="78" y2="160" stroke="none"/>
+            <text x="88" y="108" font-size="10" fill="#b85c00" font-family="Inter,sans-serif" transform="rotate(-68,88,108)">s = 13 cm</text>
+
+            <!-- Height arrow -->
+            <line x1="128" y1="50" x2="128" y2="160" stroke="#1a3a6b" stroke-width="1"/>
+            <polygon points="128,50 125,57 131,57" fill="#1a3a6b"/>
+            <polygon points="128,160 125,153 131,153" fill="#1a3a6b"/>
+            <text x="132" y="110" font-size="10" fill="#1a3a6b" font-family="Inter,sans-serif">12 cm</text>
+
+            <!-- j label (slant line on diagram) -->
+            <line x1="80" y1="47" x2="120" y2="47" stroke="#b85c00" stroke-width="1"/>
+            <text x="85" y="38" font-size="10" fill="#b85c00" font-family="Inter,sans-serif">j = 5 cm (slant)</text>
+
+            <!-- Apex dot -->
+            <circle cx="80" cy="160" r="3" fill="#b85c00"/>
+          </svg>
+          <p class="shape-label">Kon Terbalik</p>
+        </div>
+
+        <!-- Solution -->
+        <div class="solution-panel">
+          <div class="strategy-note">
+            <strong>Strategi + Nota Penting</strong>
+            j = 5 cm dalam soalan ialah <strong>jejari</strong>, bukan slant. Perlu cari panjang slant (s) menggunakan Teorem Pythagoras dahulu.<br>
+            Luas = Tapak bulat atas + Sisi kon (πjs)
+          </div>
+
+          <div class="steps">
+
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <p class="step-desc">Kenal pasti nilai</p>
+                <div class="step-eq">
+                  Jejari, j = 5 cm &nbsp;|&nbsp; Tinggi, t = 12 cm
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <p class="step-desc">Cari panjang slant, s (Teorem Pythagoras)</p>
+                <div class="step-eq">
+                  <div class="eq-line"><span class="op"></span><span>s² = j² + t²</span></div>
+                  <div class="eq-line"><span class="op">=</span><span>5² + 12²</span></div>
+                  <div class="eq-line"><span class="op">=</span><span>25 + 144 = 169</span></div>
+                  <div class="eq-line"><span class="op">s =</span><span>√169 = <strong>13 cm</strong></span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <p class="step-desc">Luas tapak bulat atas = πj²</p>
+                <div class="step-eq">
+                  <div class="eq-line"><span class="op">=</span><span><span class="frac"><span class="n">22</span><span class="d">7</span></span> × 5²</span></div>
+                  <div class="eq-line"><span class="op">=</span><span><span class="frac"><span class="n">22</span><span class="d">7</span></span> × 25 = 78.57 cm²</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">4</div>
+              <div class="step-content">
+                <p class="step-desc">Luas sisi kon = πjs</p>
+                <div class="step-eq">
+                  <div class="eq-line"><span class="op">=</span><span><span class="frac"><span class="n">22</span><span class="d">7</span></span> × 5 × 13</span></div>
+                  <div class="eq-line"><span class="op">=</span><span>204.29 cm²</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step highlight">
+              <div class="step-num">5</div>
+              <div class="step-content">
+                <p class="step-desc">Jumlahkan semua bahagian</p>
+                <div class="step-eq">
+                  <div class="eq-line"><span class="op">=</span><span>78.57 + 204.29</span></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="parts-grid">
+            <div class="part-chip"><div class="p-name">Tapak bulat atas</div><div class="p-val">78.57 cm²</div></div>
+            <div class="part-chip"><div class="p-name">Sisi kon (πjs)</div><div class="p-val">204.29 cm²</div></div>
+            <div class="part-chip"><div class="p-name">Panjang slant</div><div class="p-val">s = 13 cm ✓</div></div>
+            <div class="part-chip"><div class="p-name">Apex (hujung bawah)</div><div class="p-val">❌ tiada luas</div></div>
+          </div>
+
+          <div class="answer-box">
+            <p class="a-label">Luas permukaan gabungan</p>
+            <p class="a-value">= 282.86 cm²</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ SOALAN C ══════════════ -->
+  <div id="tab-c" class="tab-panel">
+    <div class="q-card">
+      <div class="q-card-header">
+        <span class="q-badge">3(c)</span>
+        <p class="q-title">Kuboid dengan hemisfera di bahagian atas. Diameter hemisfera = 10 cm (j = 5 cm), tinggi kuboid = 15 cm. Tapak kuboid = 10 cm × 10 cm.</p>
+      </div>
+      <div class="q-body">
+
+        <!-- SVG Diagram -->
+        <div class="diagram-panel">
+          <svg width="180" height="220" viewBox="0 0 180 220">
+            <!-- Cuboid isometric -->
+            <!-- Front face -->
+            <rect x="30" y="90" width="80" height="90" fill="#e8dcc8" stroke="#5a3e1b" stroke-width="1.5"/>
+            <!-- Top face -->
+            <polygon points="30,90 52,70 132,70 110,90" fill="#f0e8d4" stroke="#5a3e1b" stroke-width="1.5"/>
+            <!-- Right face -->
+            <polygon points="110,90 132,70 132,160 110,180" fill="#d0c0a0" stroke="#5a3e1b" stroke-width="1.5"/>
+
+            <!-- Hemisphere on top of cuboid -->
+            <!-- Base of hemisphere (ellipse) on top face -->
+            <ellipse cx="81" cy="80" rx="25" ry="7" fill="#a8d5f0" stroke="#1a3a6b" stroke-width="1.2"/>
+            <!-- Hemisphere dome -->
+            <path d="M 56 80 A 25 25 0 0 1 106 80" fill="#c0e4f8" stroke="#1a3a6b" stroke-width="1.2"/>
+            <!-- Redraw ellipse -->
+            <ellipse cx="81" cy="80" rx="25" ry="7" fill="#a8d5f0" stroke="#1a3a6b" stroke-width="1.2" fill-opacity="0.7"/>
+
+            <!-- Height arrow -->
+            <line x1="148" y1="90" x2="148" y2="180" stroke="#1a3a6b" stroke-width="1"/>
+            <polygon points="148,90 145,97 151,97" fill="#1a3a6b"/>
+            <polygon points="148,180 145,173 151,173" fill="#1a3a6b"/>
+            <text x="152" y="140" font-size="10" fill="#1a3a6b" font-family="Inter,sans-serif">15 cm</text>
+
+            <!-- Diameter label -->
+            <line x1="56" y1="95" x2="106" y2="95" stroke="#1a3a6b" stroke-width="0.8" stroke-dasharray="3,2"/>
+            <text x="60" y="108" font-size="9" fill="#1a3a6b" font-family="Inter,sans-serif">Diameter = 10 cm</text>
+
+            <!-- Width label (bottom) -->
+            <line x1="30" y1="195" x2="110" y2="195" stroke="#5a3e1b" stroke-width="1"/>
+            <polygon points="30,195 37,192 37,198" fill="#5a3e1b"/>
+            <polygon points="110,195 103,192 103,198" fill="#5a3e1b"/>
+            <text x="45" y="208" font-size="10" fill="#5a3e1b" font-family="Inter,sans-serif">10 cm</text>
+
+            <!-- Depth label -->
+            <line x1="115" y1="175" x2="137" y2="155" stroke="#5a3e1b" stroke-width="0.8"/>
+            <text x="130" y="172" font-size="9" fill="#5a3e1b" font-family="Inter,sans-serif">10 cm</text>
+          </svg>
+          <p class="shape-label">Kuboid + Hemisfera</p>
+        </div>
+
+        <!-- Solution -->
+        <div class="solution-panel">
+          <div class="strategy-note">
+            <strong>Strategi</strong>
+            Luas = Semua 6 muka kuboid − Tapak bulat (dicantum hemisfera) + Luas permukaan hemisfera<br>
+            <em>Tapak bulat atas kuboid TOLAK kerana ditutup oleh alas hemisfera.</em>
+          </div>
+
+          <div class="steps">
+
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <p class="step-desc">Kenal pasti nilai</p>
+                <div class="step-eq">
+                  Jejari hemisfera, j = 5 cm<br>
+                  Kuboid: p = 10 cm, l = 10 cm, t = 15 cm
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <p class="step-desc">Luas semua 6 muka kuboid = 2(pl + pt + lt)</p>
+                <div class="step-eq">
+                  <div class="eq-line"><span class="op">=</span><span>2[(10×10) + (10×15) + (10×15)]</span></div>
+                  <div class="eq-line"><span class="op">=</span><span>2[100 + 150 + 150]</span></div>
+                  <div class="eq-line"><span class="op">=</span><span>2 × 400 = 800 cm²</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <p class="step-desc">Tolak tapak bulat (kawasan dicantum) = πj²</p>
+                <div class="step-eq">
+                  <div class="eq-line"><span class="op">=</span><span><span class="frac"><span class="n">22</span><span class="d">7</span></span> × 5² = <span class="frac"><span class="n">22</span><span class="d">7</span></span> × 25</span></div>
+                  <div class="eq-line"><span class="op">=</span><span>78.57 cm²</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num">4</div>
+              <div class="step-content">
+                <p class="step-desc">Luas permukaan hemisfera = 2πj²</p>
+                <div class="step-eq">
+                  <div class="eq-line"><span class="op">=</span><span>2 × <span class="frac"><span class="n">22</span><span class="d">7</span></span> × 5²</span></div>
+                  <div class="eq-line"><span class="op">=</span><span>2 × <span class="frac"><span class="n">22</span><span class="d">7</span></span> × 25</span></div>
+                  <div class="eq-line"><span class="op">=</span><span>157.14 cm²</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step highlight">
+              <div class="step-num">5</div>
+              <div class="step-content">
+                <p class="step-desc">Luas gabungan = Kuboid − Tapak bulat + Hemisfera</p>
+                <div class="step-eq">
+                  <div class="eq-line"><span class="op">=</span><span>800 − 78.57 + 157.14</span></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="parts-grid">
+            <div class="part-chip"><div class="p-name">6 muka kuboid</div><div class="p-val">800.00 cm²</div></div>
+            <div class="part-chip"><div class="p-name">− Tapak bulat</div><div class="p-val">− 78.57 cm²</div></div>
+            <div class="part-chip"><div class="p-name">+ Hemisfera</div><div class="p-val">+ 157.14 cm²</div></div>
+            <div class="part-chip"><div class="p-name">Alas hemisfera</div><div class="p-val">❌ tidak dikira</div></div>
+          </div>
+
+          <div class="answer-box">
+            <p class="a-label">Luas permukaan gabungan</p>
+            <p class="a-value">= 878.57 cm²</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div><!-- tabs-wrap -->
+
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>
