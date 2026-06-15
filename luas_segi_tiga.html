@@ -1,0 +1,847 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Luas Segi Tiga — Rumus Asas 2D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16235E; --navy:#16235E; --muted:#6E76A8;
+  --purple:#7C3FBD; --purple-d:#63319C; --purple-l:#F2EAFB;
+  --gold:#FBC01E; --gold-d:#E0A40C;
+  --pink:#ED1C7A; --pink-d:#C9135F;
+  --blue:#2E86DE; --blue-d:#1B5FB0;
+  --green:#46A845; --green-d:#2E7D32;
+  --fill:#AEDCF4; --fill-tri:#C8E6A0; --fill-stroke:#16235E;
+  --cream:#FEF7D9; --cream-line:#3E9BE0;
+  --paper:#FFFFFF; --bg1:#F6F2FC; --bg2:#FDF4F8; --line:#E7E1F2;
+  --shadow:0 16px 34px rgba(60,40,110,.16); --shadow-sm:0 6px 16px rgba(60,40,110,.14);
+  --fdisplay:'Fredoka',"Segoe UI Rounded","SF Pro Rounded",system-ui,sans-serif;
+  --fbody:'Nunito',"Segoe UI",system-ui,sans-serif;
+  --r:18px; --r-lg:26px;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  font-family:var(--fbody); color:var(--ink);
+  background:
+    radial-gradient(1200px 700px at 12% -8%, #EFE7FB 0%, transparent 55%),
+    radial-gradient(1000px 700px at 100% 0%, #FDE7F1 0%, transparent 50%),
+    linear-gradient(180deg,var(--bg1),var(--bg2));
+  overflow:hidden; -webkit-tap-highlight-color:transparent; -webkit-text-size-adjust:100%;
+}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:10px}
+#sparkles{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ===== shell ===== */
+#app{position:fixed;inset:0;z-index:2;display:flex;flex-direction:column}
+.casebar{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:10px clamp(10px,3vw,24px)}
+.brandmini{display:flex;align-items:center;gap:8px;font-family:var(--fdisplay);font-weight:700;
+  color:var(--purple);font-size:14px;white-space:nowrap}
+.brandmini .dotlogo{width:26px;height:26px;border-radius:8px;background:var(--purple);display:grid;place-items:center;color:#fff;font-size:13px;box-shadow:var(--shadow-sm)}
+.dots{flex:1 1 auto;display:flex;justify-content:center;align-items:center;gap:7px}
+.dot{width:9px;height:9px;border-radius:50%;background:rgba(124,63,189,.22);transition:.35s}
+.dot.on{background:var(--gold);transform:scale(1.4);box-shadow:0 0 0 4px rgba(251,192,30,.22)}
+.dot.done{background:rgba(124,63,189,.5)}
+.tools{display:flex;gap:7px;align-items:center}
+.iconbtn{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:#fff;
+  border:1.5px solid var(--line);color:var(--purple);box-shadow:var(--shadow-sm);transition:.16s}
+.iconbtn:hover{transform:translateY(-1px);border-color:var(--purple)}
+.iconbtn svg{width:22px;height:22px}
+.iconbtn[disabled]{opacity:.4;cursor:not-allowed;transform:none}
+.iconbtn.audio.on{background:var(--gold);border-color:var(--gold-d);color:#fff}
+.sep{width:1px;height:24px;background:var(--line);margin:0 2px}
+
+.scenes{flex:1 1 auto;position:relative;min-height:0}
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  padding:4px clamp(12px,3.5vw,40px) 0;opacity:0;transform:translateY(14px) scale(.99);
+  pointer-events:none;transition:opacity .42s ease,transform .42s ease;overflow:auto}
+.scene.active{opacity:1;transform:none;pointer-events:auto}
+.wrap{width:100%;max-width:1040px;margin:auto;display:flex;flex-direction:column;align-items:center;gap:14px;zoom:var(--z,1)}
+#copyright{flex:0 0 auto;text-align:center;font-family:var(--fbody);font-weight:700;
+  font-size:clamp(9.5px,1.5vw,11px);line-height:1.35;color:rgba(60,40,110,.45);
+  padding:6px clamp(12px,3vw,26px) calc(6px + env(safe-area-inset-bottom,0px))}
+
+/* ===== type ===== */
+h1,h2,h3{font-family:var(--fdisplay);margin:0;line-height:1.06;font-weight:700}
+.step-eyebrow{font-family:var(--fdisplay);font-weight:600;color:var(--purple);letter-spacing:.02em;
+  font-size:clamp(13px,2vw,16px);background:var(--purple-l);padding:6px 16px;border-radius:999px}
+.step-h{font-size:clamp(22px,4.2vw,36px);color:var(--ink);text-align:center;max-width:22ch}
+.hint{font-weight:800;color:var(--muted);font-size:clamp(14px,2.2vw,17px);text-align:center;max-width:34ch}
+
+/* ===== brand banner / sub ===== */
+.brand-banner{position:relative;font-family:var(--fdisplay);font-weight:700;color:#fff;
+  font-size:clamp(30px,7vw,58px);letter-spacing:.005em;background:var(--purple);
+  padding:14px clamp(26px,6vw,54px);border-radius:26px;box-shadow:0 10px 0 var(--purple-d),var(--shadow);
+  text-shadow:0 2px 0 rgba(0,0,0,.12);border:3px dashed rgba(255,255,255,.5);background-clip:padding-box}
+.brand-banner .star{position:absolute;top:50%;width:34px;height:34px;transform:translateY(-50%)}
+.brand-banner .star.l{left:-20px} .brand-banner .star.r{right:-20px}
+.brand-sub{font-family:var(--fdisplay);font-weight:700;color:var(--ink);font-size:clamp(17px,3.2vw,28px);
+  background:var(--gold);padding:9px 26px;border-radius:999px;box-shadow:0 6px 0 var(--gold-d),var(--shadow-sm)}
+
+/* ===== buttons ===== */
+.btn{font-family:var(--fdisplay);font-weight:700;font-size:clamp(17px,2.5vw,21px);
+  background:var(--purple);color:#fff;padding:14px 30px;border-radius:999px;
+  box-shadow:0 7px 0 var(--purple-d),var(--shadow-sm);transition:transform .12s,box-shadow .12s;
+  display:inline-flex;gap:10px;align-items:center}
+.btn:hover{transform:translateY(-2px)} .btn:active{transform:translateY(4px);box-shadow:0 3px 0 var(--purple-d)}
+.btn[disabled]{opacity:.45;box-shadow:none;cursor:not-allowed;transform:none}
+.btn.green{background:var(--green);box-shadow:0 7px 0 var(--green-d),var(--shadow-sm)}
+.btn.green:active{box-shadow:0 3px 0 var(--green-d)}
+.btn.gold{background:var(--gold);color:var(--ink);box-shadow:0 7px 0 var(--gold-d),var(--shadow-sm)}
+.btn.gold:active{box-shadow:0 3px 0 var(--gold-d)}
+.btn.ghost{background:#fff;color:var(--purple);box-shadow:var(--shadow-sm);border:1.5px solid var(--line)}
+.btn.ghost:active{transform:translateY(2px)}
+.btn.lg{font-size:clamp(19px,3.2vw,26px);padding:17px 42px}
+.btn svg{width:22px;height:22px}
+.row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+
+.audiopill{display:inline-flex;align-items:center;gap:9px;margin-top:4px;background:#fff;
+  border:1.5px solid var(--line);color:var(--muted);font-family:var(--fdisplay);font-weight:600;
+  font-size:14px;padding:9px 18px;border-radius:999px;box-shadow:var(--shadow-sm);transition:.18s}
+.audiopill:hover{border-color:var(--purple);color:var(--purple)}
+.audiopill svg{width:18px;height:18px}
+.audiopill .ic-on{display:none}
+.audiopill.on{background:var(--gold);border-color:var(--gold-d);color:#fff}
+.audiopill.on .ic-on{display:block} .audiopill.on .ic-off{display:none}
+
+/* ===== caption / mascot ===== */
+.say{display:flex;align-items:flex-end;gap:12px;width:100%;max-width:680px}
+.av{flex:0 0 auto;width:clamp(64px,11vw,84px);height:clamp(64px,11vw,84px)}
+.av svg{width:100%;height:100%;display:block;filter:drop-shadow(0 6px 10px rgba(60,40,110,.18))}
+.bubble{position:relative;background:#fff;color:var(--ink);border-radius:20px;padding:15px 18px;
+  box-shadow:var(--shadow);flex:1 1 auto;border:2.5px solid #fff}
+.bubble:before{content:"";position:absolute;left:-9px;bottom:18px;width:18px;height:18px;background:#fff;transform:rotate(45deg);border-radius:3px}
+.bubble p{margin:0;font-size:clamp(16px,2.5vw,20px);font-weight:800;line-height:1.34}
+.bubble p b{color:var(--pink)}
+.bim{margin-top:10px;display:inline-flex;align-items:center;gap:7px;font-family:var(--fdisplay);
+  font-weight:600;font-size:12.5px;color:var(--purple);background:var(--purple-l);padding:7px 12px;
+  border-radius:999px;border:1.5px solid #E2D4F6}
+.bim:hover{background:#E9DCF9}
+.bim svg{width:17px;height:17px}
+
+/* ===== stage (white card holding svg) ===== */
+.stage{width:100%;max-width:560px;background:var(--paper);border-radius:var(--r-lg);
+  box-shadow:var(--shadow);border:1px solid var(--line);padding:clamp(12px,3vw,22px);display:flex;justify-content:center}
+.stage svg{width:100%;height:auto;display:block;overflow:visible}
+.stage.tight{max-width:460px}
+svg text{font-family:var(--fdisplay);font-weight:700}
+.lp{fill:var(--pink)} .ln{fill:var(--ink)} .lg{fill:var(--green-d)} .lb{fill:var(--blue)} .lw{fill:#fff} .lgo{fill:var(--gold-d)}
+.tapzone{cursor:pointer;fill:transparent}
+.tapzone:hover{fill:rgba(124,63,189,.10)}
+.cellU{transition:opacity .25s ease}
+.wedge{transition:transform .9s cubic-bezier(.45,.05,.2,1)}
+.tap-tip{font-family:var(--fdisplay);font-weight:600;color:var(--purple);font-size:14px;
+  display:inline-flex;align-items:center;gap:7px;background:var(--purple-l);padding:6px 14px;border-radius:999px}
+.tap-tip svg{width:16px;height:16px}
+
+/* ===== formula box ===== */
+.formula-box{width:100%;max-width:680px;background:#EAF4FE;border:3px dashed var(--blue);border-radius:var(--r-lg);
+  padding:clamp(20px,4vw,30px) clamp(16px,4vw,30px);text-align:center}
+.formula-box .f{font-family:var(--fdisplay);font-weight:700;font-size:clamp(28px,6.4vw,56px);
+  color:var(--ink);line-height:1.05;display:flex;flex-wrap:wrap;gap:.18em;align-items:center;justify-content:center}
+.formula-box sup{font-size:.55em;vertical-align:super}
+.f-luas{color:var(--ink)} .t-pink{color:var(--pink)} .t-blue{color:var(--blue)}
+.t-green{color:var(--green)} .t-navy{color:var(--ink)} .frac{display:inline-flex;flex-direction:column;
+  text-align:center;font-size:.62em;line-height:1;vertical-align:middle;margin:0 .04em}
+.frac .n{border-bottom:.09em solid currentColor;padding:0 .12em}
+.carafikir{width:100%;max-width:680px;background:var(--purple-l);border:3px dashed var(--purple);
+  border-radius:var(--r-lg);padding:16px 20px;display:flex;align-items:center;gap:14px}
+.carafikir .bulb{flex:0 0 auto;width:46px;height:46px}
+.carafikir .ct{font-family:var(--fdisplay);font-weight:700;line-height:1.15}
+.carafikir .ct .lab{color:var(--purple);font-size:clamp(18px,3vw,24px)}
+.carafikir .ct .mn{color:var(--ink);font-size:clamp(17px,2.8vw,22px)}
+.carafikir .ct .mn .t-pink{color:var(--pink)} .carafikir .ct .mn .t-blue{color:var(--blue)} .carafikir .ct .mn .t-green{color:var(--green)}
+
+/* ===== play (sliders) ===== */
+.play-grid{display:flex;gap:clamp(14px,3vw,28px);flex-wrap:wrap;justify-content:center;align-items:flex-start;width:100%}
+.play-grid .stage{flex:1 1 320px;max-width:480px}
+.play-side{flex:1 1 280px;max-width:380px;display:flex;flex-direction:column;gap:14px}
+.controls{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 20px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:18px}
+.ctrl label{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--fdisplay);font-weight:700;font-size:clamp(16px,2.4vw,19px);margin-bottom:8px}
+.ctrl .val{font-size:clamp(18px,2.8vw,22px);padding:2px 12px;border-radius:10px;color:#fff}
+.ctrl.pink .val{background:var(--pink)} .ctrl.blue .val{background:var(--blue)}
+.ctrl.green .val{background:var(--green)} .ctrl.gold .val{background:var(--gold-d)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:14px;border-radius:999px;background:var(--purple-l);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:34px;height:34px;border-radius:50%;background:var(--purple);border:4px solid #fff;box-shadow:var(--shadow-sm);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:34px;height:34px;border:4px solid #fff;border-radius:50%;background:var(--purple);box-shadow:var(--shadow-sm);cursor:pointer}
+.ctrl.pink input[type=range]::-webkit-slider-thumb{background:var(--pink)} .ctrl.pink input[type=range]::-moz-range-thumb{background:var(--pink)}
+.ctrl.blue input[type=range]::-webkit-slider-thumb{background:var(--blue)} .ctrl.blue input[type=range]::-moz-range-thumb{background:var(--blue)}
+.ctrl.green input[type=range]::-webkit-slider-thumb{background:var(--green)} .ctrl.green input[type=range]::-moz-range-thumb{background:var(--green)}
+.ctrl.gold input[type=range]::-webkit-slider-thumb{background:var(--gold-d)} .ctrl.gold input[type=range]::-moz-range-thumb{background:var(--gold-d)}
+.readout{background:var(--ink);color:#fff;border-radius:var(--r-lg);padding:18px 20px;box-shadow:var(--shadow);text-align:center}
+.readout .eq{font-family:var(--fdisplay);font-weight:700;font-size:clamp(18px,3vw,24px);line-height:1.3;display:flex;flex-wrap:wrap;gap:.16em;justify-content:center;align-items:center}
+.readout .eq .res{background:var(--gold);color:var(--ink);padding:1px 12px;border-radius:10px}
+.readout .eq .t-pink{color:#FF7FB6} .readout .eq .t-blue{color:#86C2FF} .readout .eq .t-green{color:#A9E0A0}
+.readout sup{font-size:.55em;vertical-align:super}
+.readout .sub{margin-top:8px;font-weight:800;color:#C9CFEF;font-size:14px}
+
+/* ===== worked ===== */
+.worked-problem{width:100%;max-width:640px;background:#fff;border:1px solid var(--line);border-left:7px solid var(--gold);
+  border-radius:18px;padding:16px 20px;box-shadow:var(--shadow-sm);font-weight:800;font-size:clamp(16px,2.5vw,20px);line-height:1.4}
+.worked-problem b{color:var(--pink)}
+.worked-stage{width:100%;max-width:360px;display:flex;justify-content:center}
+.worked-stage svg{width:100%;height:auto;max-width:300px}
+.steps{width:100%;max-width:640px;display:flex;flex-direction:column;gap:10px}
+.wstep{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;
+  padding:13px 16px;box-shadow:var(--shadow-sm);font-family:var(--fdisplay);font-weight:700;
+  font-size:clamp(16px,2.6vw,21px);opacity:0;transform:translateY(10px);transition:.4s}
+.wstep.show{opacity:1;transform:none}
+.wstep .n{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--purple);color:#fff;display:grid;place-items:center;font-size:16px}
+.wstep.final{border:2px solid var(--green);background:#F1FBF1}
+.wstep.final .n{background:var(--green)}
+.wstep .t-pink{color:var(--pink)} .wstep .t-blue{color:var(--blue)} .wstep .t-green{color:var(--green)}
+.wstep sup{font-size:.6em;vertical-align:super}
+.wstep .ans{margin-left:auto;background:var(--gold);color:var(--ink);padding:2px 12px;border-radius:10px}
+
+/* ===== quiz ===== */
+.q-stage{width:100%;max-width:300px;display:flex;justify-content:center}
+.q-stage svg{width:100%;height:auto;max-width:260px}
+.qtext{font-family:var(--fdisplay);font-weight:700;font-size:clamp(19px,3.4vw,28px);color:var(--ink);text-align:center;max-width:26ch}
+.qopts{display:flex;gap:clamp(10px,2vw,16px);flex-wrap:wrap;justify-content:center;width:100%}
+.qopt{position:relative;min-width:clamp(110px,26vw,150px);background:#fff;border-radius:20px;padding:16px 22px;
+  box-shadow:var(--shadow);border:3px solid transparent;font-family:var(--fdisplay);font-weight:700;
+  font-size:clamp(20px,3.6vw,28px);color:var(--ink);transition:transform .14s,border-color .2s}
+.qopt:hover{transform:translateY(-4px)}
+.qopt.right{border-color:var(--green);background:#F1FBF1}
+.qopt.wrong{border-color:var(--pink)}
+.qopt .mark{position:absolute;top:-12px;right:-12px;width:34px;height:34px;border-radius:50%;display:none;place-items:center;box-shadow:var(--shadow-sm)}
+.qopt.right .mark{display:grid;background:var(--green);color:#fff}
+.qopt.wrong .mark{display:grid;background:var(--pink);color:#fff}
+.qopt .mark svg{width:20px;height:20px}
+.feedback{min-height:26px;text-align:center;font-weight:800;font-size:clamp(15px,2.4vw,19px)}
+.feedback.ok{color:var(--green-d)} .feedback.no{color:var(--pink-d)}
+.shake{animation:shk .4s}
+@keyframes shk{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.pop-in{animation:popin .45s cubic-bezier(.2,1.4,.5,1) both}
+@keyframes popin{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+
+/* ===== done ===== */
+.done .done-mascot{width:clamp(110px,22vw,150px);height:clamp(110px,22vw,150px)}
+.done-title{font-size:clamp(30px,6vw,52px);color:var(--purple);text-align:center}
+.done-recap{width:100%;max-width:560px;background:#fff;border:3px dashed var(--gold);border-radius:var(--r-lg);
+  padding:18px 22px;text-align:center;box-shadow:var(--shadow-sm)}
+.done-recap .rl{font-family:var(--fdisplay);font-weight:600;color:var(--muted);font-size:14px;margin-bottom:6px}
+.done-recap .rf{font-family:var(--fdisplay);font-weight:700;font-size:clamp(22px,4.6vw,34px);color:var(--ink);display:flex;flex-wrap:wrap;gap:.16em;justify-content:center;align-items:center}
+.done-recap .rf sup{font-size:.55em;vertical-align:super}
+.done-recap .rf .t-pink{color:var(--pink)} .done-recap .rf .t-blue{color:var(--blue)} .done-recap .rf .t-green{color:var(--green)}
+
+/* ===== toast ===== */
+#toast{position:fixed;left:50%;bottom:74px;transform:translateX(-50%) translateY(20px);z-index:80;
+  background:var(--ink);color:#fff;font-family:var(--fdisplay);font-weight:600;font-size:15px;
+  padding:11px 20px;border-radius:999px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.3s;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%)}
+
+/* ===== BIM modal ===== */
+#bim{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;background:rgba(22,18,50,.55);padding:18px}
+#bim .panel{background:#fff;border-radius:24px;max-width:520px;width:100%;box-shadow:var(--shadow);overflow:hidden}
+#bimMedia .video{position:relative;width:100%;aspect-ratio:16/9;background:#000}
+#bimMedia .video iframe,#bimMedia .video video{position:absolute;inset:0;width:100%;height:100%;border:0}
+#bimMedia .ph{aspect-ratio:16/9;background:var(--purple-l);display:grid;place-items:center;color:var(--purple)}
+#bimMedia .ph>div{display:flex;flex-direction:column;align-items:center;gap:10px;font-family:var(--fdisplay);font-weight:600;font-size:15px}
+#bimMedia .ph svg{width:46px;height:46px}
+#bim .cap{padding:16px 20px}
+#bim .cap .lbl{font-family:var(--fdisplay);font-weight:600;color:var(--purple);font-size:12px;letter-spacing:.08em}
+#bim .cap p{margin:6px 0 0;font-weight:800;font-size:clamp(17px,2.6vw,21px);line-height:1.35;color:var(--ink)}
+#bim .cap .note{margin-top:10px;font-size:13px;color:var(--muted);font-weight:700}
+
+#confetti{position:fixed;inset:0;z-index:70;pointer-events:none;display:none}
+
+@media (max-width:560px){
+  .play-side{max-width:480px}
+  .bubble p{font-size:17px}
+}
+@media (prefers-reduced-motion:reduce){
+  .scene{transition:none} .wstep{transition:none;opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<canvas id="sparkles"></canvas>
+
+<div id="app">
+  <div class="casebar" id="casebar">
+    <div class="brandmini"><span class="dotlogo">▱</span><span class="bm-txt">Rumus Asas 2D</span></div>
+    <div class="dots" id="dots"></div>
+    <div class="tools">
+      <button class="iconbtn" id="backBtn" aria-label="Langkah sebelum" title="Sebelum">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="iconbtn" id="zoomInBtn" aria-label="Besarkan paparan" title="Zum besar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="7"/><path d="M21 21l-4.35-4.35"/><path d="M10.5 7.5v6M7.5 10.5h6"/></svg>
+      </button>
+      <button class="iconbtn" id="zoomOutBtn" aria-label="Kecilkan paparan" title="Zum kecil">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="7"/><path d="M21 21l-4.35-4.35"/><path d="M7.5 10.5h6"/></svg>
+      </button>
+      <button class="iconbtn" id="zoomResetBtn" aria-label="Saiz asal" title="Saiz asal (100%)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3 4.5V9.2h4.7"/></svg>
+      </button>
+      <span class="sep" aria-hidden="true"></span>
+      <button class="iconbtn audio" id="soundBtn" aria-label="Buka audio" title="Audio: tutup">
+        <svg id="sndOff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M22 9l-6 6M16 9l6 6"/></svg>
+        <svg id="sndOn" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="scenes" id="scenes">
+
+    <!-- 0 COVER -->
+    <section class="scene" id="sc-cover"><div class="wrap" style="gap:18px;justify-content:center;min-height:100%">
+      <div style="position:relative;display:flex;justify-content:center">
+        <div class="brand-banner">Rumus Asas 2D
+          <svg class="star l" viewBox="0 0 24 24" fill="#FBC01E" stroke="#E0A40C" stroke-width="1.5"><path d="M12 2l2.6 6.3L21 9l-5 4.3L17.5 21 12 17l-5.5 4L8 13.3 3 9l6.4-.7z"/></svg>
+          <svg class="star r" viewBox="0 0 24 24" fill="#2E86DE" stroke="#1B5FB0" stroke-width="1.5"><path d="M12 2l2.6 6.3L21 9l-5 4.3L17.5 21 12 17l-5.5 4L8 13.3 3 9l6.4-.7z"/></svg>
+        </div>
+      </div>
+      <div class="brand-sub" id="coverSub">—</div>
+      <div id="coverShape" style="width:100%;max-width:340px;margin-top:2px"></div>
+      <div id="coverMascot" style="width:clamp(90px,18vw,120px);height:clamp(90px,18vw,120px)"></div>
+      <button class="btn lg" data-next>Mula belajar
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+      <button class="audiopill" id="coverSound" aria-label="Buka atau tutup audio">
+        <svg class="ic-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M22 9l-6 6M16 9l6 6"/></svg>
+        <svg class="ic-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13"/></svg>
+        <span class="lbl">Suara &amp; bunyi: Tutup</span>
+      </button>
+    </div></section>
+
+    <!-- 1 PARTS -->
+    <section class="scene" id="sc-parts"><div class="wrap">
+      <div class="step-eyebrow">Langkah 1 &middot; Kenal Bentuk</div>
+      <h2 class="step-h" id="partsH">—</h2>
+      <span class="tap-tip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11.5V5a1.8 1.8 0 013.6 0v6"/><path d="M12.6 11V8a1.8 1.8 0 013.6 0v4"/><path d="M16.2 12V9.5a1.8 1.8 0 013.6 0V15a6 6 0 01-6 6h-1.5a6 6 0 01-5.1-2.8L4 14a1.8 1.8 0 013-2l1.8 2"/></svg>Ketuk setiap bahagian</span>
+      <div class="stage tight" id="partsStage"></div>
+      <div id="partsCap" style="width:100%;display:flex;justify-content:center"></div>
+      <button class="btn" data-next disabled id="partsNext">Seterusnya →</button>
+    </div></section>
+
+    <!-- 2 BUILD -->
+    <section class="scene" id="sc-build"><div class="wrap">
+      <div class="step-eyebrow">Langkah 2 &middot; Apa itu Luas?</div>
+      <h2 class="step-h" id="buildH">—</h2>
+      <div class="stage" id="buildStage"></div>
+      <div id="buildControls" class="row"></div>
+      <div id="buildCap" style="width:100%;display:flex;justify-content:center"></div>
+      <button class="btn" data-next>Lihat Rumus →</button>
+    </div></section>
+
+    <!-- 3 FORMULA -->
+    <section class="scene" id="sc-formula"><div class="wrap">
+      <div class="step-eyebrow">Langkah 3 &middot; Rumus</div>
+      <div class="formula-box" id="formulaBox"></div>
+      <div class="carafikir" id="caraFikir"></div>
+      <div id="formulaCap" style="width:100%;display:flex;justify-content:center"></div>
+      <button class="btn" data-next>Cuba Sendiri →</button>
+    </div></section>
+
+    <!-- 4 PLAY -->
+    <section class="scene" id="sc-play"><div class="wrap">
+      <div class="step-eyebrow">Langkah 4 &middot; Cuba Sendiri</div>
+      <h2 class="step-h" id="playH">—</h2>
+      <div class="play-grid">
+        <div class="stage" id="playStage"></div>
+        <div class="play-side">
+          <div class="controls" id="playControls"></div>
+          <div class="readout" id="playReadout"></div>
+        </div>
+      </div>
+      <button class="btn" data-next>Kira Bersama →</button>
+    </div></section>
+
+    <!-- 5 WORKED -->
+    <section class="scene" id="sc-worked"><div class="wrap">
+      <div class="step-eyebrow">Langkah 5 &middot; Kira Bersama</div>
+      <div class="worked-problem" id="workedProblem"></div>
+      <div class="worked-stage" id="workedStage"></div>
+      <div class="steps" id="workedSteps"></div>
+      <button class="btn green" id="workedNextStep">Tunjuk langkah →</button>
+      <button class="btn" data-next id="workedToQuiz" style="display:none">Cuba Kuiz →</button>
+    </div></section>
+
+    <!-- 6 QUIZ -->
+    <section class="scene" id="sc-quiz"><div class="wrap">
+      <div class="step-eyebrow">Langkah 6 &middot; Kuiz &middot; Soalan <span id="qno">1</span>/3</div>
+      <div class="q-stage" id="qStage"></div>
+      <h2 class="qtext" id="qtext">—</h2>
+      <div class="qopts" id="qopts"></div>
+      <div class="feedback" id="qfb"></div>
+      <button class="btn green" id="qnext" style="display:none">Seterusnya →</button>
+    </div></section>
+
+    <!-- 7 DONE -->
+    <section class="scene" id="sc-done"><div class="wrap done" style="justify-content:center;min-height:100%;gap:18px">
+      <div class="done-mascot" id="doneMascot"></div>
+      <h2 class="done-title">Tahniah!</h2>
+      <div class="done-recap" id="doneRecap"></div>
+      <div class="row">
+        <button class="btn green" id="replayBtn">Belajar Semula</button>
+      </div>
+    </div></section>
+
+  </div>
+  <footer id="copyright">© 2024–2026 Chong Ai Peng. Modul GeoMETriA. Hak cipta terpelihara. Notifikasi Hak Cipta MyIPO: CRDV2025M05601.</footer>
+</div>
+
+<canvas id="confetti"></canvas>
+<div id="toast"></div>
+
+<div id="bim" role="dialog" aria-modal="true" aria-label="Video bahasa isyarat">
+  <div class="panel">
+    <div id="bimMedia"></div>
+    <div class="cap">
+      <div class="lbl">BAHASA ISYARAT MALAYSIA (BIM)</div>
+      <p id="bimText">—</p>
+      <div class="note" id="bimNote">Cikgu boleh masukkan pautan video isyarat dalam senarai BIM_VIDEOS untuk setiap ayat.</div>
+      <div style="margin-top:14px;text-align:right"><button class="btn ghost" id="bimClose">Tutup</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   SHARED ENGINE  — Rumus Asas 2D (poster series)
+   Visual-first for deaf learners. Audio is optional (off by default).
+========================================================= */
+const SVGNS='http://www.w3.org/2000/svg';
+function E(tag,attrs,parent){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* ---- friendly mascot (Geo) ---- */
+function mascot(ex){
+  ex=ex||'happy';
+  const mouth = ex==='cheer'
+    ? '<path d="M42 58 q18 24 36 0 q-18 9 -36 0Z" fill="#8A2E16"/><path d="M48 62 q12 7 24 0" fill="#F06A90"/>'
+    : ex==='think'
+    ? '<circle cx="60" cy="66" r="5" fill="none" stroke="#16235E" stroke-width="4"/>'
+    : '<path d="M44 60 q16 15 32 0" fill="none" stroke="#16235E" stroke-width="5" stroke-linecap="round"/>';
+  const brow = ex==='think' ? '<path d="M40 40 q8 -5 14 -1" stroke="#16235E" stroke-width="4" fill="none" stroke-linecap="round"/>' : '';
+  const arms = ex==='cheer'
+    ? '<g stroke="#E0A40C" stroke-width="9" stroke-linecap="round"><path d="M24 70 L9 50"/><path d="M96 70 L111 50"/></g>'
+    : '<g stroke="#E0A40C" stroke-width="9" stroke-linecap="round"><path d="M24 80 L12 90"/><path d="M96 80 L108 90"/></g>';
+  const spark = ex==='cheer' ? '<g fill="#FBC01E"><path d="M12 24l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/><path d="M108 26l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z"/></g>' : '';
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">${spark}${arms}
+    <circle cx="60" cy="62" r="40" fill="#FFCB3C" stroke="#E0A40C" stroke-width="4"/>
+    <circle cx="48" cy="50" r="5.5" fill="#16235E"/><circle cx="72" cy="50" r="5.5" fill="#16235E"/>
+    ${brow}${mouth}
+    <circle cx="38" cy="66" r="5" fill="#F7A8C0" opacity=".7"/><circle cx="82" cy="66" r="5" fill="#F7A8C0" opacity=".7"/></svg>`;
+}
+
+/* ---- sound effects ---- */
+let SND=false, actx=null;
+function beep(type){
+  if(!SND) return;
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    const seq={click:[[520,.05]],pop:[[440,.07],[660,.07]],good:[[523,.09],[659,.09],[784,.12]],
+      tick:[[880,.04]],win:[[523,.1],[659,.1],[784,.1],[1047,.22]],err:[[210,.13]]}[type]||[[440,.06]];
+    let t=actx.currentTime;
+    seq.forEach(([f,d])=>{const o=actx.createOscillator(),g=actx.createGain();o.type=(type==='err')?'square':'sine';o.frequency.value=f;o.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.18,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.start(t);o.stop(t+d);t+=d;});
+  }catch(e){}
+}
+
+/* ---- Malay TTS (optional, graceful) ---- */
+const HAS_TTS=('speechSynthesis' in window)&&('SpeechSynthesisUtterance' in window);
+let VOICE=null, VOICE_LANG='ms-MY';
+function loadVoices(){
+  if(!HAS_TTS) return;
+  const vs=speechSynthesis.getVoices(); if(!vs.length) return;
+  VOICE = vs.find(v=>/^ms[-_]?my/i.test(v.lang)) || vs.find(v=>/^ms\b/i.test(v.lang)||/malay/i.test(v.name))
+       || vs.find(v=>/^id[-_]?id/i.test(v.lang)||/indonesia/i.test(v.name)) || null;
+  VOICE_LANG = VOICE ? VOICE.lang : 'ms-MY';
+}
+if(HAS_TTS){ loadVoices(); speechSynthesis.onvoiceschanged=loadVoices; }
+function stripTags(h){const d=document.createElement('div');d.innerHTML=h||'';return (d.textContent||'').replace(/\s+/g,' ').trim();}
+function utter(t){try{const u=new SpeechSynthesisUtterance(t);if(VOICE)u.voice=VOICE;u.lang=VOICE_LANG;u.rate=.95;u.pitch=1.05;speechSynthesis.speak(u);}catch(e){}}
+let sceneNarr=[];
+function narrate(items){sceneNarr=items||[];runNarrate();}
+function runNarrate(){
+  if(!SND||!HAS_TTS) return;
+  const scope=document.querySelector('.scene.active')||document; const texts=[];
+  sceneNarr.forEach(it=>{ if(typeof it==='string'){const el=scope.querySelector(it);if(el){const t=stripTags(el.innerHTML);if(t)texts.push(t);}} else if(it&&it.say){texts.push(it.say);} });
+  try{speechSynthesis.cancel();}catch(e){}
+  setTimeout(()=>{ if(!SND)return; texts.forEach(t=>utter(t)); },90);
+}
+function speak(t){ if(!SND||!HAS_TTS)return; const s=stripTags(t); if(!s)return; try{speechSynthesis.cancel();}catch(e){} setTimeout(()=>{if(SND)utter(s);},90); }
+function stopSpeak(){ if(HAS_TTS){try{speechSynthesis.cancel();}catch(e){}} }
+
+/* ---- caption helper (mascot + bubble + BIM button) ---- */
+function say(text, ex, bimId){
+  return `<div class="say"><div class="av">${mascot(ex||'happy')}</div>
+    <div class="bubble"><p>${text}</p>
+      <button class="bim" data-bim="${text.replace(/"/g,'&quot;')}" data-bim-id="${bimId||''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 00-4 0 2 2 0 00-4 0 2 2 0 00-4 0v7"/><path d="M6 13l-1.5-1.5a1.5 1.5 0 00-2 2L6 18a6 6 0 006 4h1a6 6 0 006-6v-3"/></svg>
+        Tonton Isyarat (BIM)
+      </button>
+    </div></div>`;
+}
+
+/* =========================================================
+   Scene controller
+========================================================= */
+const SCENE_IDS=['sc-cover','sc-parts','sc-build','sc-formula','sc-play','sc-worked','sc-quiz','sc-done'];
+const WORK_DOTS=[1,2,3,4,5,6,7];
+let cur=0;
+const ENTER={};
+const dotsEl=document.getElementById('dots');
+WORK_DOTS.forEach(()=>{const d=document.createElement('div');d.className='dot';dotsEl.appendChild(d);});
+function paintDots(){[...dotsEl.children].forEach((d,i)=>{const s=WORK_DOTS[i];d.className='dot'+(s<cur?' done':'')+(s===cur?' on':'');});}
+const scenesEl=document.getElementById('scenes');
+function showScene(i){
+  stopSpeak(); cur=i;
+  [...scenesEl.querySelectorAll('.scene')].forEach(s=>s.classList.remove('active'));
+  const id=SCENE_IDS[i]; const node=document.getElementById(id);
+  node.classList.add('active'); node.scrollTop=0;
+  document.getElementById('casebar').style.visibility=(i===0)?'hidden':'visible';
+  document.getElementById('backBtn').style.visibility=(i<=1)?'hidden':'visible';
+  paintDots(); ENTER[id]&&ENTER[id](); beep('pop');
+}
+document.addEventListener('click',e=>{
+  const n=e.target.closest('[data-next]'); if(n&&!n.disabled){ showScene(Math.min(cur+1,SCENE_IDS.length-1)); }
+  const b=e.target.closest('[data-bim]'); if(b){ openBim(b.dataset.bim,b.dataset.bimId); }
+});
+document.getElementById('backBtn').onclick=()=>{ if(cur>0) showScene(cur-1); };
+addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'){const c=document.querySelector('.scene.active [data-next]:not([disabled])');c&&c.click();}
+  if(e.key==='ArrowLeft'){document.getElementById('backBtn').click();}
+});
+
+/* ---- zoom ---- */
+let zoom=1; const ZMIN=0.6,ZMAX=2,ZSTEP=0.1;
+const zIn=document.getElementById('zoomInBtn'),zOut=document.getElementById('zoomOutBtn'),zRes=document.getElementById('zoomResetBtn');
+function applyZoom(){
+  zoom=Math.min(ZMAX,Math.max(ZMIN,Math.round(zoom*100)/100));
+  scenesEl.style.setProperty('--z',String(zoom));
+  const pct=Math.round(zoom*100)+'%';
+  zIn.disabled=zoom>=ZMAX-0.001; zOut.disabled=zoom<=ZMIN+0.001; zRes.disabled=Math.abs(zoom-1)<0.001;
+  zRes.title='Saiz asal ('+pct+')';
+}
+zIn.onclick=()=>{zoom+=ZSTEP;applyZoom();beep('click');};
+zOut.onclick=()=>{zoom-=ZSTEP;applyZoom();beep('click');};
+zRes.onclick=()=>{zoom=1;applyZoom();beep('click');};
+
+/* ---- audio toggle (one state, two buttons) ---- */
+function setAudio(on){
+  SND=on;
+  document.getElementById('sndOn').style.display=on?'block':'none';
+  document.getElementById('sndOff').style.display=on?'none':'block';
+  document.getElementById('soundBtn').classList.toggle('on',on);
+  document.getElementById('soundBtn').title='Audio: '+(on?'buka':'tutup');
+  const cs=document.getElementById('coverSound'); if(cs){cs.classList.toggle('on',on);const l=cs.querySelector('.lbl');if(l)l.textContent='Suara & bunyi: '+(on?'Buka':'Tutup');}
+  if(on){ try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();}catch(e){} loadVoices(); beep('click'); runNarrate(); }
+  else stopSpeak();
+}
+document.getElementById('soundBtn').onclick=()=>setAudio(!SND);
+{const cs=document.getElementById('coverSound');if(cs)cs.onclick=()=>setAudio(!SND);}
+
+/* ---- toast ---- */
+let toastT; function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2400);}
+
+/* ---- BIM modal ---- */
+const BIM_PH='<div class="ph"><div><svg viewBox="0 0 24 24" fill="none" stroke="#7C3FBD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 00-2-2 2 2 0 00-2 2 2 2 0 00-2-2 2 2 0 00-2 2v0a2 2 0 00-2-2 2 2 0 00-2 2v7"/><path d="M6 13l-1.5-1.5a1.5 1.5 0 00-2 2L6 18a6 6 0 006 4h2a6 6 0 006-6v-3"/></svg>Ruang Video BIM</div></div>';
+function bimEmbed(url){
+  url=(url||'').trim(); if(!url) return '';
+  let m=url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if(m) return `<div class="video"><iframe src="https://www.youtube.com/embed/${m[1]}?rel=0&modestbranding=1&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
+  m=url.match(/drive\.google\.com\/file\/d\/([A-Za-z0-9_-]+)/);
+  if(m) return `<div class="video"><iframe src="https://drive.google.com/file/d/${m[1]}/preview" allow="autoplay" allowfullscreen></iframe></div>`;
+  if(/\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i.test(url)) return `<div class="video"><video src="${url}" controls playsinline loop muted autoplay></video></div>`;
+  if(/^[A-Za-z0-9_-]{11}$/.test(url)) return `<div class="video"><iframe src="https://www.youtube.com/embed/${url}?rel=0&modestbranding=1&playsinline=1" allowfullscreen></iframe></div>`;
+  return '';
+}
+function openBim(text,id){
+  document.getElementById('bimText').innerHTML=text;
+  const url=(id&&typeof BIM_VIDEOS==='object')?(BIM_VIDEOS[id]||''):'';
+  const embed=bimEmbed(url);
+  document.getElementById('bimMedia').innerHTML=embed||BIM_PH;
+  document.getElementById('bimNote').style.display=embed?'none':'';
+  document.getElementById('bim').style.display='flex'; speak(text);
+}
+function closeBim(){stopSpeak();document.getElementById('bim').style.display='none';document.getElementById('bimMedia').innerHTML='';}
+document.getElementById('bimClose').onclick=closeBim;
+document.getElementById('bim').addEventListener('click',e=>{if(e.target.id==='bim')closeBim();});
+
+/* ---- confetti ---- */
+const cc=document.getElementById('confetti'),cx=cc.getContext('2d');
+let parts=[],confAF=null;
+function sizeCC(){cc.width=innerWidth;cc.height=innerHeight;} addEventListener('resize',sizeCC); sizeCC();
+const CCOL=['#7C3FBD','#FBC01E','#ED1C7A','#2E86DE','#46A845'];
+function burst(ms){
+  if(reduce) return; cc.style.display='block'; beep('win');
+  for(let i=0;i<160;i++)parts.push({x:Math.random()*cc.width,y:-20-Math.random()*cc.height*.3,vx:(Math.random()-.5)*4,vy:2+Math.random()*4,r:5+Math.random()*7,c:CCOL[i%CCOL.length],rot:Math.random()*6,vr:(Math.random()-.5)*.3});
+  if(!confAF)confAF=requestAnimationFrame(stepCC);
+  clearTimeout(burst._t);burst._t=setTimeout(()=>{parts=[];},ms||1300);
+}
+function stepCC(){cx.clearRect(0,0,cc.width,cc.height);parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.06;p.rot+=p.vr;cx.save();cx.translate(p.x,p.y);cx.rotate(p.rot);cx.fillStyle=p.c;cx.fillRect(-p.r/2,-p.r/2,p.r,p.r*1.4);cx.restore();});parts=parts.filter(p=>p.y<cc.height+30);if(parts.length)confAF=requestAnimationFrame(stepCC);else{confAF=null;cc.style.display='none';cx.clearRect(0,0,cc.width,cc.height);}}
+
+/* ---- decorative sparkles bg ---- */
+(function(){const c=document.getElementById('sparkles'),x=c.getContext('2d');
+  function size(){c.width=innerWidth;c.height=innerHeight;draw();}
+  function draw(){x.clearRect(0,0,c.width,c.height);const col=['#7C3FBD','#FBC01E','#ED1C7A','#2E86DE'];
+    for(let i=0;i<26;i++){const sx=(i*97.3)%c.width,sy=(i*161.7)%c.height,r=(i%3)*1.1+1.4;x.globalAlpha=.10+((i*23)%30)/100*.18;x.fillStyle=col[i%4];x.beginPath();x.arc(sx,sy,r,0,7);x.fill();}
+    x.globalAlpha=1;}
+  addEventListener('resize',size);size();})();
+
+/* =========================================================
+   Generic scene handlers (data supplied by each lesson)
+========================================================= */
+ENTER['sc-cover']=()=>{
+  document.getElementById('coverSub').textContent=COVER.sub;
+  document.getElementById('coverShape').innerHTML=COVER.shape;
+  document.getElementById('coverMascot').innerHTML=mascot(COVER.mascot||'cheer');
+};
+ENTER['sc-formula']=()=>{
+  document.getElementById('formulaBox').innerHTML='<div class="f">'+FORMULA.box+'</div>';
+  document.getElementById('caraFikir').innerHTML=
+    '<svg class="bulb" viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 21h4" stroke="#E0A40C" stroke-width="2" stroke-linecap="round"/><path d="M12 2a7 7 0 00-4 12.7c.6.5 1 1.2 1 2V17h6v-.3c0-.8.4-1.5 1-2A7 7 0 0012 2z" fill="#FBC01E" stroke="#E0A40C" stroke-width="1.5"/></svg>'+
+    '<div class="ct"><div class="lab">Cara fikir:</div><div class="mn">'+FORMULA.cara+'</div></div>';
+  document.getElementById('formulaCap').innerHTML=FORMULA.cap?say(FORMULA.cap.t,FORMULA.cap.ex,FORMULA.cap.bim):'';
+  narrate(['#formulaCap .bubble p']);
+};
+/* worked: reveal steps one at a time */
+let wStepIdx=0;
+ENTER['sc-worked']=()=>{
+  document.getElementById('workedProblem').innerHTML=WORKED.problem;
+  document.getElementById('workedStage').innerHTML=WORKED.stage||'';
+  const host=document.getElementById('workedSteps'); host.innerHTML='';
+  WORKED.steps.forEach((s,i)=>{
+    const final=(i===WORKED.steps.length-1);
+    const el=document.createElement('div'); el.className='wstep'+(final?' final':'');
+    el.innerHTML=`<span class="n">${final?'✓':(i+1)}</span><span class="stx">${s}</span>`;
+    host.appendChild(el);
+  });
+  wStepIdx=0;
+  const nb=document.getElementById('workedNextStep'), tq=document.getElementById('workedToQuiz');
+  nb.style.display='inline-flex'; nb.textContent='Tunjuk langkah →'; tq.style.display='none';
+  nb.onclick=()=>{
+    const items=[...host.children];
+    if(wStepIdx<items.length){ items[wStepIdx].classList.add('show'); speak(items[wStepIdx].querySelector('.stx').textContent); beep(wStepIdx===items.length-1?'good':'tick'); wStepIdx++; }
+    if(wStepIdx>=items.length){ nb.style.display='none'; tq.style.display='inline-flex'; }
+    else nb.textContent='Langkah seterusnya →';
+  };
+  narrate(['#workedProblem']);
+};
+/* quiz */
+let qi=0, qLock=false;
+ENTER['sc-quiz']=()=>{ qi=0; renderQ(); };
+function renderQ(){
+  qLock=false;
+  const Q=QUIZ[qi];
+  document.getElementById('qno').textContent=String(qi+1);
+  document.getElementById('qStage').innerHTML=Q.stage||'';
+  document.getElementById('qtext').textContent=Q.q;
+  const fb=document.getElementById('qfb'); fb.textContent=''; fb.className='feedback';
+  document.getElementById('qnext').style.display='none';
+  const wrap=document.getElementById('qopts'); wrap.innerHTML='';
+  Q.options.forEach(o=>{
+    const b=document.createElement('button'); b.className='qopt'; b.innerHTML=`${o.t}<span class="mark"></span>`;
+    wrap.appendChild(b);
+    b.onclick=()=>answerQ(b,o,Q);
+  });
+  narrate(['#qtext']);
+}
+function answerQ(b,o,Q){
+  if(qLock) return;
+  const fb=document.getElementById('qfb');
+  if(o.ok){
+    qLock=true; beep('good');
+    b.classList.add('right'); b.querySelector('.mark').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>';
+    fb.className='feedback ok'; fb.textContent=Q.right; speak(Q.right);
+    const nx=document.getElementById('qnext'); nx.style.display='inline-flex';
+    nx.textContent=(qi<QUIZ.length-1)?'Soalan seterusnya →':'Habiskan →';
+    nx.onclick=()=>{ if(qi<QUIZ.length-1){qi++;renderQ();} else showScene(7); };
+  } else {
+    beep('err');
+    b.classList.add('wrong'); b.querySelector('.mark').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    b.classList.add('shake'); setTimeout(()=>b.classList.remove('shake'),420);
+    fb.className='feedback no'; fb.textContent=Q.wrong||'Cuba lagi.'; speak(Q.wrong||'Cuba lagi.');
+    setTimeout(()=>{b.classList.remove('wrong');b.querySelector('.mark').innerHTML='';},950);
+  }
+}
+/* done */
+ENTER['sc-done']=()=>{
+  document.getElementById('doneMascot').innerHTML=mascot('cheer');
+  document.getElementById('doneRecap').innerHTML='<div class="rl">Kamu sudah belajar:</div><div class="rf">'+DONE.recap+'</div>';
+  setTimeout(()=>burst(1500),300);
+  narrate([{say:DONE.say||'Tahniah! Kamu berjaya.'}]);
+};
+document.getElementById('replayBtn').onclick=()=>showScene(0);
+</script>
+
+<script>
+/* === LESSON MODULE (injected per file) === */
+/* ================= LESSON 3 — Luas Segi Tiga ================= */
+(function(){
+  const INK='#16235E', TRI='#C8E6A0', TRI2='#E2F0CC', GREEN='#2E7D32', PINK='#ED1C7A';
+
+  function dim(x1,y1,x2,y2,col){
+    col=col||GREEN;
+    let s=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="2.6"/>`;
+    if(y1===y2){ s+=`<path d="M${x1} ${y1} l9 -5 l0 10z" fill="${col}"/><path d="M${x2} ${y2} l-9 -5 l0 10z" fill="${col}"/>`; }
+    else { s+=`<path d="M${x1} ${y1} l-5 9 l10 0z" fill="${col}"/><path d="M${x2} ${y2} l-5 -9 l10 0z" fill="${col}"/>`; }
+    return s;
+  }
+  /* geometry for an apex-centred triangle, base b, height h, scale sc px/unit */
+  function geo(b,h,sc,VB,VH,dy){
+    const W=b*sc,Hh=h*sc,x0=Math.round((VB-W)/2),yB=Math.round((VH+Hh)/2)+(dy||0),yT=yB-Hh;
+    return {W,Hh,x0,yB,yT,L:[x0,yB],R:[x0+W,yB],T:[x0+W/2,yT],M:[x0+W/2,yB]};
+  }
+  function raMark(x,y){ /* right-angle square sitting on base at (x,y), opening up-left */
+    return `<path d="M${x-12} ${y} L${x-12} ${y-12} L${x} ${y-12}" fill="none" stroke="${INK}" stroke-width="2"/>`;
+  }
+
+  window.BIM_VIDEOS = { /* cikgu: paste pautan video isyarat di sini */ };
+
+  (function(){const g=geo(6,4,40,300,230,-8);
+    window.COVER={ sub:'Luas Segi Tiga', mascot:'cheer',
+      shape:`<svg viewBox="0 0 300 230"><polygon points="${g.L[0]},${g.L[1]} ${g.R[0]},${g.R[1]} ${g.T[0]},${g.T[1]}" fill="${TRI}" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>`+
+        `<line x1="${g.T[0]}" y1="${g.T[1]}" x2="${g.M[0]}" y2="${g.M[1]}" stroke="${PINK}" stroke-width="3" stroke-dasharray="6 5"/>${raMark(g.M[0],g.M[1])}`+
+        `<text class="lp" x="${g.M[0]}" y="${g.yB+26}" font-size="24" text-anchor="middle">tapak</text>`+
+        `<text class="lp" x="${g.M[0]+30}" y="${(g.yT+g.yB)/2}" font-size="22">tinggi</text></svg>` };
+  })();
+
+  window.FORMULA = {
+    box:'Luas = <span class="frac t-pink"><span class="n">1</span><span>2</span></span> × <span class="t-pink">tapak</span> × <span class="t-pink">tinggi</span>',
+    cara:'ambil <span class="t-pink">½</span> daripada tapak × tinggi',
+    cap:{ t:'Darab tapak × tinggi, kemudian <b>bahagi 2</b>.', ex:'happy', bim:'rumus' }
+  };
+
+  (function(){const g=geo(6,4,30,260,170,-4);
+    window.WORKED={
+      problem:'Segi tiga: tapak <b>6 cm</b>, tinggi <b>4 cm</b>. Cari luasnya.',
+      stage:`<svg viewBox="0 0 260 170"><polygon points="${g.L[0]},${g.L[1]} ${g.R[0]},${g.R[1]} ${g.T[0]},${g.T[1]}" fill="${TRI}" stroke="${INK}" stroke-width="3.5" stroke-linejoin="round"/>`+
+        `<line x1="${g.T[0]}" y1="${g.T[1]}" x2="${g.M[0]}" y2="${g.M[1]}" stroke="${PINK}" stroke-width="2.6" stroke-dasharray="5 4"/>${raMark(g.M[0],g.M[1])}`+
+        `<text class="lp" x="${g.M[0]}" y="${g.yB+20}" font-size="17" text-anchor="middle">6 cm</text>`+
+        `<text class="lp" x="${g.M[0]+8}" y="${(g.yT+g.yB)/2}" font-size="16">4 cm</text></svg>`,
+      steps:[
+        'Tulis rumus: Luas = ½ × <span class="t-pink">tapak</span> × <span class="t-pink">tinggi</span>',
+        'Masukkan nombor: Luas = ½ × <span class="t-pink">6</span> × <span class="t-pink">4</span>',
+        '½ × 24 = <span class="t-green">12 cm<sup>2</sup></span> <span class="ans">12 cm²</span>'
+      ] };
+  })();
+
+  function triQ(b,h,vb,vh){const g=geo(b,h,Math.min(26,Math.floor((vb-30)/Math.max(b,h))),vb,vh,-2);
+    return `<svg viewBox="0 0 ${vb} ${vh}"><polygon points="${g.L[0]},${g.L[1]} ${g.R[0]},${g.R[1]} ${g.T[0]},${g.T[1]}" fill="${TRI}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>`+
+      `<line x1="${g.T[0]}" y1="${g.T[1]}" x2="${g.M[0]}" y2="${g.M[1]}" stroke="${PINK}" stroke-width="2.4" stroke-dasharray="5 4"/>`+
+      `<text class="lp" x="${g.M[0]}" y="${g.yB+18}" font-size="15" text-anchor="middle">${b}</text>`+
+      `<text class="lp" x="${g.M[0]+7}" y="${(g.yT+g.yB)/2}" font-size="15">${h}</text></svg>`;}
+
+  window.QUIZ = [
+    { stage:triQ(4,3,180,150), q:'tapak 4, tinggi 3. Luas?',
+      options:[{t:'12'},{t:'6',ok:true},{t:'7'}],
+      right:'Betul! ½ × 4 × 3 = 6 cm².', wrong:'Ingat bahagi 2: ½ × 4 × 3.' },
+    { q:'Rumus luas segi tiga?',
+      options:[{t:'tapak × tinggi'},{t:'½ × tapak × tinggi',ok:true},{t:'2 × tapak × tinggi'}],
+      right:'Ya! ½ × tapak × tinggi.', wrong:'Jangan lupa ½ (bahagi 2).' },
+    { stage:triQ(10,4,200,150), q:'tapak 10, tinggi 4. Luas?',
+      options:[{t:'40'},{t:'14'},{t:'20',ok:true}],
+      right:'Hebat! ½ × 10 × 4 = 20 cm².', wrong:'½ × 10 × 4 = 20.' }
+  ];
+
+  window.DONE = {
+    recap:'Luas = <span class="frac t-pink"><span class="n">1</span><span>2</span></span> × <span class="t-pink">tapak</span> × <span class="t-pink">tinggi</span>',
+    say:'Tahniah! Kamu sudah belajar luas segi tiga.'
+  };
+
+  /* SCENE 1: parts — tap tapak (base) & tinggi (dashed height) */
+  ENTER['sc-parts']=()=>{
+    document.getElementById('partsH').textContent='Segi tiga ada tapak (bawah) dan tinggi (garis tegak). Ketuk kedua-duanya.';
+    const g=geo(6,4,32,320,300,-6);
+    let svg=`<svg viewBox="0 0 320 300">`;
+    svg+=`<polygon points="${g.L[0]},${g.L[1]} ${g.R[0]},${g.R[1]} ${g.T[0]},${g.T[1]}" fill="${TRI}" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>`;
+    svg+=`<g id="hi"></g>`;
+    svg+=`<rect class="tapzone" data-grp="b" x="${g.L[0]-10}" y="${g.yB-16}" width="${g.W+20}" height="32" rx="8"/>`;
+    svg+=`<rect class="tapzone" data-grp="h" x="${g.M[0]-16}" y="${g.yT}" width="32" height="${g.Hh}" rx="8"/>`;
+    svg+=`</svg>`;
+    const stage=document.getElementById('partsStage'); stage.innerHTML=svg;
+    const hi=stage.querySelector('#hi'), done=new Set();
+    const next=document.getElementById('partsNext'), cap=document.getElementById('partsCap'); cap.innerHTML='';
+    const mk=(t,a)=>{const e=document.createElementNS('http://www.w3.org/2000/svg',t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+    stage.querySelectorAll('.tapzone').forEach(z=>{
+      z.addEventListener('click',()=>{
+        const k=z.dataset.grp; if(done.has(k))return; done.add(k); beep('pop');
+        if(k==='b'){
+          hi.appendChild(mk('line',{x1:g.L[0],y1:g.yB,x2:g.R[0],y2:g.yB,stroke:PINK,'stroke-width':7,'stroke-linecap':'round',class:'pop-in'}));
+          const t=mk('text',{x:g.M[0],y:g.yB+28,'font-size':24,'text-anchor':'middle',class:'lp pop-in'});t.textContent='tapak';hi.appendChild(t);
+        }else{
+          hi.appendChild(mk('line',{x1:g.T[0],y1:g.T[1],x2:g.M[0],y2:g.M[1],stroke:PINK,'stroke-width':5,'stroke-dasharray':'6 5',class:'pop-in'}));
+          hi.insertAdjacentHTML&&hi.appendChild(document.createRange().createContextualFragment(raMark(g.M[0],g.M[1])));
+          const t=mk('text',{x:g.M[0]+10,y:(g.yT+g.yB)/2,'font-size':22,class:'lp pop-in'});t.textContent='tinggi';hi.appendChild(t);
+        }
+        if(done.size===2){
+          next.disabled=false;
+          cap.innerHTML=say('<b>Tinggi</b> mesti tegak (90°) dengan <b>tapak</b>.','cheer','kenal');
+          narrate(['#partsCap .bubble p']); beep('good');
+        }
+      });
+    });
+  };
+
+  /* SCENE 2: build — triangle is half a rectangle */
+  ENTER['sc-build']=()=>{
+    document.getElementById('buildH').textContent='Segi tiga ialah separuh daripada segi empat tepat.';
+    const g=geo(6,4,40,320,250,-6), x0=g.x0,W=g.W,Hh=g.Hh,yT=g.yT,yB=g.yB;
+    function render(){
+      let s=`<svg viewBox="0 0 320 250">`;
+      // faint bounding rectangle
+      s+=`<rect x="${x0}" y="${yT}" width="${W}" height="${Hh}" rx="4" fill="#fff" stroke="${INK}" stroke-width="2" stroke-dasharray="6 5" opacity=".9"/>`;
+      // corner triangles (lighter) - hidden first
+      s+=`<polygon id="cL" points="${x0},${yT} ${g.T[0]},${yT} ${x0},${yB}" fill="${TRI2}" stroke="${GREEN}" stroke-width="1.6" stroke-dasharray="4 3" opacity="0"/>`;
+      s+=`<polygon id="cR" points="${g.T[0]},${yT} ${x0+W},${yT} ${x0+W},${yB}" fill="${TRI2}" stroke="${GREEN}" stroke-width="1.6" stroke-dasharray="4 3" opacity="0"/>`;
+      // main triangle
+      s+=`<polygon points="${g.L[0]},${g.L[1]} ${g.R[0]},${g.R[1]} ${g.T[0]},${g.T[1]}" fill="${TRI}" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>`;
+      s+=dim(x0,yB+16,x0+W,yB+16,PINK)+`<text class="lp" x="${g.T[0]}" y="${yB+38}" font-size="17" text-anchor="middle">tapak</text>`;
+      s+=dim(x0-16,yT,x0-16,yB)+`<text class="lg" x="${x0-22}" y="${(yT+yB)/2+6}" font-size="16" text-anchor="middle" transform="rotate(-90 ${x0-22} ${(yT+yB)/2+6})">tinggi</text>`;
+      s+=`</svg>`;
+      document.getElementById('buildStage').innerHTML=s;
+      const cL=document.getElementById('cL'),cR=document.getElementById('cR');
+      cL.style.transition=cR.style.transition='opacity .5s';
+      setTimeout(()=>{cL.style.opacity='.9';beep('tick');},reduce?0:500);
+      setTimeout(()=>{cR.style.opacity='.9';beep('tick');},reduce?0:1000);
+      setTimeout(()=>{document.getElementById('buildCap').innerHTML=say('Dua keping kecil itu sama dengan segi tiga hijau. Jadi segi tiga = <b>½ segi empat tepat</b>.','happy','luas');narrate(['#buildCap .bubble p']);beep('good');},reduce?0:1450);
+    }
+    document.getElementById('buildControls').innerHTML='<button class="btn ghost" id="refill">Main semula</button>';
+    document.getElementById('buildControls').querySelector('#refill').onclick=()=>{document.getElementById('buildCap').innerHTML='';render();};
+    document.getElementById('buildCap').innerHTML=''; render();
+  };
+
+  /* SCENE 4: play — sliders tapak, tinggi */
+  ENTER['sc-play']=()=>{
+    document.getElementById('playH').textContent='Ubah tapak dan tinggi. Tengok luas berubah!';
+    document.getElementById('playControls').innerHTML=
+      '<div class="ctrl pink"><label>Tapak <span class="val" id="vB">6</span></label><input type="range" id="rB" min="2" max="10" value="6" step="1"></div>'+
+      '<div class="ctrl pink"><label>Tinggi <span class="val" id="vH">4</span></label><input type="range" id="rH" min="2" max="7" value="4" step="1"></div>';
+    function draw(b,h){
+      const sc=24, g=geo(b,h,sc,340,300,-2);
+      let s=`<svg viewBox="0 0 340 300">`;
+      s+=`<rect x="${g.x0}" y="${g.yT}" width="${g.W}" height="${g.Hh}" rx="4" fill="none" stroke="${INK}" stroke-width="1.6" stroke-dasharray="6 5" opacity=".55"/>`;
+      s+=`<polygon points="${g.L[0]},${g.L[1]} ${g.R[0]},${g.R[1]} ${g.T[0]},${g.T[1]}" fill="${TRI}" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>`;
+      s+=`<line x1="${g.T[0]}" y1="${g.T[1]}" x2="${g.M[0]}" y2="${g.M[1]}" stroke="${PINK}" stroke-width="2.6" stroke-dasharray="6 5"/>${raMark(g.M[0],g.M[1])}`;
+      s+=dim(g.x0,g.yB+16,g.x0+g.W,g.yB+16,PINK)+`<text class="lp" x="${g.T[0]}" y="${g.yB+38}" font-size="17" text-anchor="middle">tapak = ${b}</text>`;
+      s+=dim(g.x0-16,g.yT,g.x0-16,g.yB)+`<text class="lg" x="${g.x0-22}" y="${(g.yT+g.yB)/2+6}" font-size="15" text-anchor="middle" transform="rotate(-90 ${g.x0-22} ${(g.yT+g.yB)/2+6})">tinggi = ${h}</text>`;
+      s+=`</svg>`;
+      document.getElementById('playStage').innerHTML=s;
+      const area=(b*h/2);
+      document.getElementById('playReadout').innerHTML=
+        '<div class="eq">Luas = ½ × <span class="t-pink">'+b+'</span> × <span class="t-pink">'+h+'</span> = <span class="res">'+(Number.isInteger(area)?area:area.toFixed(1))+' cm²</span></div>'+
+        '<div class="sub">½ × tapak × tinggi = ½ × '+(b*h)+'</div>';
+    }
+    const rB=document.getElementById('rB'),rH=document.getElementById('rH'),vB=document.getElementById('vB'),vH=document.getElementById('vH');
+    function up(){vB.textContent=rB.value;vH.textContent=rH.value;draw(+rB.value,+rH.value);beep('tick');}
+    rB.oninput=up;rH.oninput=up;draw(6,4);
+  };
+})();
+
+</script>
+
+<script>
+/* boot */
+applyZoom(); setAudio(false); showScene(0);
+</script>
+</body>
+</html>
