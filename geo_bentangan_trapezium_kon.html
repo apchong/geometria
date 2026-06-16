@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEO • Pembaris Ajaib 2: Prisma Trapezium &amp; Kon</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--teal:#3DD6E0;--dark:#1A7A8A;--orange:#FFAA00;--pink:#FF6B9D;--yellow:#FFE033;--blue:#4A90FF;--green:#22c55e;--red:#ef4444;--purple:#A78BFA;--ruler:#FFE9A8;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#000;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:"Fredoka One",cursive;overflow:hidden;}
+  #stage{width:900px;height:506px;position:relative;overflow:hidden;border-radius:16px;box-shadow:0 0 60px rgba(61,214,224,0.4);transform-origin:center center;transition:transform 0.25s ease;}
+  .bg{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 40%,#0a3a5c 0%,#050e1a 70%);}
+  .star{position:absolute;background:white;border-radius:50%;animation:twinkle 2s infinite alternate;}
+  @keyframes twinkle{from{opacity:0.2}to{opacity:1}}
+
+  #stage.flash-ok{animation:flashOK .7s ease;}
+  @keyframes flashOK{0%{box-shadow:0 0 60px rgba(61,214,224,.4)}30%{box-shadow:0 0 0 10px rgba(34,197,94,.9),0 0 90px rgba(34,197,94,.8)}100%{box-shadow:0 0 60px rgba(61,214,224,.4)}}
+  #stage.flash-bad{animation:flashBad .55s ease;}
+  @keyframes flashBad{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-7px)}80%{transform:translateX(7px)}}
+  .okBurst{position:absolute;font-size:60px;left:50%;top:42%;transform:translate(-50%,-50%) scale(.3);opacity:0;pointer-events:none;z-index:300;animation:burst .9s ease forwards;}
+  @keyframes burst{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.25)}70%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.1)}}
+
+  #zoomBar{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;align-items:center;gap:10px;background:rgba(0,0,0,0.75);border:2px solid var(--teal);border-radius:40px;padding:6px 16px;box-shadow:0 0 18px rgba(61,214,224,0.45);}
+  .zoom-btn{width:42px;height:42px;border:none;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;font-family:"Fredoka One",cursive;font-size:24px;line-height:1;cursor:pointer;transition:transform 0.15s ease;display:flex;align-items:center;justify-content:center;}
+  .zoom-btn:hover{transform:scale(1.12);}
+  .zoom-btn:active{transform:scale(0.95);}
+  #zoomLevel{color:#fff;font-family:"Nunito",sans-serif;font-weight:900;font-size:15px;min-width:52px;text-align:center;}
+  #zoomReset{width:auto;border-radius:30px;padding:0 14px;font-size:14px;background:linear-gradient(135deg,var(--orange),var(--pink));}
+
+  #progress{position:absolute;top:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:50;display:none;}
+  .pdot{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,0.18);border:2px solid rgba(61,214,224,0.45);transition:all .3s;cursor:pointer;position:relative;}
+  .pdot:hover{transform:scale(1.45);background:rgba(255,255,255,0.55);border-color:#fff;box-shadow:0 0 8px rgba(255,255,255,0.7);}
+  .pdot:hover::after{content:attr(data-label);position:absolute;top:18px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.82);color:#fff;font-family:"Nunito",sans-serif;font-weight:900;font-size:11px;white-space:nowrap;padding:4px 9px;border-radius:8px;border:1px solid rgba(61,214,224,.5);pointer-events:none;z-index:200;}
+  .pdot.on{background:var(--teal);box-shadow:0 0 10px var(--teal);}
+  .pdot.done{background:var(--green);border-color:var(--green);}
+
+  .scene{position:absolute;inset:0;opacity:0;transition:opacity .6s ease;pointer-events:none;}
+  .scene.active{opacity:1;pointer-events:all;}
+  .scene-badge{position:absolute;top:34px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;border-radius:30px;padding:6px 20px;font-family:"Nunito",sans-serif;font-weight:900;font-size:13px;letter-spacing:1px;text-transform:uppercase;box-shadow:0 2px 10px rgba(0,0,0,.4);white-space:nowrap;z-index:40;}
+
+  .subtitle{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);width:840px;background:rgba(0,0,0,.72);border:2px solid rgba(61,214,224,.6);border-radius:14px;padding:10px 18px;color:#fff;font-family:"Nunito",sans-serif;font-weight:900;font-size:17px;line-height:1.45;text-align:center;z-index:60;}
+  .subtitle b{color:var(--yellow);}
+
+  .next-btn{position:absolute;right:18px;bottom:74px;background:linear-gradient(135deg,var(--orange),var(--pink));border:none;border-radius:30px;color:#fff;font-family:"Fredoka One",cursive;font-size:17px;padding:11px 22px;cursor:pointer;z-index:70;box-shadow:0 4px 14px rgba(0,0,0,.45);transition:transform .15s;}
+  .next-btn:hover{transform:scale(1.07);}
+  #backBtn{position:absolute;left:16px;top:30px;z-index:80;background:rgba(0,0,0,.55);border:2px solid rgba(61,214,224,.7);border-radius:30px;color:#fff;font-family:"Fredoka One",cursive;font-size:15px;padding:8px 16px;cursor:pointer;transition:transform .15s;display:none;}
+  #backBtn:hover{transform:scale(1.08);background:rgba(61,214,224,.25);}
+  .hidden{display:none!important;}
+
+  .step-btn{position:absolute;left:18px;bottom:74px;background:linear-gradient(135deg,var(--green),var(--teal));border:none;border-radius:30px;color:#fff;font-family:"Fredoka One",cursive;font-size:17px;padding:11px 22px;cursor:pointer;z-index:70;box-shadow:0 4px 14px rgba(0,0,0,.45);transition:transform .15s;animation:pulseBtn 1.4s infinite;}
+  .step-btn:disabled{opacity:.45;animation:none;cursor:wait;}
+  @keyframes pulseBtn{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+  .fold-ui{position:absolute;left:18px;bottom:74px;z-index:70;background:rgba(0,0,0,.7);border:2px solid var(--yellow);border-radius:16px;padding:9px 14px;display:flex;flex-direction:column;gap:5px;width:250px;box-shadow:0 0 18px rgba(255,224,51,.35);}
+  .fold-ui label{color:var(--yellow);font-family:"Nunito",sans-serif;font-weight:900;font-size:13.5px;text-align:center;}
+  .fold-ui input[type=range]{width:100%;height:30px;cursor:grab;accent-color:var(--orange);}
+  .fold-ui input[type=range]:active{cursor:grabbing;}
+
+  .svg-wrap{position:absolute;z-index:20;}
+  .gridbg{stroke:rgba(255,255,255,.3);stroke-width:1;}
+  .gridbg5{stroke:rgba(255,255,255,.48);stroke-width:1.4;}
+
+  .steplist{position:absolute;left:18px;top:78px;width:250px;z-index:55;display:flex;flex-direction:column;gap:6px;}
+  .stepitem{background:rgba(0,0,0,.6);border:2px solid rgba(255,255,255,.18);border-radius:12px;padding:7px 12px;color:rgba(255,255,255,.55);font-family:"Nunito",sans-serif;font-weight:900;font-size:13.5px;display:flex;align-items:center;gap:8px;transition:all .3s;}
+  .stepitem .ic{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:12px;flex:none;}
+  .stepitem.now{border-color:var(--yellow);color:#fff;box-shadow:0 0 14px rgba(255,224,51,.35);}
+  .stepitem.now .ic{background:var(--yellow);color:#000;}
+  .stepitem.done{border-color:var(--green);color:#cffadd;}
+  .stepitem.done .ic{background:var(--green);color:#fff;}
+
+  /* info cards for RANCANG scenes */
+  .info-cards{position:absolute;left:24px;top:84px;width:330px;z-index:55;display:flex;flex-direction:column;gap:8px;}
+  .icard{background:rgba(0,0,0,.6);border:2px solid rgba(255,255,255,.2);border-radius:14px;padding:9px 13px;color:#fff;font-family:"Nunito",sans-serif;font-weight:900;font-size:14.5px;display:flex;align-items:center;gap:10px;opacity:0;transform:translateX(-16px);transition:all .45s;}
+  .icard.show{opacity:1;transform:translateX(0);}
+  .icard .sw{width:22px;height:22px;border-radius:6px;flex:none;border:2px solid rgba(255,255,255,.6);}
+  .icard .num{min-width:34px;height:24px;border-radius:12px;background:rgba(255,255,255,.14);border:2px solid var(--teal);color:var(--teal);display:flex;align-items:center;justify-content:center;font-size:12.5px;flex:none;padding:0 4px;}
+  .icard b{color:var(--yellow);}
+  .icard.gold{border-color:var(--yellow);box-shadow:0 0 14px rgba(255,224,51,.3);}
+
+  .formula-card{position:absolute;z-index:65;background:rgba(0,0,0,.82);border:3px solid var(--yellow);border-radius:18px;padding:12px 20px;color:#fff;font-family:"Nunito",sans-serif;font-weight:900;font-size:18px;text-align:center;box-shadow:0 0 24px rgba(255,224,51,.4);transform:scale(0);transition:transform .5s cubic-bezier(.2,1.6,.4,1);}
+  .formula-card.show{transform:scale(1);}
+  .formula-card .big{font-family:"Fredoka One",cursive;font-size:26px;color:var(--yellow);margin-top:4px;}
+
+  .title-scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;background:radial-gradient(ellipse at 50% 35%,#0d4a6e 0%,#050e1a 75%);}
+  .t-main{font-size:42px;color:#fff;text-align:center;text-shadow:0 0 24px rgba(61,214,224,.8);line-height:1.2;}
+  .t-sub{margin-top:14px;font-family:"Nunito",sans-serif;font-weight:900;color:var(--teal);font-size:19px;}
+  .t-btn{margin-top:26px;background:linear-gradient(135deg,var(--orange),var(--pink));border:none;border-radius:40px;color:#fff;font-family:"Fredoka One",cursive;font-size:24px;padding:16px 38px;cursor:pointer;box-shadow:0 6px 24px rgba(255,107,157,.5);transition:transform .15s;animation:pulseBtn 1.6s infinite;}
+  .t-btn:hover{transform:scale(1.08);}
+  .bstar{position:absolute;font-size:30px;animation:bob 3s infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+  .ans-btn{background:rgba(255,255,255,.1);border:3px solid rgba(255,255,255,.3);border-radius:16px;color:#fff;font-family:"Fredoka One",cursive;font-size:20px;padding:14px 26px;cursor:pointer;transition:all .2s;margin:0 10px;}
+  .ans-btn:hover{border-color:var(--teal);transform:scale(1.05);}
+  .ans-btn.correct{background:var(--green);border-color:var(--green);}
+  .ans-btn.wrong{background:var(--red);border-color:var(--red);animation:flashBad .5s;}
+  .ans-btn:disabled{cursor:default;}
+  .quiz-row{position:absolute;left:0;right:0;display:flex;justify-content:center;z-index:40;}
+  .quiz-q{position:absolute;left:0;right:0;text-align:center;color:#fff;font-family:"Nunito",sans-serif;font-weight:900;font-size:19px;z-index:40;}
+  .quiz-q b{color:var(--yellow);}
+
+  .big-cue{position:absolute;z-index:80;background:var(--yellow);color:#000;font-family:"Nunito",sans-serif;font-weight:900;font-size:15px;padding:7px 14px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.5);animation:cuePop .5s ease;white-space:nowrap;}
+  .big-cue::after{content:"";position:absolute;left:24px;bottom:-9px;border:10px solid transparent;border-top-color:var(--yellow);border-bottom:none;}
+  @keyframes cuePop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+
+  .confetti{position:absolute;top:-20px;z-index:90;animation:fall linear infinite;}
+  @keyframes fall{to{transform:translateY(560px) rotate(720deg)}}
+  .result-tag{position:absolute;right:26px;bottom:80px;transform:scale(0);width:300px;background:linear-gradient(135deg,var(--yellow),var(--orange));color:#5b3a00;border-radius:22px;padding:14px 18px;font-size:21px;z-index:95;box-shadow:0 8px 30px rgba(255,170,0,.55);transition:transform .5s cubic-bezier(.2,1.6,.4,1);text-align:center;}
+  .result-tag.show{transform:scale(1);}
+
+  #audioBtn{font-size:20px;background:linear-gradient(135deg,#1e6b7a,#0d3d47);border:2px solid rgba(61,214,224,0.5);}
+  #audioBtn:hover{background:linear-gradient(135deg,var(--teal),var(--dark));}
+  #audioBtn.muted{background:linear-gradient(135deg,#4a2020,#2a0d0d);border-color:rgba(239,68,68,0.5);opacity:0.75;}
+  .zoom-divider{width:1px;height:28px;background:rgba(255,255,255,0.2);margin:0 2px;}
+
+  #copyright{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:rgba(5,14,26,0.92);border-top:1px solid rgba(61,214,224,0.25);color:rgba(255,255,255,0.45);font-family:"Nunito",sans-serif;font-weight:700;font-size:10.5px;text-align:center;padding:4px 12px;letter-spacing:0.25px;line-height:1.4;}
+  #copyright .hl{color:var(--teal);}
+  #copyright .myipo{color:rgba(255,224,51,0.65);}
+</style>
+</head>
+<body>
+
+<div id="zoomBar">
+  <button class="zoom-btn" onclick="zoomOut()">−</button>
+  <span id="zoomLevel">100%</span>
+  <button class="zoom-btn" onclick="zoomIn()">+</button>
+  <button class="zoom-btn" id="zoomReset" onclick="zoomResetFn()">Asal</button>
+  <div class="zoom-divider"></div>
+  <button class="zoom-btn" id="audioBtn" onclick="toggleAudio()" title="Audio BM — Hidup/Mati">🔊</button>
+</div>
+
+<div id="stage">
+  <div class="bg"></div>
+  <div id="bgStars" style="position:absolute;inset:0;"></div>
+
+  <div id="progress"></div>
+  <button id="backBtn" onclick="goBack()">◀ Kembali</button>
+
+  <!-- TITLE -->
+  <div class="title-scene" id="titleScreen">
+    <div class="bstar" style="top:50px;left:110px;">⭐</div>
+    <div class="bstar" style="top:100px;right:140px;animation-delay:.6s;">✨</div>
+    <div class="bstar" style="bottom:90px;left:190px;animation-delay:1.1s;">📏</div>
+    <div class="bstar" style="bottom:130px;right:120px;animation-delay:.3s;">📐</div>
+    <div class="t-main">GEO &amp; PEMBARIS AJAIB 2<br><span style="font-size:26px;color:var(--yellow);">Prisma Trapezium &amp; Kon</span></div>
+    <div class="t-sub">🤖 Misi baharu: 2 bentangan yang lebih mencabar!</div>
+    <button class="t-btn" onclick="startStory()">▶ MULA MISI</button>
+  </div>
+
+  <!-- S1: RANCANG PRISMA TRAPEZIUM -->
+  <div class="scene" id="s1">
+    <div class="scene-badge">Babak 1 • Rancang: Prisma Trapezium 🏠</div>
+    <div class="info-cards" id="cards1">
+      <div class="icard"><span class="num">1</span><span class="sw" style="background:#FF6B9D;"></span>Tapak segi empat <b>5 × 4</b></div>
+      <div class="icard"><span class="num">2</span><span class="sw" style="background:#3DD6E0;"></span>Sisi tegak <b>4 × 4</b></div>
+      <div class="icard"><span class="num">3</span><span class="sw" style="background:#FFE033;"></span>Sisi atas <b>2 × 4</b></div>
+      <div class="icard"><span class="num">4</span><span class="sw" style="background:#A78BFA;"></span>Sisi condong <b>5 × 4</b></div>
+      <div class="icard"><span class="num">5 + 6</span><span class="sw" style="background:#FFAA00;"></span>2 × <b>Trapezium</b> (penutup depan &amp; belakang)</div>
+      <div class="icard gold">✅ JUMLAH: <b>6 keping</b> perlu dilukis!</div>
+      <div class="icard">🕵️ Rahsia sisi condong: <b>&radic;(3² + 4²) = 5 cm</b></div>
+    </div>
+    <svg class="svg-wrap" id="svg1" width="470" height="350" viewBox="0 0 470 350" style="right:30px;top:84px;"></svg>
+    <button class="next-btn" onclick="go(2)">Jom Lukis! ▶</button>
+    <div class="subtitle">Sebelum melukis, KIRA dahulu: <b>6 keping</b> perlu dilukis — 4 segi empat tepat + 2 trapezium! 🤖</div>
+  </div>
+
+  <!-- S2: LUKIS + LIPAT PRISMA -->
+  <div class="scene" id="s2">
+    <div class="scene-badge">Babak 2 • Lukis &amp; Lipat: Prisma Trapezium ✏️</div>
+    <div class="steplist" id="listP"></div>
+    <svg class="svg-wrap" id="svgP" width="600" height="406" viewBox="0 0 600 406" style="right:10px;top:72px;">
+      <g id="gridP"></g><g id="artP"></g><g id="foldP"></g>
+    </svg>
+    <button class="step-btn" id="btnP" onclick="stepP()">✏️ Lukis Langkah 1</button>
+    <div class="fold-ui hidden" id="foldUiP">
+      <label>🪄 SERET ke kanan: LIPAT jadi 3D!</label>
+      <input type="range" id="sliderP" min="0" max="100" value="0" oninput="renderFoldP(this.value/100)">
+    </div>
+    <button class="next-btn hidden" id="nextP" onclick="go(3)">Seterusnya: Kon ▶</button>
+    <div class="subtitle" id="subP">Kita lukis <b>jalur 4 segi empat</b> dahulu, kemudian tampal trapezium di kiri &amp; kanan tapak.</div>
+  </div>
+
+  <!-- S3: RANCANG KON -->
+  <div class="scene" id="s3">
+    <div class="scene-badge">Babak 3 • Rancang: Kon 🍦</div>
+    <div class="info-cards" id="cards3">
+      <div class="icard"><span class="num">1</span><span class="sw" style="background:#FF6B9D;border-radius:50%;"></span>Tapak = <b>bulatan, jejari j = 3 cm</b></div>
+      <div class="icard"><span class="num">2</span><span class="sw" style="background:#A78BFA;border-radius:50% 50% 0 0;"></span>Selimut = <b>SEKTOR, jejari s = 5 cm</b></div>
+      <div class="icard gold">✅ JUMLAH: <b>2 keping</b> sahaja perlu dilukis!</div>
+      <div class="icard">📐 s = sisi sendeng = <b>&radic;(3² + 4²) = 5 cm</b></div>
+      <div class="icard gold">🌟 Sudut sektor = <b>j &frasl; s × 360° = 3&frasl;5 × 360° = 216°</b></div>
+      <div class="icard">💡 Sebab: <b>lengkok sektor</b> mesti sama panjang dengan <b>lilitan tapak</b>!</div>
+    </div>
+    <svg class="svg-wrap" id="svg3" width="420" height="360" viewBox="0 0 420 360" style="right:50px;top:80px;"></svg>
+    <button class="next-btn" onclick="go(4)">Jom Lukis! ▶</button>
+    <div class="subtitle">Kon lebih mudah: hanya <b>2 keping</b> — 1 bulatan + 1 sektor. Kuncinya: kira <b>sudut sektor</b> dengan betul! 🤖</div>
+  </div>
+
+  <!-- S4: LUKIS + LIPAT KON -->
+  <div class="scene" id="s4">
+    <div class="scene-badge">Babak 4 • Lukis &amp; Lipat: Kon ✏️</div>
+    <div class="steplist" id="listK"></div>
+    <svg class="svg-wrap" id="svgK" width="600" height="430" viewBox="0 0 600 430" style="right:10px;top:66px;">
+      <g id="gridK"></g><g id="artK"></g><g id="foldK"></g>
+    </svg>
+    <div class="formula-card" id="formulaK" style="left:300px;top:190px;">
+      Sudut sektor = j &frasl; s × 360°
+      <div class="big">= 3&frasl;5 × 360° = 216°</div>
+    </div>
+    <button class="step-btn" id="btnK" onclick="stepK()">✏️ Lukis Langkah 1</button>
+    <div class="fold-ui hidden" id="foldUiK">
+      <label>🪄 SERET ke kanan: GULUNG jadi KON!</label>
+      <input type="range" id="sliderK" min="0" max="100" value="0" oninput="renderFoldK(this.value/100)">
+    </div>
+    <button class="next-btn hidden" id="nextK" onclick="go(5)">Kuiz Mini ▶</button>
+    <div class="subtitle" id="subK">Lukis bulatan tapak dahulu, kira sudut, kemudian lukis sektor. Akhir sekali... <b>GULUNG!</b></div>
+  </div>
+
+  <!-- S5: KUIZ -->
+  <div class="scene" id="s5">
+    <div class="scene-badge">Babak 5 • Kuiz Mini 🧠</div>
+    <div class="quiz-q" id="q1q" style="top:96px;">Soalan 1: Kon dengan j = 3 cm dan s = 5 cm. <b>Sudut sektor</b> = ?</div>
+    <div class="quiz-row" id="q1r" style="top:136px;">
+      <button class="ans-btn" onclick="quiz(this,1,false)">144°</button>
+      <button class="ans-btn" onclick="quiz(this,1,true)">216°</button>
+      <button class="ans-btn" onclick="quiz(this,1,false)">270°</button>
+    </div>
+    <div class="quiz-q hidden" id="q2q" style="top:226px;">Soalan 2: Bentangan <b>prisma trapezium</b> ada berapa keping permukaan?</div>
+    <div class="quiz-row hidden" id="q2r" style="top:266px;">
+      <button class="ans-btn" onclick="quiz(this,2,false)">4</button>
+      <button class="ans-btn" onclick="quiz(this,2,true)">6</button>
+      <button class="ans-btn" onclick="quiz(this,2,false)">8</button>
+    </div>
+    <div class="result-tag" id="resultTag">🏅 JURUTERA BENTANGAN! 🏅<br><span style="font-size:15px;font-family:'Nunito',sans-serif;font-weight:900;">Prisma trapezium &amp; kon — anda kuasai kedua-duanya!</span></div>
+    <div class="subtitle" id="subQ">Jawab 2 soalan untuk dapat lencana <b>Jurutera Bentangan</b>! 🏅</div>
+  </div>
+</div>
+
+<div id="copyright">
+  © 2024–2026 <span class="hl">Chong Ai Peng</span> | Modul <span class="hl">GeoMETriA</span> — Hak cipta terpelihara. &nbsp;|&nbsp; Notifikasi Hak Cipta MyIPO: <span class="myipo">CRDV2025M05601</span>
+</div>
+
+<script>
+/* ---------- zoom ---------- */
+let zoomVal=1;
+function applyZoom(){zoomVal=Math.min(2.5,Math.max(0.4,zoomVal));document.getElementById('stage').style.transform='scale('+zoomVal+')';document.getElementById('zoomLevel').textContent=Math.round(zoomVal*100)+'%';}
+function zoomIn(){zoomVal+=0.1;applyZoom();}
+function zoomOut(){zoomVal-=0.1;applyZoom();}
+function zoomResetFn(){zoomVal=1;applyZoom();}
+(function(){const fit=Math.min(1,(window.innerWidth-20)/900,(window.innerHeight-20)/506);if(fit<1){zoomVal=fit;applyZoom();}})();
+
+/* ---------- stars ---------- */
+(function(){const w=document.getElementById('bgStars');for(let i=0;i<46;i++){const s=document.createElement('div');s.className='star';const z=Math.random()*2.4+1;s.style.cssText=`width:${z}px;height:${z}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*2}s;`;w.appendChild(s);}})();
+
+/* ---------- sounds ---------- */
+let AC=null;
+function ac(){try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();return AC;}catch(e){return null;}}
+function tone(f,d,t,v,dl){const c=ac();if(!c)return;const o=c.createOscillator(),g=c.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.setValueAtTime(0,c.currentTime+(dl||0));g.gain.linearRampToValueAtTime(v||0.1,c.currentTime+(dl||0)+0.02);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+(dl||0)+d);o.connect(g);g.connect(c.destination);o.start(c.currentTime+(dl||0));o.stop(c.currentTime+(dl||0)+d+0.05);}
+function playDing(p){tone(620*(p||1),0.22,'sine',0.14);}
+function playFanfare(){[523,659,784,1047].forEach((f,i)=>tone(f,0.3,'triangle',0.14,i*0.12));}
+
+/* ---------- audio BM (Web Speech API) ---------- */
+let audioOn=true;
+const VOICE_PREF=['ms-MY','ms','id-ID'];
+let _voice=null;
+function getVoice(){
+  if(_voice)return _voice;
+  const vv=window.speechSynthesis.getVoices();
+  for(const lang of VOICE_PREF){
+    const v=vv.find(x=>x.lang===lang)||vv.find(x=>x.lang.startsWith(lang.split('-')[0]));
+    if(v){_voice=v;return v;}
+  }
+  return null;
+}
+window.speechSynthesis.onvoiceschanged=()=>{_voice=null;getVoice();};
+function speak(txt){
+  if(!audioOn||!window.speechSynthesis)return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(txt);
+  const v=getVoice();if(v)u.voice=v;
+  u.lang='ms-MY';u.rate=0.88;u.pitch=1.05;u.volume=1;
+  window.speechSynthesis.speak(u);
+}
+function stopSpeak(){window.speechSynthesis&&window.speechSynthesis.cancel();}
+function toggleAudio(){
+  audioOn=!audioOn;
+  const btn=document.getElementById('audioBtn');
+  btn.textContent=audioOn?'🔊':'🔇';
+  btn.classList.toggle('muted',!audioOn);
+  if(!audioOn){stopSpeak();}else{speak('Audio dihidupkan.');}
+}
+const SCENE_TTS=[
+  'Babak Satu. Rancang Prisma Trapezium. Sebelum melukis, kira dahulu. Enam keping perlu dilukis, iaitu empat segi empat tepat dan dua trapezium.',
+  'Babak Dua. Lukis dan Lipat Prisma Trapezium. Klik butang untuk melukis setiap langkah satu persatu.',
+  'Babak Tiga. Rancang Kon. Kon lebih mudah, hanya dua keping sahaja, satu bulatan dan satu sektor. Kuncinya, kira sudut sektor dengan betul.',
+  'Babak Empat. Lukis dan Lipat Kon. Kita lukis bulatan tapak dahulu, kira sudut sektor, kemudian lukis sektor. Akhir sekali, gulung jadi kon!',
+  'Babak Lima. Kuiz Mini. Jawab dua soalan untuk dapat lencana Jurutera Bentangan!'
+];
+const PTTS=[
+  'Mula dengan tapak 5 darab 4. Tinggi 5 petak, lebar 4 petak.',
+  'Naik ke atas. Sisi tegak 4 darab 4, segi empat sama!',
+  'Sambung lagi. Sisi atas 2 darab 4, yang paling pendek.',
+  'Paling atas. Sisi condong 5 darab 4. Ingat rahsia, punca tiga kuasa dua tambah empat kuasa dua sama dengan 5!',
+  'Tampal trapezium kiri pada tepi tapak. Empat mendatar, turun 2, condong 5.',
+  'Akhir sekali trapezium kanan, cermin trapezium kiri!'
+];
+const KTTS=[
+  'Lukis bulatan tapak. Jejari 3 sentimeter.',
+  'Formula ajaib! Sudut sektor sama dengan jejari dibahagi sisi sendeng, darab 360 darjah.',
+  'Lukis dua jejari 5 sentimeter, kemudian sapu lengkok sehingga 216 darjah!'
+];
+
+/* ---------- visual feedback ---------- */
+function flashOK(emoji){
+  const st=document.getElementById('stage');
+  st.classList.remove('flash-ok');void st.offsetWidth;st.classList.add('flash-ok');
+  const b=document.createElement('div');b.className='okBurst';b.textContent=emoji||'✅';st.appendChild(b);
+  setTimeout(()=>b.remove(),950);playDing(1.3);
+}
+function flashBad(){
+  const st=document.getElementById('stage');
+  st.classList.remove('flash-bad');void st.offsetWidth;st.classList.add('flash-bad');
+  const b=document.createElement('div');b.className='okBurst';b.textContent='❌';st.appendChild(b);
+  setTimeout(()=>b.remove(),950);playDing(0.5);
+}
+
+/* ---------- scene control ---------- */
+const TOTAL=5;let current=0;
+const SCENE_LABELS=['Babak 1: Rancang Prisma','Babak 2: Lukis Prisma','Babak 3: Rancang Kon','Babak 4: Lukis Kon','Babak 5: Kuiz Mini'];
+(function(){const p=document.getElementById('progress');for(let i=0;i<TOTAL;i++){const d=document.createElement('div');d.className='pdot';d.id='pd'+i;d.setAttribute('data-label',SCENE_LABELS[i]);d.onclick=()=>go(i+1);p.appendChild(d);}})();
+function go(n){
+  document.querySelectorAll('.scene').forEach(e=>e.classList.remove('active'));
+  const sc=document.getElementById('s'+n);if(sc)sc.classList.add('active');
+  current=n;
+  for(let i=0;i<TOTAL;i++){const d=document.getElementById('pd'+i);d.classList.toggle('on',i===n-1);d.classList.toggle('done',i<n-1);}
+  document.getElementById('backBtn').style.display=n>1?'block':'none';
+  if(n===1)showCards('cards1');
+  if(n===3)showCards('cards3');
+  setTimeout(()=>speak(SCENE_TTS[n-1]),400);
+  if(n===5)setTimeout(()=>speak('Soalan Satu. Kon dengan jejari 3 sentimeter dan sisi sendeng 5 sentimeter. Berapakah sudut sektor?'),3200);
+}
+function goBack(){if(current>1)go(current-1);}
+function startStory(){ac();document.getElementById('titleScreen').style.display='none';document.getElementById('progress').style.display='flex';speak('Selamat datang! GEO dan Pembaris Ajaib Dua. Misi baharu: Prisma Trapezium dan Kon!');setTimeout(()=>go(1),1200);}
+function showCards(id){
+  document.querySelectorAll('#'+id+' .icard').forEach((c,i)=>{c.classList.remove('show');setTimeout(()=>{c.classList.add('show');playDing(1+i*0.1);},250+i*350);});
+}
+
+/* ---------- svg helpers ---------- */
+const SVGNS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+function paintGrid(gid,w,h,px){
+  const g=document.getElementById(gid);
+  for(let x=0;x<=w;x+=px)el('line',{x1:x,y1:0,x2:x,y2:h,class:(x/px)%5===0?'gridbg5':'gridbg'},g);
+  for(let y=0;y<=h;y+=px)el('line',{x1:0,y1:y,x2:w,y2:y,class:(y/px)%5===0?'gridbg5':'gridbg'},g);
+}
+paintGrid('gridP',600,406,18);
+paintGrid('gridK',600,430,24);
+
+/* ---------- magic ruler engine ---------- */
+let cueEl=null;
+function showCue(txt,x,y,sceneId){
+  hideCue();
+  const sc=document.getElementById(sceneId);
+  cueEl=document.createElement('div');cueEl.className='big-cue';cueEl.textContent=txt;
+  cueEl.style.left=x+'px';cueEl.style.top=y+'px';sc.appendChild(cueEl);
+}
+function hideCue(){if(cueEl){cueEl.remove();cueEl=null;}}
+
+function buildRulerGroup(cm,px){
+  const g=el('g',{opacity:0});
+  const L=cm*px;
+  el('rect',{x:-14,y:6,width:L+34,height:44,rx:4,fill:'var(--ruler)',stroke:'#C9A227','stroke-width':2},g);
+  const whole=Math.floor(cm);
+  for(let i=0;i<=whole;i++){
+    el('line',{x1:i*px,y1:6,x2:i*px,y2:i===0?24:20,stroke:i===0?'#b00':'#7a5b00','stroke-width':i===0?3:1.6},g);
+    const t=el('text',{x:i*px,y:38,'text-anchor':'middle','font-family':'Nunito','font-weight':900,'font-size':12,fill:i===0?'#b00':'#7a5b00'},g);
+    t.textContent=i;
+    if(i<whole)el('line',{x1:(i+0.5)*px,y1:6,x2:(i+0.5)*px,y2:15,stroke:'#a98c2f','stroke-width':1},g);
+  }
+  if(cm>whole){
+    el('line',{x1:L,y1:6,x2:L,y2:24,stroke:'#b00','stroke-width':3},g);
+    const t=el('text',{x:L,y:38,'text-anchor':'middle','font-family':'Nunito','font-weight':900,'font-size':11,fill:'#b00'},g);
+    t.textContent=cm;
+  }
+  return g;
+}
+function fmt(v,dec){return dec?v.toFixed(1):Math.round(v);}
+function animRuler(artId,x1,y1,x2,y2,cm,px,color,label,done,fast,measure){
+  const art=document.getElementById(artId);
+  const ang=Math.atan2(y2-y1,x2-x1)*180/Math.PI;
+  const ruler=buildRulerGroup(cm,px);
+  ruler.setAttribute('transform',`translate(${x1},${y1}) rotate(${ang.toFixed(2)})`);
+  art.appendChild(ruler);
+  const line=el('line',{x1:x1,y1:y1,x2:x1,y2:y1,stroke:color,'stroke-width':measure?4:6,'stroke-linecap':'round'},art);
+  if(measure)line.setAttribute('stroke-dasharray','7 7');
+  const pen=el('circle',{cx:x1,cy:y1,r:6,fill:'var(--yellow)',stroke:'#000','stroke-width':1.5},art);
+  const counter=el('text',{x:x1,y:y1-14,'font-family':'Nunito','font-weight':900,'font-size':19,fill:color,'text-anchor':'middle',stroke:'rgba(0,0,0,.6)','stroke-width':4,'paint-order':'stroke'},art);
+  const dec=cm%1!==0;
+  requestAnimationFrame(()=>{ruler.style.transition='opacity .4s';ruler.style.opacity=1;});
+  const dur=fast?Math.max(500,cm*70):Math.max(900,Math.min(2600,cm*170));
+  const t0=performance.now()+450;
+  function frame(now){
+    let t=(now-t0)/dur;
+    if(t<0)t=0;if(t>1)t=1;
+    const cx=x1+(x2-x1)*t, cy=y1+(y2-y1)*t;
+    line.setAttribute('x2',cx);line.setAttribute('y2',cy);
+    pen.setAttribute('cx',cx);pen.setAttribute('cy',cy);
+    counter.setAttribute('x',cx);counter.setAttribute('y',cy-14);
+    counter.textContent=fmt(cm*t,dec)+' cm';
+    if(t<1){requestAnimationFrame(frame);}
+    else{
+      pen.remove();counter.remove();
+      ruler.style.opacity=0;setTimeout(()=>ruler.remove(),450);
+      if(label){
+        const mx=(x1+x2)/2,my=(y1+y2)/2;
+        const nx=-(y2-y1),ny=(x2-x1);const nl=Math.hypot(nx,ny)||1;
+        const lt=el('text',{x:mx+nx/nl*16,y:my+ny/nl*16+5,'font-family':'Nunito','font-weight':900,'font-size':15,fill:color,'text-anchor':'middle',stroke:'rgba(0,0,0,.55)','stroke-width':4,'paint-order':'stroke'},art);
+        lt.textContent=label;
+      }
+      if(done)done();
+    }
+  }
+  requestAnimationFrame(frame);
+}
+function drawSeq(artId,strokes,px,onAll){
+  let i=0;
+  function nx(){
+    if(i>=strokes.length){if(onAll)onAll();return;}
+    const s=strokes[i++];
+    animRuler(artId,s[0],s[1],s[2],s[3],s[4],px,s[5],s[6],nx,true);
+  }
+  nx();
+}
+function tween(dur,fn,done){
+  const t0=performance.now();
+  function f(now){let t=(now-t0)/dur;if(t>1)t=1;
+    const e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+    fn(e);if(t<1)requestAnimationFrame(f);else if(done)done();}
+  requestAnimationFrame(f);
+}
+
+/* ---------- step list ---------- */
+function buildSteps(listId,items){
+  const w=document.getElementById(listId);
+  items.forEach((tx,i)=>{
+    const d=document.createElement('div');d.className='stepitem';d.id=listId+'_i'+i;
+    d.innerHTML='<span class="ic">'+(i+1)+'</span><span>'+tx+'</span>';
+    w.appendChild(d);
+  });
+}
+function setStep(listId,idx){
+  const w=document.getElementById(listId);
+  [...w.children].forEach((c,i)=>{
+    c.classList.toggle('now',i===idx);
+    c.classList.toggle('done',i<idx);
+    if(i<idx)c.querySelector('.ic').textContent='✓';
+  });
+  if(idx>=w.children.length)[...w.children].forEach(c=>{c.classList.remove('now');c.classList.add('done');c.querySelector('.ic').textContent='✓';});
+}
+
+/* =========================================================
+   PRISMA TRAPEZIUM
+   Keratan rentas: A(0,0) B(5,0) C(2,4) D(0,4); condong CB = 5
+   3D: X = arah tapak (0..5), Y = tinggi, Z = panjang prisma (0..4)
+========================================================= */
+const PSTYLE={base:'#FF6B9D',f4:'#3DD6E0',f2:'#FFE033',f5:'#A78BFA',cap:'#FFAA00'};
+const CS=[[0,0],[5,0],[2,4],[0,4]]; // A B C D
+
+// unjuran diinterpolasi: t=0 grid net (18px/cm), t=1 oblik
+function projP(x,y,z,t){
+  const ox=240+(180-240)*t, oy=218+(330-218)*t;
+  const sxx=16*t,          sxy=18*(1-t);
+  const syy=-16*t;
+  const szx=18+(24-18)*t,  szy=-9.6*t;
+  return [ox + x*sxx + z*szx, oy + x*sxy + y*syy + z*szy];
+}
+const PH3=Math.PI - Math.atan2(-4,3) ; // 4.0689 rad: putaran penuh condong
+function prismPieces(t){
+  const f1=Math.PI-(Math.PI/2)*t;
+  const f2=Math.PI-Math.PI*t;
+  const f3=Math.PI-(Math.PI+0.9272952180016122)*t;
+  const A=[0,0];
+  const D=[A[0]+4*Math.cos(f1), A[1]+4*Math.sin(f1)];
+  const C=[D[0]+2*Math.cos(f2), D[1]+2*Math.sin(f2)];
+  const Bc=[C[0]+5*Math.cos(f3), C[1]+5*Math.sin(f3)];
+  const th=t*Math.PI/2, s=Math.sin(th), c=Math.cos(th);
+  const capF=CS.map(([x,y])=>[x, y*s, -y*c]);
+  const capB=CS.map(([x,y])=>[x, y*s, 4+y*c]);
+  const ext=(P,Q)=>[[P[0],P[1],0],[Q[0],Q[1],0],[Q[0],Q[1],4],[P[0],P[1],4]];
+  return [ // susunan lukis: belakang → depan
+    {pts:capB, col:PSTYLE.cap},
+    {pts:ext(A,D), col:PSTYLE.f4},
+    {pts:[[0,0,0],[5,0,0],[5,0,4],[0,0,4]], col:PSTYLE.base},
+    {pts:ext(D,C), col:PSTYLE.f2},
+    {pts:ext(C,Bc), col:PSTYLE.f5},
+    {pts:capF, col:PSTYLE.cap},
+  ];
+}
+function renderPrism(gid,t){
+  const g=document.getElementById(gid);g.innerHTML='';
+  prismPieces(t).forEach(p=>{
+    const pts=p.pts.map(([x,y,z])=>projP(x,y,z,t).map(v=>v.toFixed(1)).join(',')).join(' ');
+    el('polygon',{points:pts,fill:p.col,'fill-opacity':0.55,stroke:'#fff','stroke-width':2.5,'stroke-linejoin':'round'},g);
+  });
+}
+let foldPDone=false;
+function renderFoldP(t){
+  document.getElementById('artP').style.opacity=1-0.85*t;
+  renderPrism('foldP',t);
+  if(t>=0.99&&!foldPDone){foldPDone=true;flashOK('🎉');playFanfare();
+    document.getElementById('subP').innerHTML='HEBAT! Bentangan rata jadi <b>PRISMA TRAPEZIUM</b>! Trapezium tutup depan-belakang, jalur 4 segi empat balut keliling. 🏠';
+    speak('Hebat! Bentangan rata jadi Prisma Trapezium! Trapezium tutup depan dan belakang, jalur empat segi empat balut keliling.');
+    document.getElementById('nextP').classList.remove('hidden');}
+}
+
+/* langkah LUKIS prisma (18px/cm) */
+buildSteps('listP',[
+  'Tapak <b>5 × 4</b> (bawah)',
+  'Sisi tegak <b>4 × 4</b>',
+  'Sisi atas <b>2 × 4</b>',
+  'Sisi condong <b>5 × 4</b>',
+  'Trapezium <b>kiri</b>',
+  'Trapezium <b>kanan</b>',
+]);
+const P=PSTYLE;
+const PSTEPS=[
+  [[240,218,312,218,4,P.base,'4 cm'],[312,218,312,308,5,P.base,'5 cm'],[312,308,240,308,4,P.base,''],[240,308,240,218,5,P.base,'']],
+  [[240,218,240,146,4,P.f4,'4 cm'],[240,146,312,146,4,P.f4,'4 cm'],[312,146,312,218,4,P.f4,'']],
+  [[240,146,240,110,2,P.f2,'2 cm'],[240,110,312,110,4,P.f2,''],[312,110,312,146,2,P.f2,'']],
+  [[240,110,240,20,5,P.f5,'5 cm'],[240,20,312,20,4,P.f5,''],[312,20,312,110,5,P.f5,'']],
+  [[240,218,168,218,4,P.cap,'4 cm'],[168,218,168,254,2,P.cap,'2 cm'],[168,254,240,308,5,P.cap,'5 cm']],
+  [[312,218,384,218,4,P.cap,'4 cm'],[384,218,384,254,2,P.cap,'2 cm'],[384,254,312,308,5,P.cap,'5 cm']],
+];
+const PSUBS=[
+  'Mula dengan <b>tapak 5 × 4</b>. Tinggi 5 petak, lebar 4 petak.',
+  'Naik ke atas: <b>sisi tegak 4 × 4</b> — segi empat sama!',
+  'Sambung lagi: <b>sisi atas 2 × 4</b>, yang paling pendek.',
+  'Paling atas: <b>sisi condong 5 × 4</b>. Ingat rahsia: &radic;(3²+4²) = 5!',
+  'Tampal <b>trapezium kiri</b> pada tepi tapak: 4 mendatar, turun 2, condong 5.',
+  'Akhir sekali <b>trapezium kanan</b> — cermin trapezium kiri!',
+];
+let stepPidx=0;
+function stepP(){
+  const btn=document.getElementById('btnP');
+  if(stepPidx>=PSTEPS.length)return;
+  btn.disabled=true;
+  setStep('listP',stepPidx);
+  document.getElementById('subP').innerHTML=PSUBS[stepPidx];
+  speak(PTTS[stepPidx]);
+  drawSeq('artP',PSTEPS[stepPidx],18,()=>{
+    stepPidx++;setStep('listP',stepPidx);flashOK('✅');
+    if(stepPidx>=PSTEPS.length){
+      btn.classList.add('hidden');
+      document.getElementById('foldUiP').classList.remove('hidden');
+      document.getElementById('subP').innerHTML='SIAP! Bentangan lengkap. Sekarang... seret slider untuk <b>LIPAT jadi 3D</b>! 🪄';
+      speak('Siap! Bentangan lengkap. Sekarang seret slider untuk lipat jadi tiga D!');
+    }else{
+      btn.disabled=false;btn.textContent='✏️ Lukis Langkah '+(stepPidx+1);
+    }
+  });
+}
+
+/* S1: prisma 3D statik */
+(function(){
+  const svg=document.getElementById('svg1');
+  const g=el('g',{transform:'scale(1.62) translate(-128,-148)'},svg);
+  g.id='prism3d';svg.appendChild(g);
+  prismPieces(1).forEach(p=>{
+    const pts=p.pts.map(([x,y,z])=>projP(x,y,z,1).map(v=>v.toFixed(1)).join(',')).join(' ');
+    el('polygon',{points:pts,fill:p.col,'fill-opacity':0.55,stroke:'#fff','stroke-width':1.8,'stroke-linejoin':'round'},g);
+  });
+  // label dimensi
+  const lbl=(x,y,t,c)=>{const e=el('text',{x:x,y:y,'font-family':'Nunito','font-weight':900,'font-size':11,fill:c||'#fff','text-anchor':'middle',stroke:'rgba(0,0,0,.6)','stroke-width':3,'paint-order':'stroke'},g);e.textContent=t;};
+  lbl(220,344,'5 cm','#FF6B9D');lbl(170,298,'4 cm','#3DD6E0');lbl(196,258,'2 cm','#FFE033');lbl(248,290,'5 cm','#A78BFA');lbl(316,318,'panjang 4 cm','#FFAA00');
+})();
+
+/* =========================================================
+   KON  r=3, t=4, s=5  (24px/cm)
+   net: sektor pusat (300,150) R=120 sudut 216° (takuk di atas)
+        bulatan pusat (300,342) r=72, tangen pada (300,270)
+   gulung: r_eff = 5−2t, h = √(25−r_eff²), pecahan balut f = 3/r_eff
+========================================================= */
+function conePieces(t){
+  const re=5-2*t, h=Math.sqrt(Math.max(0,25-re*re)), f=3/re, e=1-0.68*t;
+  const bc=[300,150+150*t];
+  const rx=24*re, ry=rx*e;
+  const d=24*h; // jarak puncak ke pusat tapak (skrin)
+  const apex=[300, bc[1]-d];
+  // julat lengkok balutan (takuk di atas; tengah di bawah = 90°)
+  let a0=90-f*180, a1=90+f*180;
+  // jika puncak di luar elips: potong pada tangen siluet
+  if(d>ry){
+    const alf=Math.asin(ry/d)*180/Math.PI;
+    a0=Math.max(a0,-alf); a1=Math.min(a1,180+alf);
+  }
+  let dPath='M '+apex[0].toFixed(1)+','+apex[1].toFixed(1);
+  const N=40;
+  for(let i=0;i<=N;i++){
+    const a=(a0+(a1-a0)*i/N)*Math.PI/180;
+    dPath+=' L '+(bc[0]+rx*Math.cos(a)).toFixed(1)+','+(bc[1]+ry*Math.sin(a)).toFixed(1);
+  }
+  dPath+=' Z';
+  const cc=[300,342-42*t], cry=72*(1-0.68*t);
+  return {sector:dPath, circle:{cx:cc[0],cy:cc[1],rx:72,ry:cry}};
+}
+function renderCone(gid,t){
+  const g=document.getElementById(gid);g.innerHTML='';
+  const p=conePieces(t);
+  el('ellipse',{cx:p.circle.cx,cy:p.circle.cy,rx:p.circle.rx,ry:p.circle.ry,fill:'#FF6B9D','fill-opacity':0.5,stroke:'#fff','stroke-width':2.5},g);
+  el('path',{d:p.sector,fill:'#A78BFA','fill-opacity':0.55,stroke:'#fff','stroke-width':2.5,'stroke-linejoin':'round'},g);
+}
+let foldKDone=false;
+function renderFoldK(t){
+  document.getElementById('artK').style.opacity=1-0.85*t;
+  renderCone('foldK',t);
+  if(t>=0.99&&!foldKDone){foldKDone=true;flashOK('🍦');playFanfare();
+    document.getElementById('subK').innerHTML='SEMPURNA! Sektor 216° menggulung penuh — lengkoknya <b>tepat</b> mengelilingi bulatan tapak. Itulah sebab kita kira j&frasl;s × 360°! 🍦';
+    speak('Sempurna! Sektor 216 darjah menggulung penuh. Lengkoknya tepat mengelilingi bulatan tapak. Itulah sebab kita kira jejari dibahagi sendeng darab 360 darjah!');
+    document.getElementById('nextK').classList.remove('hidden');}
+}
+
+/* langkah LUKIS kon */
+buildSteps('listK',[
+  'Bulatan tapak <b>j = 3 cm</b>',
+  'Kira <b>sudut sektor</b>',
+  'Sektor <b>s = 5 cm, 216°</b>',
+]);
+const KSUBS=[
+  'Lukis <b>bulatan tapak</b>: jejari 3 cm. (Guna jangka lukis di kertas sebenar!)',
+  'Formula ajaib: sudut sektor = <b>j&frasl;s × 360°</b>. Kira dengan saya!',
+  'Lukis 2 jejari <b>5 cm</b>, kemudian sapu lengkok sehingga <b>216°</b>!',
+];
+let stepKidx=0;
+function stepK(){
+  const btn=document.getElementById('btnK');
+  if(stepKidx>=3)return;
+  btn.disabled=true;
+  setStep('listK',stepKidx);
+  document.getElementById('subK').innerHTML=KSUBS[stepKidx];
+  speak(KTTS[stepKidx]);
+  if(stepKidx===0)kStep1(finishK);
+  if(stepKidx===1)kStep2(finishK);
+  if(stepKidx===2)kStep3(finishK);
+}
+function finishK(){
+  const btn=document.getElementById('btnK');
+  stepKidx++;setStep('listK',stepKidx);flashOK('✅');
+  if(stepKidx>=3){
+    btn.classList.add('hidden');
+    document.getElementById('foldUiK').classList.remove('hidden');
+    document.getElementById('subK').innerHTML='SIAP! Sekarang bahagian paling seronok — seret slider untuk <b>GULUNG sektor jadi kon</b>! 🪄';
+    speak('Siap! Sekarang bahagian paling seronok, seret slider untuk gulung sektor jadi kon!');
+  }else{
+    btn.disabled=false;btn.textContent='✏️ Lukis Langkah '+(stepKidx+1);
+  }
+}
+/* K1: jejari + bulatan tapak */
+function kStep1(done){
+  animRuler('artK',300,342,372,342,3,24,'#FF6B9D','j = 3 cm',()=>{
+    const circ=el('circle',{cx:300,cy:342,r:72,fill:'none',stroke:'#FF6B9D','stroke-width':5,'stroke-linecap':'round'},document.getElementById('artK'));
+    const L=2*Math.PI*72;
+    circ.setAttribute('stroke-dasharray',L);circ.setAttribute('stroke-dashoffset',L);
+    circ.setAttribute('transform','rotate(-90 300 342)');
+    tween(1400,e=>circ.setAttribute('stroke-dashoffset',L*(1-e)),()=>{
+      el('circle',{cx:300,cy:342,r:4,fill:'#fff'},document.getElementById('artK'));
+      done();
+    });
+  });
+}
+/* K2: formula */
+function kStep2(done){
+  const f=document.getElementById('formulaK');
+  f.classList.add('show');playDing(1.2);
+  setTimeout(()=>{f.classList.remove('show');done();},3400);
+}
+/* K3: sektor — jejari, sapuan lengkok dengan kaunter darjah */
+function kStep3(done){
+  const art=document.getElementById('artK');
+  const O=[300,150], R=120;
+  const dir=a=>[O[0]+R*Math.cos(a*Math.PI/180), O[1]+R*Math.sin(a*Math.PI/180)];
+  const p0=dir(-18);
+  animRuler('artK',O[0],O[1],p0[0],p0[1],5,24,'#A78BFA','s = 5 cm',()=>{
+    el('circle',{cx:O[0],cy:O[1],r:4,fill:'#fff'},art);
+    const arc=el('path',{d:'',fill:'none',stroke:'#A78BFA','stroke-width':5,'stroke-linecap':'round'},art);
+    const sweep=el('line',{x1:O[0],y1:O[1],x2:p0[0],y2:p0[1],stroke:'#A78BFA','stroke-width':5,'stroke-linecap':'round'},art);
+    const counter=el('text',{x:O[0],y:O[1]-10,'font-family':'Nunito','font-weight':900,'font-size':22,fill:'#FFE033','text-anchor':'middle',stroke:'rgba(0,0,0,.6)','stroke-width':5,'paint-order':'stroke'},art);
+    tween(2600,e=>{
+      const ang=216*e;
+      const a=-18+ang;
+      const pt=dir(a);
+      sweep.setAttribute('x2',pt[0]);sweep.setAttribute('y2',pt[1]);
+      arc.setAttribute('d','M '+p0[0].toFixed(1)+','+p0[1].toFixed(1)+' A '+R+' '+R+' 0 '+(ang>180?1:0)+' 1 '+pt[0].toFixed(1)+','+pt[1].toFixed(1));
+      counter.textContent=Math.round(ang)+'°';
+      const cp=[O[0]+(R+26)*Math.cos((a)*Math.PI/180)*0.5, O[1]+(R+26)*Math.sin((a)*Math.PI/180)*0.5];
+      counter.setAttribute('x',cp[0]);counter.setAttribute('y',cp[1]);
+    },()=>{
+      counter.textContent='216°';counter.setAttribute('x',O[0]);counter.setAttribute('y',O[1]+56);
+      el('path',{d:conePieces(0).sector,fill:'#A78BFA','fill-opacity':0.18},art);
+      done();
+    });
+  });
+}
+
+/* S3: kon 3D statik */
+(function(){
+  const svg=document.getElementById('svg3');
+  const g=el('g',{transform:'scale(1.85) translate(-196,-150)'},svg);
+  const p=conePieces(1);
+  el('ellipse',{cx:p.circle.cx,cy:p.circle.cy,rx:p.circle.rx,ry:p.circle.ry,fill:'#FF6B9D','fill-opacity':0.5,stroke:'#fff','stroke-width':1.6},g);
+  el('path',{d:p.sector,fill:'#A78BFA','fill-opacity':0.55,stroke:'#fff','stroke-width':1.6,'stroke-linejoin':'round'},g);
+  // garis tinggi & sendeng
+  el('line',{x1:300,y1:204,x2:300,y2:300,stroke:'#FFE033','stroke-width':1.6,'stroke-dasharray':'5 4'},g);
+  el('line',{x1:300,y1:204,x2:372,y2:300,stroke:'#3DD6E0','stroke-width':1.6,'stroke-dasharray':'5 4'},g);
+  const lbl=(x,y,t,c)=>{const e=el('text',{x:x,y:y,'font-family':'Nunito','font-weight':900,'font-size':11,fill:c,'text-anchor':'middle',stroke:'rgba(0,0,0,.6)','stroke-width':3,'paint-order':'stroke'},g);e.textContent=t;};
+  lbl(290,254,'t = 4','#FFE033');lbl(352,246,'s = 5','#3DD6E0');lbl(300,322,'j = 3','#FF6B9D');
+})();
+
+/* ---------- kuiz ---------- */
+let quizScore=0;
+function quiz(btn,q,ok){
+  if(ok){
+    btn.classList.add('correct');flashOK('🌟');
+    [...btn.parentElement.children].forEach(b=>b.disabled=true);
+    quizScore++;
+    if(q===1){
+      document.getElementById('q2q').classList.remove('hidden');
+      document.getElementById('q2r').classList.remove('hidden');
+      document.getElementById('subQ').innerHTML='Betul! j&frasl;s × 360° = 3&frasl;5 × 360° = <b>216°</b>. Satu lagi soalan!';
+      speak('Betul! Jejari dibahagi sendeng darab 360 darjah sama dengan 216 darjah. Satu lagi soalan!');
+    }else{
+      document.getElementById('subQ').innerHTML='TAHNIAH! 2 trapezium + 4 segi empat = <b>6 permukaan</b>. Anda JURUTERA BENTANGAN! 🏅';
+      speak('Tahniah! Dua trapezium tambah empat segi empat sama dengan enam permukaan. Anda Jurutera Bentangan!');
+      celebrate();
+    }
+  }else{
+    btn.classList.add('wrong');btn.disabled=true;flashBad();
+    document.getElementById('subQ').innerHTML=q===1?'Cuba lagi! Ingat formula: <b>j&frasl;s × 360°</b>...':'Cuba lagi! Kira: 2 trapezium + berapa segi empat?';
+    speak(q===1?'Cuba lagi! Ingat formula, jejari dibahagi sendeng, darab 360 darjah.':'Cuba lagi! Kira, dua trapezium tambah berapa segi empat?');
+  }
+}
+function celebrate(){
+  playFanfare();
+  document.getElementById('resultTag').classList.add('show');
+  const st=document.getElementById('stage');
+  const cols=['#FFE033','#FF6B9D','#3DD6E0','#FFAA00','#A78BFA','#22c55e'];
+  for(let i=0;i<60;i++){
+    const c=document.createElement('div');c.className='confetti';
+    const z=Math.random()*9+5;
+    c.style.cssText=`left:${Math.random()*100}%;width:${z}px;height:${z*0.5}px;background:${cols[i%cols.length]};animation-duration:${2.2+Math.random()*2.4}s;animation-delay:${Math.random()*1.8}s;border-radius:2px;`;
+    st.appendChild(c);
+  }
+}
+</script>
+</body>
+</html>

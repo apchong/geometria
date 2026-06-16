@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEO • Luas Permukaan Gabungan (Kubus + Piramid)</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--teal:#3DD6E0;--dark:#1A7A8A;--orange:#FFAA00;--pink:#FF6B9D;--yellow:#FFE033;--blue:#4A90FF;--green:#22c55e;--indigo:#818cf8;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#000;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:"Fredoka One",cursive;overflow:hidden;}
+  #stage{width:900px;height:506px;position:relative;overflow:hidden;border-radius:16px;box-shadow:0 0 60px rgba(61,214,224,0.4);transform-origin:center center;transition:transform 0.25s ease;}
+  .bg{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 40%,#0a3a5c 0%,#050e1a 70%);}
+  .bg-stars{position:absolute;inset:0;}
+  .star{position:absolute;background:white;border-radius:50%;animation:twinkle 2s infinite alternate;}
+  @keyframes twinkle{from{opacity:0.2}to{opacity:1}}
+  .bg-floor{position:absolute;bottom:0;left:0;right:0;height:90px;background:linear-gradient(to top,#0a2540,transparent);}
+
+  /* maklum balas visual (mesra murat pekak) */
+  @keyframes flashGood{0%,100%{box-shadow:0 0 60px rgba(61,214,224,0.4);}40%{box-shadow:0 0 80px 14px rgba(34,197,94,.95);}}
+  @keyframes flashBad{0%,100%{box-shadow:0 0 60px rgba(61,214,224,0.4);}40%{box-shadow:0 0 80px 14px rgba(239,68,68,.95);}}
+  #stage.good{animation:flashGood .7s ease;}
+  #stage.bad{animation:flashBad .7s ease;}
+
+  /* ── ZOOM BAR ── */
+  #zoomBar{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;align-items:center;gap:10px;background:rgba(0,0,0,0.75);border:2px solid var(--teal);border-radius:40px;padding:6px 16px;box-shadow:0 0 18px rgba(61,214,224,0.45);}
+  .zoom-btn{width:42px;height:42px;border:none;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;font-family:"Fredoka One",cursive;font-size:24px;line-height:1;cursor:pointer;transition:transform 0.15s ease;display:flex;align-items:center;justify-content:center;}
+  .zoom-btn:hover{transform:scale(1.12);}
+  .zoom-btn:active{transform:scale(0.95);}
+  #zoomLevel{color:#fff;font-family:"Nunito",sans-serif;font-weight:900;font-size:15px;min-width:52px;text-align:center;}
+  #zoomReset{width:auto;border-radius:30px;padding:0 14px;font-size:14px;background:linear-gradient(135deg,var(--orange),var(--pink));}
+
+  /* titik kemajuan (boleh klik) */
+  #progress{position:absolute;top:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:50;}
+  .pdot{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,0.18);border:2px solid rgba(61,214,224,0.45);transition:all .3s;cursor:pointer;}
+  .pdot:hover{transform:scale(1.35);box-shadow:0 0 10px var(--teal);}
+  .pdot.on{background:var(--teal);box-shadow:0 0 10px var(--teal);}
+  .pdot.done{background:var(--green);border-color:var(--green);}
+
+  .scene{position:absolute;inset:0;opacity:0;transition:opacity .6s ease;pointer-events:none;}
+  .scene.active{opacity:1;pointer-events:all;}
+
+  /* badge babak — boleh klik untuk buka menu */
+  .scene-badge{position:absolute;top:36px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;border-radius:30px;padding:6px 18px;font-family:"Nunito",sans-serif;font-weight:900;font-size:13px;letter-spacing:1px;text-transform:uppercase;box-shadow:0 2px 12px rgba(61,214,224,.4);white-space:nowrap;animation:subPop .4s .1s cubic-bezier(.34,1.56,.64,1) both;z-index:5;cursor:pointer;user-select:none;outline:none;display:inline-flex;align-items:center;gap:7px;transition:transform .15s ease,box-shadow .2s ease;}
+  .scene-badge::after{content:"";width:14px;height:14px;background-image:radial-gradient(circle,#fff 38%,transparent 40%);background-size:7px 7px;opacity:.92;}
+  .scene-badge:hover{transform:translateX(-50%) translateY(-1px) scale(1.05);box-shadow:0 4px 16px rgba(61,214,224,.65);}
+  .scene-badge:active{transform:translateX(-50%) scale(.98);}
+  .scene-badge:focus-visible{box-shadow:0 0 0 3px var(--yellow),0 2px 12px rgba(61,214,224,.4);}
+
+  .subtitle{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);border:2px solid var(--teal);border-radius:30px;padding:9px 24px;color:#fff;font-family:"Nunito",sans-serif;font-weight:900;font-size:16px;text-align:center;max-width:88%;line-height:1.35;box-shadow:0 0 20px rgba(61,214,224,.5);animation:subPop .4s cubic-bezier(.34,1.56,.64,1) both;z-index:6;}
+  @keyframes subPop{from{transform:translateX(-50%) scale(.8);opacity:0;}to{transform:translateX(-50%) scale(1);opacity:1;}}
+
+  /* mascot emoji */
+  .mascot{position:absolute;width:78px;height:78px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:44px;background:radial-gradient(circle at 35% 30%,#0d3a52,#071726);border:3px solid var(--teal);box-shadow:0 0 22px rgba(61,214,224,.6);z-index:8;}
+  @keyframes charBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  .bob{animation:charBob 3s ease-in-out infinite;}
+
+  .next-btn{position:absolute;right:20px;bottom:66px;background:linear-gradient(135deg,var(--orange),var(--pink));border:none;border-radius:30px;color:#fff;font-family:"Fredoka One",cursive;font-size:17px;padding:11px 24px;cursor:pointer;box-shadow:0 4px 16px rgba(255,107,157,.5);transition:all .2s;z-index:20;}
+  .next-btn:hover{transform:scale(1.07);}
+  .next-btn.hidden{opacity:0;pointer-events:none;transform:scale(.6);}
+
+  .act-btn{position:absolute;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--teal),var(--blue));border:none;border-radius:30px;color:#fff;font-family:"Fredoka One",cursive;font-size:16px;padding:10px 22px;cursor:pointer;box-shadow:0 4px 16px rgba(61,214,224,.5);transition:all .2s;z-index:20;}
+  .act-btn:hover{transform:translateX(-50%) scale(1.06);}
+  .act-btn.hidden{opacity:0;pointer-events:none;transform:translateX(-50%) scale(.6);}
+
+  /* TITLE */
+  .title-scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:30;}
+  .bstar{position:absolute;color:var(--yellow);font-size:24px;animation:twinkle 2.4s infinite alternate;}
+  .t-emoji{font-size:64px;margin-bottom:6px;animation:charBob 3s ease-in-out infinite;}
+  .t-main{font-size:42px;color:var(--teal);text-shadow:0 0 28px rgba(61,214,224,.85);letter-spacing:1px;text-align:center;line-height:1.1;}
+  .t-sub{font-family:"Nunito",sans-serif;font-weight:900;font-size:20px;color:var(--yellow);margin:10px 0 20px;text-align:center;}
+  .t-btn{background:linear-gradient(135deg,var(--orange),var(--pink));border:none;border-radius:40px;color:#fff;font-family:"Fredoka One",cursive;font-size:22px;padding:14px 38px;cursor:pointer;box-shadow:0 6px 24px rgba(255,107,157,.55);transition:transform .2s;}
+  .t-btn:hover{transform:scale(1.08);}
+
+  /* SVG bersama */
+  .stage-svg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:visible;}
+  .edge{stroke:#0b2545;stroke-width:2.5;stroke-linejoin:round;}
+  .dimtxt{font-family:"Nunito",sans-serif;font-weight:900;fill:#fff;}
+  .face{cursor:pointer;transition:fill .3s ease, transform .15s ease;}
+  .face:hover{filter:brightness(1.12);}
+  .face.painted{fill:url(#paintGrad) !important;}
+
+  /* muka rahsia */
+  .secret-face{fill:rgba(148,163,184,.18);stroke:#94a3b8;stroke-width:2.5;stroke-dasharray:7 5;opacity:0;transition:opacity .3s;}
+  .secret-face.reveal{opacity:1;animation:secretFlash 1.1s ease;}
+  @keyframes secretFlash{0%,100%{fill:rgba(148,163,184,.28);}45%{fill:rgba(61,214,224,.75);}}
+  .lock-tag{position:absolute;background:rgba(15,23,42,.92);border:2px solid #94a3b8;border-radius:14px;padding:5px 12px;color:#e2e8f0;font-family:"Nunito",sans-serif;font-weight:900;font-size:13px;opacity:0;transform:scale(.5);transition:all .4s cubic-bezier(.34,1.56,.64,1);z-index:9;white-space:nowrap;}
+  .lock-tag.show{opacity:1;transform:scale(1);}
+
+  /* panel kira */
+  .panel{position:absolute;background:rgba(3,16,28,.9);border:2px solid var(--teal);border-radius:18px;padding:14px 20px;box-shadow:0 0 26px rgba(61,214,224,.4);color:#fff;font-family:"Nunito",sans-serif;font-weight:900;z-index:7;}
+  .calc-line{opacity:0;transform:translateY(8px);transition:all .45s;margin:6px 0;}
+  .calc-line.show{opacity:1;transform:none;}
+  .big-eq{font-family:"Fredoka One",cursive;}
+  .hl-green{color:#4ade80;} .hl-indigo{color:#a5b4fc;} .hl-yellow{color:var(--yellow);}
+  .hl-teal{color:var(--teal);} .hl-pink{color:var(--pink);} .hl-orange{color:var(--orange);}
+
+  .total-pill{position:absolute;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#FFE033,#FFAA00);color:#1a1a2e;border-radius:30px;padding:8px 22px;font-family:"Fredoka One",cursive;font-size:18px;box-shadow:0 4px 16px rgba(255,170,0,.55);z-index:8;}
+
+  .result-tag{position:absolute;left:50%;transform:translateX(-50%) scale(0);background:linear-gradient(135deg,#FFE033,#FFAA00);color:#1a1a2e;border-radius:16px;padding:11px 22px;font-family:"Fredoka One",cursive;font-size:18px;box-shadow:0 6px 24px rgba(255,170,0,.6);transition:transform .55s cubic-bezier(.34,1.56,.64,1);z-index:9;text-align:center;}
+  .result-tag.show{transform:translateX(-50%) scale(1);}
+
+  .recap-card{background:rgba(61,214,224,.1);border:2px solid rgba(61,214,224,.5);border-radius:14px;padding:10px 12px;font-family:"Nunito",sans-serif;font-weight:900;color:#fff;font-size:13px;line-height:1.3;display:flex;gap:9px;align-items:center;}
+  .recap-num{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-family:"Fredoka One",cursive;font-size:15px;}
+
+  .confetti{position:absolute;top:-20px;animation:confFall linear infinite;z-index:30;}
+  @keyframes confFall{to{transform:translateY(540px) rotate(720deg);}}
+  .wow-pop{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%) scale(0);font-family:"Fredoka One",cursive;font-size:50px;color:var(--yellow);text-shadow:0 0 24px rgba(255,224,51,.9);animation:wowP 1.6s ease forwards;z-index:31;}
+  @keyframes wowP{0%{transform:translate(-50%,-50%) scale(0)}30%{transform:translate(-50%,-50%) scale(1.2)}50%{transform:translate(-50%,-50%) scale(1)}100%{transform:translate(-50%,-50%) scale(1)}}
+
+  /* ── menu pilih babak ── */
+  #chapterMenu{position:absolute;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(3,12,20,.86);opacity:0;transition:opacity .25s ease;}
+  #chapterMenu.open{display:flex;opacity:1;}
+  .cm-panel{position:relative;width:660px;max-width:92%;max-height:90%;overflow:auto;background:radial-gradient(ellipse at 30% 0%,#0d3a52 0%,#071726 80%);border:2.5px solid var(--teal);border-radius:22px;padding:22px 24px 26px;box-shadow:0 0 40px rgba(61,214,224,.45);transform:scale(.92);transition:transform .25s cubic-bezier(.34,1.56,.64,1);}
+  #chapterMenu.open .cm-panel{transform:scale(1);}
+  .cm-title{font-family:"Fredoka One",cursive;color:var(--teal);font-size:26px;text-align:center;text-shadow:0 0 16px rgba(61,214,224,.6);margin-bottom:4px;}
+  .cm-sub{font-family:"Nunito",sans-serif;font-weight:700;color:var(--yellow);font-size:14px;text-align:center;margin-bottom:18px;opacity:.9;}
+  .cm-close{position:absolute;top:12px;right:14px;width:38px;height:38px;border:none;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--pink));color:#fff;font-family:"Fredoka One",cursive;font-size:20px;line-height:1;cursor:pointer;box-shadow:0 3px 10px rgba(255,107,157,.5);transition:transform .15s ease;}
+  .cm-close:hover{transform:scale(1.12);}
+  .cm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .cm-item{display:flex;align-items:center;gap:11px;text-align:left;padding:12px 12px;border:2px solid rgba(61,214,224,.4);border-radius:14px;background:rgba(61,214,224,.07);color:#fff;font-family:"Nunito",sans-serif;cursor:pointer;transition:transform .15s ease,border-color .2s ease,background .2s ease;outline:none;}
+  .cm-item:hover{transform:translateY(-3px) scale(1.03);border-color:var(--teal);background:rgba(61,214,224,.16);}
+  .cm-item:focus-visible{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(255,224,51,.4);}
+  .cm-num{flex:0 0 auto;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;font-family:"Fredoka One",cursive;font-size:18px;box-shadow:0 2px 8px rgba(61,214,224,.5);position:relative;}
+  .cm-txt{font-weight:900;font-size:13px;line-height:1.25;}
+  .cm-item.current{border-color:var(--yellow);background:rgba(255,224,51,.12);}
+  .cm-item.current .cm-num{background:linear-gradient(135deg,var(--orange),var(--pink));box-shadow:0 0 14px rgba(255,170,0,.7);}
+  .cm-item.seen .cm-num::after{content:"✓";position:absolute;right:-5px;top:-5px;width:18px;height:18px;border-radius:50%;background:var(--green);color:#fff;font-family:"Nunito",sans-serif;font-weight:900;font-size:11px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.4);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001s !important;transition-duration:.05s !important;}
+  }
+</style>
+</head>
+<body>
+
+<div id="zoomBar">
+  <button class="zoom-btn" onclick="zoomOut()" aria-label="Zum keluar">−</button>
+  <span id="zoomLevel">100%</span>
+  <button class="zoom-btn" onclick="zoomIn()" aria-label="Zum masuk">+</button>
+  <button class="zoom-btn" id="zoomReset" onclick="zoomResetFn()">Reset</button>
+</div>
+
+<div id="stage">
+  <div class="bg"></div>
+  <div class="bg-stars" id="bgStars"></div>
+  <div class="bg-floor"></div>
+
+  <div id="progress" style="display:none">
+    <div class="pdot" id="pd0"></div><div class="pdot" id="pd1"></div><div class="pdot" id="pd2"></div>
+    <div class="pdot" id="pd3"></div><div class="pdot" id="pd4"></div><div class="pdot" id="pd5"></div>
+    <div class="pdot" id="pd6"></div><div class="pdot" id="pd7"></div><div class="pdot" id="pd8"></div>
+  </div>
+
+  <!-- ════════ SKRIN TAJUK ════════ -->
+  <div class="title-scene" id="titleScreen">
+    <div class="bstar" style="left:14%;top:20%">✦</div>
+    <div class="bstar" style="left:82%;top:24%;font-size:18px">✦</div>
+    <div class="bstar" style="left:24%;top:74%;font-size:16px">✧</div>
+    <div class="bstar" style="left:74%;top:70%">✧</div>
+    <div class="t-emoji">🏠</div>
+    <div class="t-main">Luas Permukaan<br>Bentuk Gabungan</div>
+    <div class="t-sub">Kubus + Piramid • Rumah Terapung Geo 🦊</div>
+    <button class="t-btn" onclick="startStory()">▶ Mula Sekarang</button>
+  </div>
+
+  <!-- ════════ BABAK 1 ════════ -->
+  <div class="scene" id="s1">
+    <div class="scene-badge">Babak 1 • Rumah Terapung Geo</div>
+    <div class="mascot bob" style="left:34px;top:96px">🦊</div>
+    <svg class="stage-svg" viewBox="0 0 460 400" width="404" height="352" style="top:45%">
+      <ellipse cx="235" cy="372" rx="150" ry="18" fill="rgba(61,214,224,.16)"/>
+      <polygon class="edge" points="270,360 270,210 350,152 350,302" fill="#16a34a"/>
+      <polygon class="edge" points="120,210 270,210 350,152 200,152" fill="#86efac"/>
+      <polygon class="edge" points="120,360 270,360 270,210 120,210" fill="#4ade80"/>
+      <polygon class="edge" points="270,210 350,152 235,31" fill="#a5b4fc"/>
+      <polygon class="edge" points="120,210 270,210 235,31" fill="#818cf8"/>
+      <line x1="120" y1="380" x2="270" y2="380" stroke="#FFE033" stroke-width="3"/>
+      <text x="195" y="398" font-family="Nunito,sans-serif" font-weight="900" font-size="18" fill="#FFE033" text-anchor="middle">5 cm</text>
+      <line x1="96" y1="360" x2="96" y2="31" stroke="#FFAA00" stroke-width="3" stroke-dasharray="6 5"/>
+      <text x="62" y="200" font-family="Nunito,sans-serif" font-weight="900" font-size="18" fill="#FFAA00" text-anchor="middle" transform="rotate(-90 62 200)">11 cm</text>
+    </svg>
+    <div class="subtitle">Geo: "Ini rumah terapung saya! 🏠 Saya nak <b class="hl-teal">CAT</b> semua kulit luar. Berapa luas perlu dicat? Itulah <b class="hl-yellow">luas permukaan</b>!"</div>
+    <button class="next-btn" onclick="go(2)">Jom mula! ▸</button>
+  </div>
+
+  <!-- ════════ BABAK 2 ════════ -->
+  <div class="scene" id="s2">
+    <div class="scene-badge">Babak 2 • Dua Kawan Bercantum</div>
+    <svg class="stage-svg" viewBox="0 0 400 400" width="320" height="320" style="left:30%;top:50%">
+      <ellipse cx="200" cy="372" rx="130" ry="16" fill="rgba(61,214,224,.16)"/>
+      <polygon class="edge" points="235,360 235,210 315,152 315,302" fill="#16a34a"/>
+      <polygon class="edge" points="85,210 235,210 315,152 165,152" fill="#86efac"/>
+      <polygon class="edge" points="85,360 235,360 235,210 85,210" fill="#4ade80"/>
+      <polygon class="edge" points="235,210 315,152 200,31" fill="#a5b4fc"/>
+      <polygon class="edge" points="85,210 235,210 200,31" fill="#818cf8"/>
+      <polygon id="secretFace" class="secret-face" points="85,210 235,210 315,152 165,152"/>
+      <g id="lockTag" class="secret-lock" opacity="0">
+        <rect x="138" y="150" width="124" height="28" rx="8" fill="rgba(15,23,42,.94)" stroke="#94a3b8" stroke-width="2"/>
+        <text x="200" y="169" font-family="Nunito,sans-serif" font-weight="900" font-size="13" fill="#e2e8f0" text-anchor="middle">🔒 2 muka rahsia</text>
+      </g>
+    </svg>
+    <div class="panel" style="right:28px;top:118px;width:300px;font-size:14px;line-height:1.8">
+      <div>🟩 <b>Kubus</b>: <span class="hl-green">6</span> segi empat</div>
+      <div>🟦 <b>Piramid</b>: <span class="hl-indigo">4</span> segi tiga + <span class="hl-indigo">1</span> tapak</div>
+      <div id="joinConclusion" class="calc-line" style="margin-top:10px;border-top:1px dashed rgba(255,255,255,.3);padding-top:9px">
+        Bila bercantum, muka atas kubus &amp; tapak bumbung <span class="hl-pink">berlaga → 2 muka SOROK!</span><br><br>
+        ✅ Cat: <span class="hl-green">5</span> ◼ + <span class="hl-indigo">4</span> ▲
+      </div>
+    </div>
+    <button class="act-btn" id="s2btn" style="bottom:106px" onclick="joinHouse()">🔧 Cantumkan rumah!</button>
+    <div class="subtitle">Rumah ini = <b class="hl-green">kubus</b> + <b class="hl-indigo">piramid</b>. Tekan butang dan lihat apa jadi di tengah!</div>
+    <button class="next-btn hidden" id="next2" onclick="go(3)">Teruskan ▸</button>
+  </div>
+
+  <!-- ════════ BABAK 3 ════════ -->
+  <div class="scene" id="s3">
+    <div class="scene-badge">Babak 3 • Buka Jadi Rata</div>
+    <svg class="stage-svg" viewBox="0 0 640 270" width="630" height="266" style="top:48%">
+      <text x="20" y="24" font-family="Fredoka One,cursive" font-size="16" fill="#4ade80">✅ DICAT</text>
+      <!-- 5 segi empat -->
+      <rect x="20" y="36" width="58" height="58" rx="4" fill="#4ade80" class="edge"/>
+      <rect x="86" y="36" width="58" height="58" rx="4" fill="#4ade80" class="edge"/>
+      <rect x="152" y="36" width="58" height="58" rx="4" fill="#4ade80" class="edge"/>
+      <rect x="218" y="36" width="58" height="58" rx="4" fill="#4ade80" class="edge"/>
+      <rect x="284" y="36" width="58" height="58" rx="4" fill="#4ade80" class="edge"/>
+      <text x="181" y="112" font-family="Nunito,sans-serif" font-weight="900" font-size="14" fill="#bbf7d0" text-anchor="middle">5 segi empat (badan)</text>
+      <!-- 4 segi tiga -->
+      <polygon points="20,232 78,232 49,160" fill="#818cf8" class="edge"/>
+      <polygon points="86,232 144,232 115,160" fill="#818cf8" class="edge"/>
+      <polygon points="152,232 210,232 181,160" fill="#818cf8" class="edge"/>
+      <polygon points="218,232 276,232 247,160" fill="#818cf8" class="edge"/>
+      <text x="148" y="252" font-family="Nunito,sans-serif" font-weight="900" font-size="14" fill="#c7d2fe" text-anchor="middle">4 segi tiga (bumbung)</text>
+      <!-- rahsia -->
+      <text x="440" y="24" font-family="Fredoka One,cursive" font-size="16" fill="#94a3b8">🔒 RAHSIA</text>
+      <rect x="440" y="36" width="54" height="54" rx="4" fill="rgba(148,163,184,.3)" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 4"/>
+      <polygon points="510,118 564,118 537,52" fill="rgba(148,163,184,.3)" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 4"/>
+      <line x1="442" y1="38" x2="492" y2="88" stroke="#ef4444" stroke-width="3"/><line x1="492" y1="38" x2="442" y2="88" stroke="#ef4444" stroke-width="3"/>
+      <line x1="515" y1="60" x2="558" y2="112" stroke="#ef4444" stroke-width="3"/><line x1="558" y1="60" x2="515" y2="112" stroke="#ef4444" stroke-width="3"/>
+      <text x="505" y="150" font-family="Nunito,sans-serif" font-weight="900" font-size="13" fill="#94a3b8" text-anchor="middle">2 muka ini TAK dicat</text>
+    </svg>
+    <div class="subtitle">Buka rumah jadi rata! 📦➡️ Inilah <b class="hl-green">5 segi empat</b> + <b class="hl-indigo">4 segi tiga</b> yang kita cat. 2 muka rahsia tak masuk!</div>
+    <button class="next-btn" onclick="go(4)">Jom cat! ▸</button>
+  </div>
+
+  <!-- ════════ BABAK 4 ════════ -->
+  <div class="scene" id="s4">
+    <div class="scene-badge">Babak 4 • Cat Badan Kubus</div>
+    <div class="total-pill" style="top:88px">Jumlah: <span id="cubeTotal">0 cm²</span></div>
+    <svg class="stage-svg" viewBox="0 0 540 130" width="540" height="130" style="top:50%">
+      <defs><linearGradient id="paintGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3DD6E0"/><stop offset="1" stop-color="#FFE033"/></linearGradient></defs>
+      <g class="face" onclick="paintFace(this,'cube')"><rect x="14" y="20" width="86" height="86" rx="5" fill="#4ade80" class="edge"/><text x="57" y="69" font-family="Nunito,sans-serif" font-weight="900" font-size="15" fill="#06281a" text-anchor="middle" pointer-events="none">5×5</text></g>
+      <g class="face" onclick="paintFace(this,'cube')"><rect x="118" y="20" width="86" height="86" rx="5" fill="#4ade80" class="edge"/><text x="161" y="69" font-family="Nunito,sans-serif" font-weight="900" font-size="15" fill="#06281a" text-anchor="middle" pointer-events="none">5×5</text></g>
+      <g class="face" onclick="paintFace(this,'cube')"><rect x="222" y="20" width="86" height="86" rx="5" fill="#4ade80" class="edge"/><text x="265" y="69" font-family="Nunito,sans-serif" font-weight="900" font-size="15" fill="#06281a" text-anchor="middle" pointer-events="none">5×5</text></g>
+      <g class="face" onclick="paintFace(this,'cube')"><rect x="326" y="20" width="86" height="86" rx="5" fill="#4ade80" class="edge"/><text x="369" y="69" font-family="Nunito,sans-serif" font-weight="900" font-size="15" fill="#06281a" text-anchor="middle" pointer-events="none">5×5</text></g>
+      <g class="face" onclick="paintFace(this,'cube')"><rect x="430" y="20" width="86" height="86" rx="5" fill="#4ade80" class="edge"/><text x="473" y="69" font-family="Nunito,sans-serif" font-weight="900" font-size="15" fill="#06281a" text-anchor="middle" pointer-events="none">5×5</text></g>
+    </svg>
+    <div class="result-tag" id="cubeDone" style="top:330px">Badan kubus = 5 × 25 = <span class="hl-orange">125 cm²</span> 🎉</div>
+    <div class="subtitle">Tekan setiap segi empat untuk <b class="hl-teal">cat</b>! 🖌️ Luas satu muka = 5 × 5 = <b>25 cm²</b>.</div>
+    <button class="next-btn hidden" id="next4" onclick="go(5)">Teruskan ▸</button>
+  </div>
+
+  <!-- ════════ BABAK 5 ════════ -->
+  <div class="scene" id="s5">
+    <div class="scene-badge">Babak 5 • Misteri Tinggi Bumbung</div>
+    <svg class="stage-svg" viewBox="0 0 300 330" width="252" height="277" style="left:27%;top:50%">
+      <polygon points="90,260 90,92 160,260" fill="#a5b4fc" class="edge"/>
+      <path d="M90,242 L108,242 L108,260" fill="none" stroke="#0b2545" stroke-width="2.5"/>
+      <text x="58" y="180" font-family="Nunito,sans-serif" font-weight="900" font-size="16" fill="#FFAA00" text-anchor="middle" transform="rotate(-90 58 180)">6 cm</text>
+      <text x="125" y="284" font-family="Nunito,sans-serif" font-weight="900" font-size="16" fill="#FFE033" text-anchor="middle">2.5 cm</text>
+      <text x="150" y="165" font-family="Fredoka One,cursive" font-size="20" fill="#3DD6E0" text-anchor="middle">s</text>
+      <text x="56" y="312" font-family="Nunito,sans-serif" font-weight="700" font-size="11" fill="#fca5a5">tinggi tegak = 11−5 = 6</text>
+      <text x="56" y="328" font-family="Nunito,sans-serif" font-weight="700" font-size="11" fill="#fca5a5">separuh tapak = 5÷2 = 2.5</text>
+    </svg>
+    <div class="panel" style="right:26px;top:104px;width:308px;font-size:15px">
+      <div style="font-family:'Fredoka One',cursive;color:var(--teal);margin-bottom:6px">Cari sisi sendeng (s)</div>
+      <div id="s5calc">
+        <div class="calc-line">Tinggi tegak = <span class="hl-orange">11 − 5 = 6</span> cm</div>
+        <div class="calc-line">Guna segitiga tegak ➜ Pythagoras</div>
+        <div class="calc-line big-eq">s = √(6² + 2.5²)</div>
+        <div class="calc-line big-eq">s = √(36 + 6.25)</div>
+        <div class="calc-line big-eq">s = √42.25</div>
+        <div class="calc-line big-eq" style="font-size:20px">s = <span class="hl-yellow">6.5 cm</span> ✓</div>
+      </div>
+    </div>
+    <button class="act-btn" id="s5btn" style="bottom:104px" onclick="s5next()">Tunjuk langkah ▸</button>
+    <div class="subtitle">Muka bumbung itu <b class="hl-indigo">sendeng</b>. Kita perlu cari panjang sendeng <b class="hl-teal">s</b> dulu. Tekan untuk lihat caranya!</div>
+    <button class="next-btn hidden" id="next5" onclick="go(6)">Teruskan ▸</button>
+  </div>
+
+  <!-- ════════ BABAK 6 ════════ -->
+  <div class="scene" id="s6">
+    <div class="scene-badge">Babak 6 • Cat Bumbung Piramid</div>
+    <div class="total-pill" style="top:88px">Jumlah: <span id="roofTotal">0 cm²</span></div>
+    <svg class="stage-svg" viewBox="0 0 500 170" width="500" height="170" style="top:50%">
+      <defs><linearGradient id="paintGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3DD6E0"/><stop offset="1" stop-color="#FFE033"/></linearGradient></defs>
+      <g class="face" onclick="paintFace(this,'roof')"><polygon points="20,150 100,150 60,28" fill="#818cf8" class="edge"/><text x="60" y="132" font-family="Nunito,sans-serif" font-weight="900" font-size="11" fill="#1e1b4b" text-anchor="middle" pointer-events="none">½·5·6.5</text></g>
+      <g class="face" onclick="paintFace(this,'roof')"><polygon points="140,150 220,150 180,28" fill="#818cf8" class="edge"/><text x="180" y="132" font-family="Nunito,sans-serif" font-weight="900" font-size="11" fill="#1e1b4b" text-anchor="middle" pointer-events="none">½·5·6.5</text></g>
+      <g class="face" onclick="paintFace(this,'roof')"><polygon points="260,150 340,150 300,28" fill="#818cf8" class="edge"/><text x="300" y="132" font-family="Nunito,sans-serif" font-weight="900" font-size="11" fill="#1e1b4b" text-anchor="middle" pointer-events="none">½·5·6.5</text></g>
+      <g class="face" onclick="paintFace(this,'roof')"><polygon points="380,150 460,150 420,28" fill="#818cf8" class="edge"/><text x="420" y="132" font-family="Nunito,sans-serif" font-weight="900" font-size="11" fill="#1e1b4b" text-anchor="middle" pointer-events="none">½·5·6.5</text></g>
+    </svg>
+    <div class="result-tag" id="roofDone" style="top:330px">Bumbung = 4 × 16.25 = <span class="hl-orange">65 cm²</span> 🎉</div>
+    <div class="subtitle">Tekan setiap segi tiga! 🖌️ Luas satu = ½ × 5 × 6.5 = <b>16.25 cm²</b>.</div>
+    <button class="next-btn hidden" id="next6" onclick="go(7)">Teruskan ▸</button>
+  </div>
+
+  <!-- ════════ BABAK 7 ════════ -->
+  <div class="scene" id="s7">
+    <div class="scene-badge">Babak 7 • Campur Semua</div>
+    <svg class="stage-svg" viewBox="0 0 400 380" width="280" height="266" style="left:28%;top:48%">
+      <defs><linearGradient id="paintGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3DD6E0"/><stop offset="1" stop-color="#FFE033"/></linearGradient></defs>
+      <ellipse cx="200" cy="360" rx="130" ry="16" fill="rgba(255,170,0,.2)"/>
+      <polygon points="235,348 235,200 315,144 315,294" fill="url(#paintGrad)" class="edge"/>
+      <polygon points="85,200 235,200 315,144 165,144" fill="url(#paintGrad)" class="edge"/>
+      <polygon points="85,348 235,348 235,200 85,200" fill="url(#paintGrad)" class="edge"/>
+      <polygon points="235,200 315,144 200,30" fill="url(#paintGrad)" class="edge"/>
+      <polygon points="85,200 235,200 200,30" fill="url(#paintGrad)" class="edge"/>
+    </svg>
+    <div class="panel" style="right:24px;top:108px;width:330px;font-size:15px">
+      <div style="font-family:'Fredoka One',cursive;color:var(--teal);font-size:14px;margin-bottom:8px">Jumlah luas permukaan</div>
+      <div style="font-size:13px;color:#cbd5e1;margin-bottom:8px">= 5(5×5) + 4(½ × 5 × 6.5)</div>
+      <div id="s7calc">
+        <div class="calc-line big-eq">= <span class="hl-green">125</span> + <span class="hl-indigo">65</span></div>
+        <div class="calc-line big-eq" style="font-size:24px">= <span class="hl-orange">190 cm²</span> ✓</div>
+      </div>
+    </div>
+    <button class="act-btn" id="s7btn" style="bottom:104px" onclick="s7next()">Lihat jumlah ▸</button>
+    <div class="subtitle">Campur badan + bumbung: <b class="hl-green">125</b> + <b class="hl-indigo">65</b>. Tekan untuk lihat jumlahnya!</div>
+    <button class="next-btn hidden" id="next7" onclick="go(8)">Hampir siap ▸</button>
+  </div>
+
+  <!-- ════════ BABAK 8 ════════ -->
+  <div class="scene" id="s8">
+    <div class="scene-badge">Babak 8 • Tukar cm² → m²</div>
+    <svg class="stage-svg" viewBox="0 0 220 240" width="210" height="229" style="left:27%;top:50%">
+      <rect x="20" y="20" width="180" height="180" fill="rgba(61,214,224,.12)" stroke="var(--teal)" stroke-width="3"/>
+      <g stroke="rgba(61,214,224,.35)" stroke-width="1">
+        <line x1="38" y1="20" x2="38" y2="200"/><line x1="56" y1="20" x2="56" y2="200"/><line x1="74" y1="20" x2="74" y2="200"/><line x1="92" y1="20" x2="92" y2="200"/><line x1="110" y1="20" x2="110" y2="200"/><line x1="128" y1="20" x2="128" y2="200"/><line x1="146" y1="20" x2="146" y2="200"/><line x1="164" y1="20" x2="164" y2="200"/><line x1="182" y1="20" x2="182" y2="200"/>
+        <line x1="20" y1="38" x2="200" y2="38"/><line x1="20" y1="56" x2="200" y2="56"/><line x1="20" y1="74" x2="200" y2="74"/><line x1="20" y1="92" x2="200" y2="92"/><line x1="20" y1="110" x2="200" y2="110"/><line x1="20" y1="128" x2="200" y2="128"/><line x1="20" y1="146" x2="200" y2="146"/><line x1="20" y1="164" x2="200" y2="164"/><line x1="20" y1="182" x2="200" y2="182"/>
+      </g>
+      <rect x="20" y="182" width="18" height="18" fill="var(--yellow)"/>
+      <text x="110" y="222" font-family="Nunito,sans-serif" font-weight="900" font-size="14" fill="var(--teal)" text-anchor="middle">1 m² = 10 000 kotak cm²</text>
+    </svg>
+    <div class="panel" style="right:26px;top:110px;width:310px;font-size:15px">
+      <div style="font-family:'Fredoka One',cursive;color:var(--teal);margin-bottom:6px">Soalan minta jawapan m²</div>
+      <div id="s8calc">
+        <div class="calc-line">1 m² = <span class="hl-teal">10 000</span> cm²</div>
+        <div class="calc-line big-eq">190 cm² = 190 ÷ 10 000</div>
+        <div class="calc-line big-eq" style="font-size:22px">= <span class="hl-orange">0.019 m²</span> ✓</div>
+        <div class="calc-line" style="font-size:13px;color:#cbd5e1;margin-top:8px">m² sangat besar, jadi nombornya jadi kecil 🙂</div>
+      </div>
+    </div>
+    <button class="act-btn" id="s8btn" style="bottom:104px" onclick="s8next()">Tunjuk langkah ▸</button>
+    <div class="subtitle">cm² kecil, m² besar. Untuk tukar cm² → m², kita <b class="hl-teal">bahagi 10 000</b>. Tekan untuk lihat!</div>
+    <button class="next-btn hidden" id="next8" onclick="go(9)">Selesai! ▸</button>
+  </div>
+
+  <!-- ════════ BABAK 9 ════════ -->
+  <div class="scene" id="s9">
+    <div class="scene-badge">Babak 9 • Pakar Bongkah! 🎉</div>
+    <div class="mascot bob" style="left:54px;top:80px">🦊</div>
+    <div style="position:absolute;left:50%;top:60px;transform:translateX(-50%);font-family:'Fredoka One',cursive;font-size:32px;color:var(--teal);text-shadow:0 0 22px rgba(61,214,224,.8)">🏆 Pakar Bongkah!</div>
+    <div style="position:absolute;left:50%;top:106px;transform:translateX(-50%);width:580px;display:flex;flex-direction:column;gap:8px">
+      <div class="recap-card"><span class="recap-num">1</span><span>2 muka <b class="hl-pink">berlaga</b> di tengah = <b>SOROK</b>, tak dicat.</span></div>
+      <div class="recap-card"><span class="recap-num">2</span><span>Cari <b class="hl-yellow">tinggi sendeng</b> dulu: s = √(tegak² + separuh tapak²) = 6.5 cm.</span></div>
+      <div class="recap-card"><span class="recap-num">3</span><span>Campur semua muka: <b class="hl-green">5</b> ◼ + <b class="hl-indigo">4</b> ▲ = <b>190 cm²</b>.</span></div>
+      <div class="recap-card"><span class="recap-num">4</span><span>Tukar unit: cm² <b class="hl-teal">÷ 10 000</b> = m² ➜ <b>0.019 m²</b>.</span></div>
+    </div>
+    <button class="t-btn" style="position:absolute;left:50%;bottom:24px;transform:translateX(-50%);font-size:18px;padding:10px 28px" onclick="replay()">🔁 Main Semula</button>
+  </div>
+
+  <!-- ════════ MENU PILIH BABAK ════════ -->
+  <div id="chapterMenu" role="dialog" aria-modal="true" aria-labelledby="cmTitle">
+    <div class="cm-panel">
+      <button class="cm-close" type="button" onclick="closeMenu()" aria-label="Tutup menu">✕</button>
+      <div class="cm-title" id="cmTitle">Pilih Babak</div>
+      <div class="cm-sub">Tekan mana-mana babak untuk tonton semula</div>
+      <div class="cm-grid" id="cmGrid"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── zoom ── */
+let zoomVal=1;
+function applyZoom(){zoomVal=Math.min(2.5,Math.max(0.4,zoomVal));document.getElementById('stage').style.transform='scale('+zoomVal+')';document.getElementById('zoomLevel').textContent=Math.round(zoomVal*100)+'%';}
+function zoomIn(){zoomVal+=0.1;applyZoom();}
+function zoomOut(){zoomVal-=0.1;applyZoom();}
+function zoomResetFn(){zoomVal=1;applyZoom();}
+
+/* ── bintang ── */
+(function(){const w=document.getElementById('bgStars');for(let i=0;i<46;i++){const s=document.createElement('div');s.className='star';const z=Math.random()*2.4+1;s.style.cssText=`width:${z}px;height:${z}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*2}s;`;w.appendChild(s);}})();
+
+/* ── audio ── */
+let AC=null;
+function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();return AC;}
+function tone(f,d,t,v,dl){const c=ac(),o=c.createOscillator(),g=c.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.setValueAtTime(0,c.currentTime+(dl||0));g.gain.linearRampToValueAtTime(v||0.18,c.currentTime+(dl||0)+0.02);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+(dl||0)+d);o.connect(g);g.connect(c.destination);o.start(c.currentTime+(dl||0));o.stop(c.currentTime+(dl||0)+d+0.05);}
+function playDing(p){tone(620*(p||1),0.22,'sine',0.16);tone(930*(p||1),0.3,'sine',0.1,0.05);}
+function playFanfare(){[523,659,784,1047].forEach((f,i)=>tone(f,0.32,'triangle',0.16,i*0.12));}
+function playBoing(){tone(300,0.25,'sawtooth',0.1);tone(180,0.3,'sawtooth',0.08,0.1);}
+function playWow(){const c=ac();
+  const o=c.createOscillator(),g=c.createGain();o.type='sawtooth';
+  o.frequency.setValueAtTime(220,c.currentTime);
+  o.frequency.linearRampToValueAtTime(720,c.currentTime+0.16);
+  o.frequency.linearRampToValueAtTime(360,c.currentTime+0.55);
+  g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(0.16,c.currentTime+0.05);
+  g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.6);
+  o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+0.65);
+  for(let i=0;i<6;i++){tone(140+Math.random()*60,0.06,'square',0.08,0.12+i*0.11);}
+}
+
+/* ── kilat maklum balas ── */
+function flash(ok){const st=document.getElementById('stage');st.classList.remove('good','bad');void st.offsetWidth;st.classList.add(ok?'good':'bad');}
+
+/* ── enjin babak ── */
+const TOTAL=9;let current=0;
+function go(n){
+  document.querySelectorAll('.scene').forEach(e=>e.classList.remove('active'));
+  const sc=document.getElementById('s'+n);if(sc)sc.classList.add('active');
+  current=n;visited.add(n);
+  for(let i=0;i<TOTAL;i++){const d=document.getElementById('pd'+i);const b=i+1;d.classList.toggle('on',b===n);d.classList.toggle('done',b!==n&&visited.has(b));}
+  if(typeof updateMenuState==='function')updateMenuState();
+  if(n===9)celebrate();
+}
+function startStory(){ac();document.getElementById('titleScreen').style.display='none';document.getElementById('progress').style.display='flex';playDing(1);go(1);}
+
+/* ── menu pilih babak (klik badge biru / dot) ── */
+const BABAK=['Rumah Terapung Geo','Dua Kawan Bercantum','Buka Jadi Rata','Cat Badan Kubus','Misteri Tinggi Bumbung','Cat Bumbung Piramid','Campur Semua','Tukar cm² → m²','Pakar Bongkah! 🎉'];
+const visited=new Set();
+(function buildMenu(){
+  const g=document.getElementById('cmGrid');if(!g)return;
+  BABAK.forEach((t,i)=>{
+    const b=i+1,it=document.createElement('button');
+    it.className='cm-item';it.id='cmi'+b;it.type='button';
+    it.setAttribute('aria-label','Babak '+b+': '+t);
+    it.innerHTML='<span class="cm-num">'+b+'</span><span class="cm-txt">'+t+'</span>';
+    it.addEventListener('click',()=>jumpTo(b));
+    g.appendChild(it);
+  });
+})();
+function updateMenuState(){
+  for(let i=1;i<=TOTAL;i++){const it=document.getElementById('cmi'+i);if(!it)continue;
+    it.classList.toggle('current',i===current);
+    it.classList.toggle('seen',visited.has(i)&&i!==current);}
+}
+function openMenu(){ac();updateMenuState();document.getElementById('chapterMenu').classList.add('open');const cur=document.getElementById('cmi'+current);if(cur)cur.focus();}
+function closeMenu(){document.getElementById('chapterMenu').classList.remove('open');}
+function jumpTo(n){closeMenu();go(n);}
+
+/* ── cat muka (babak 4 & 6) ── */
+const paintState={cube:{n:0,need:5,each:25},roof:{n:0,need:4,each:16.25}};
+function fmt(x){return Number.isInteger(x)?x:(Math.round(x*100)/100);}
+function paintFace(el,key){
+  if(el.classList.contains('painted'))return;
+  el.classList.add('painted');
+  const st=paintState[key];st.n++;
+  const total=fmt(st.n*st.each);
+  playDing(0.8+st.n*0.12);flash(true);
+  const pill=document.getElementById(key+'Total');if(pill)pill.textContent=total+' cm²';
+  if(st.n===st.need){
+    playFanfare();
+    const done=document.getElementById(key+'Done');if(done)done.classList.add('show');
+    const nb=document.getElementById('next'+(key==='cube'?'4':'6'));if(nb)nb.classList.remove('hidden');
+  }
+}
+
+/* ── babak 2: cantum + muka rahsia ── */
+function joinHouse(){
+  const sf=document.getElementById('secretFace');if(sf)sf.classList.add('reveal');
+  setTimeout(()=>{document.getElementById('lockTag').classList.add('show');},500);
+  document.getElementById('joinConclusion').classList.add('show');
+  document.getElementById('s2btn').classList.add('hidden');
+  document.getElementById('next2').classList.remove('hidden');
+  playBoing();setTimeout(()=>playDing(1.2),350);flash(true);
+}
+
+/* ── babak 5: reveal langkah Pythagoras ── */
+let s5step=0;
+function s5next(){
+  const lines=document.querySelectorAll('#s5calc .calc-line');
+  if(s5step<lines.length){lines[s5step].classList.add('show');playDing(0.85+s5step*0.08);s5step++;}
+  if(s5step>=lines.length){document.getElementById('s5btn').classList.add('hidden');document.getElementById('next5').classList.remove('hidden');}
+}
+
+/* ── babak 7: reveal campur ── */
+let s7step=0;
+function s7next(){
+  const lines=document.querySelectorAll('#s7calc .calc-line');
+  if(s7step<lines.length){lines[s7step].classList.add('show');playDing(0.85+s7step*0.12);s7step++;}
+  if(s7step>=lines.length){document.getElementById('s7btn').classList.add('hidden');document.getElementById('next7').classList.remove('hidden');flash(true);}
+}
+
+/* ── babak 8: reveal tukar unit ── */
+let s8step=0;
+function s8next(){
+  const lines=document.querySelectorAll('#s8calc .calc-line');
+  if(s8step<lines.length){lines[s8step].classList.add('show');playDing(0.85+s8step*0.08);s8step++;}
+  if(s8step>=lines.length){document.getElementById('s8btn').classList.add('hidden');document.getElementById('next8').classList.remove('hidden');}
+}
+
+/* ── babak 9: raikan ── */
+let celebrated=false;
+function celebrate(){
+  if(celebrated)return;celebrated=true;
+  const host=document.getElementById('s9');
+  const cols=['#FFE033','#FF6B9D','#3DD6E0','#4A90FF','#22c55e','#FFAA00'];
+  for(let i=0;i<70;i++){const c=document.createElement('div');c.className='confetti';
+    c.style.cssText=`left:${Math.random()*100}%;width:${6+Math.random()*7}px;height:${10+Math.random()*8}px;background:${cols[i%cols.length]};animation-duration:${2+Math.random()*2.4}s;animation-delay:${Math.random()*1.6}s;border-radius:2px;`;
+    host.appendChild(c);}
+  const w=document.createElement('div');w.className='wow-pop';w.textContent='🎉 HEBAT! 🎉';host.appendChild(w);
+  playFanfare();setTimeout(playWow,250);
+}
+function replay(){location.reload();}
+
+/* badge + dot boleh klik */
+function wireControls(){
+  document.querySelectorAll('.scene-badge').forEach(b=>{
+    b.setAttribute('role','button');b.setAttribute('tabindex','0');
+    b.setAttribute('aria-label','Buka senarai babak untuk tonton semula');
+    b.addEventListener('click',openMenu);
+    b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openMenu();}});
+  });
+  for(let i=0;i<TOTAL;i++){const d=document.getElementById('pd'+i);if(!d)continue;
+    d.setAttribute('role','button');d.setAttribute('tabindex','0');d.setAttribute('aria-label','Pergi ke Babak '+(i+1));
+    d.addEventListener('click',()=>go(i+1));
+    d.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go(i+1);}});}
+  document.getElementById('chapterMenu').addEventListener('click',e=>{if(e.target.id==='chapterMenu')closeMenu();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
+}
+wireControls();
+</script>
+</body>
+</html>
