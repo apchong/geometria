@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PolyQuest — Cabaran Matematik Poligon</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --bg:       #F4F3FF;
+  --s1:       #FFFFFF;
+  --s2:       #EBEBF8;
+  --p:        #4C44D4;
+  --p-dim:    rgba(76,68,212,0.08);
+  --ok:       #1A7A42;
+  --ok-bg:    rgba(26,122,66,0.09);
+  --ok-bdr:   rgba(26,122,66,0.35);
+  --err:      #C0392B;
+  --err-bg:   rgba(192,57,43,0.08);
+  --err-bdr:  rgba(192,57,43,0.35);
+  --gold:     #A05E00;
+  --txt:      #1A1828;
+  --txt2:     #6B6580;
+  --bdr:      rgba(0,0,0,0.08);
+  --bdr2:     rgba(0,0,0,0.13);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--txt);
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* ── ZOOM BAR ── */
+#zoomBar {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #fff;
+  border-bottom: 1px solid rgba(0,0,0,0.09);
+  padding: 7px 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+#zoomBar .zoom-lbl {
+  font-size: 11px;
+  color: var(--txt2);
+  font-family: 'Space Mono', monospace;
+  letter-spacing: .3px;
+}
+
+#zoomBar button {
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(0,0,0,0.13);
+  border-radius: 8px;
+  background: var(--bg);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--txt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Grotesk', sans-serif;
+  transition: background .12s, border-color .12s;
+  user-select: none;
+}
+
+#zoomBar button:hover { background: var(--s2); border-color: var(--p); }
+#zoomBar button:active { transform: scale(0.95); }
+
+#zoomLvl {
+  font-size: 12px;
+  font-family: 'Space Mono', monospace;
+  color: var(--p);
+  min-width: 40px;
+  text-align: center;
+  font-weight: 700;
+}
+
+/* ── FOOTER ── */
+footer {
+  text-align: center;
+  padding: 16px 20px 20px;
+  font-size: 11px;
+  color: var(--txt2);
+  line-height: 1.7;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+footer strong {
+  font-weight: 600;
+  color: var(--txt);
+}
+
+/* ── APP ── */
+#app {
+  width: 100%;
+  max-width: 440px;
+  min-height: calc(100vh - 46px);
+  padding: 24px 20px 40px;
+  margin: 0 auto;
+  transform-origin: top center;
+}
+
+/* ── SCREENS ── */
+.screen { display:none; flex-direction:column; }
+.screen.on { display:flex; }
+
+/* ══════════════════ HOME ══════════════════ */
+
+.home-hero {
+  text-align: center;
+  padding: 44px 0 40px;
+}
+
+.home-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--p-dim);
+  border: 1px solid rgba(113,104,240,0.25);
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Space Mono', monospace;
+  color: var(--p);
+  letter-spacing: .5px;
+  margin-bottom: 20px;
+}
+
+.home-title {
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+
+.home-title em { color: var(--p); font-style: normal; }
+
+.home-sub {
+  font-size: 14px;
+  color: var(--txt2);
+  margin-top: 8px;
+}
+
+.level-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.level-card {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--s1);
+  border: 1px solid var(--bdr);
+  border-radius: 16px;
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: border-color .18s, background .18s, transform .1s;
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.level-card:hover {
+  border-color: var(--p);
+  background: var(--p-dim);
+  transform: translateY(-1px);
+}
+
+.level-card:active { transform: scale(0.99); }
+
+.level-ico {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.level-info { flex:1; }
+.level-info h3 { font-size:15px; font-weight:600; color:var(--txt); }
+.level-info p  { font-size:12px; color:var(--txt2); margin-top:2px; }
+
+.level-badge {
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+  padding: 4px 10px;
+  border-radius: 7px;
+  flex-shrink: 0;
+  letter-spacing: .3px;
+}
+
+.b-g { background:rgba(26,122,66,0.12);  color:#1A7A42; }
+.b-y { background:rgba(160,94,0,0.12);   color:#A05E00; }
+.b-r { background:rgba(192,57,43,0.12);  color:#C0392B; }
+
+.home-hint {
+  font-size: 12px;
+  color: var(--txt2);
+  text-align: center;
+  margin-top: 22px;
+}
+
+/* ══════════════════ GAME ══════════════════ */
+
+.game-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.stat { text-align:center; min-width:64px; }
+.stat-lbl {
+  font-size: 10px;
+  font-family: 'Space Mono', monospace;
+  color: var(--txt2);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  margin-bottom: 2px;
+}
+.stat-val {
+  font-size: 22px;
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+}
+.s-score  { color: var(--gold); }
+.s-streak { color: var(--p); }
+
+.hearts { display:flex; gap:5px; align-items:center; }
+.hrt {
+  font-size: 22px;
+  color: var(--err);
+  transition: opacity .25s, transform .25s;
+  line-height: 1;
+}
+.hrt.lost { opacity:.14; transform:scale(0.8); }
+
+.prog-bar {
+  height: 3px;
+  background: var(--bdr);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 22px;
+}
+
+.prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--p), #7B74F0);
+  border-radius: 3px;
+  transition: width .4s ease;
+}
+
+/* polygon display */
+.poly-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 185px;
+  margin-bottom: 18px;
+  position: relative;
+}
+
+#polySVG { overflow: visible; }
+
+.poly-qmark {
+  display: none;
+  position: absolute;
+  inset: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 68px;
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+  color: var(--p);
+  opacity: .2;
+  line-height: 1;
+}
+
+/* question */
+.q-lbl {
+  font-size: 10px;
+  font-family: 'Space Mono', monospace;
+  color: var(--txt2);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 8px;
+}
+
+.q-txt {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.48;
+  min-height: 56px;
+  margin-bottom: 22px;
+  color: var(--txt);
+}
+
+/* options */
+.opts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-bottom: 14px;
+}
+
+.opt {
+  all: unset;
+  display: block;
+  background: var(--s1);
+  border: 1px solid var(--bdr2);
+  border-radius: 12px;
+  padding: 14px 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--txt);
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.3;
+  box-sizing: border-box;
+  width: 100%;
+  transition: background .12s, border-color .12s, transform .07s;
+}
+
+.opt:hover:not(:disabled) {
+  background: var(--s2);
+  border-color: rgba(113,104,240,0.45);
+}
+
+.opt:active:not(:disabled) { transform: scale(0.98); }
+
+.opt.ok  { background:var(--ok-bg);  border-color:var(--ok);  color:var(--ok); }
+.opt.err { background:var(--err-bg); border-color:var(--err); color:var(--err); }
+
+/* feedback */
+.feedback {
+  border-radius: 12px;
+  padding: 13px 16px;
+  font-size: 13px;
+  line-height: 1.55;
+  display: none;
+  margin-bottom: 12px;
+}
+
+.feedback.show { display:block; }
+
+.fb-ok  { background:var(--ok-bg);  border:1px solid var(--ok-bdr);  color:var(--ok); }
+.fb-err { background:var(--err-bg); border:1px solid var(--err-bdr); color:var(--err); }
+
+.feedback strong { display:block; font-size:14px; font-weight:600; margin-bottom:4px; }
+.feedback .fact  { display:block; opacity:.7; font-size:12px; margin-top:3px; }
+
+/* next button */
+.next-btn {
+  all: unset;
+  display: none;
+  width: 100%;
+  padding: 15px;
+  box-sizing: border-box;
+  text-align: center;
+  background: var(--p);
+  color: #fff;
+  border-radius: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .15s, transform .1s;
+}
+
+.next-btn.show { display:block; }
+.next-btn:hover { opacity:.9; }
+.next-btn:active { transform:scale(0.99); }
+
+/* ══════════════════ RESULT ══════════════════ */
+
+.result-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 52px 0 0;
+}
+
+.result-ico { font-size:62px; margin-bottom:14px; line-height:1; }
+
+.result-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--txt);
+}
+
+.result-score {
+  font-size: 70px;
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+  color: var(--gold);
+  line-height: 1.05;
+  margin: 20px 0 4px;
+}
+
+.result-lbl {
+  font-size: 11px;
+  font-family: 'Space Mono', monospace;
+  color: var(--txt2);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 28px;
+}
+
+.result-stats {
+  width: 100%;
+  background: var(--s1);
+  border: 1px solid var(--bdr);
+  border-radius: 16px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.rs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.rs-val {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+}
+
+.c-ok   { color: var(--ok); }
+.c-err  { color: var(--err); }
+.c-p    { color: var(--p); }
+
+.rs-lbl {
+  font-size: 10px;
+  font-family: 'Space Mono', monospace;
+  color: var(--txt2);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+
+.result-btns {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-p {
+  all: unset;
+  display: block;
+  width: 100%;
+  padding: 15px;
+  box-sizing: border-box;
+  text-align: center;
+  background: var(--p);
+  color: #fff;
+  border-radius: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.btn-p:hover { opacity:.9; }
+
+.btn-s {
+  all: unset;
+  display: block;
+  width: 100%;
+  padding: 15px;
+  box-sizing: border-box;
+  text-align: center;
+  border: 1px solid var(--bdr2);
+  border-radius: 12px;
+  color: var(--txt);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s;
+}
+.btn-s:hover { background: var(--s1); }
+
+/* ══════════════════ ANIMATIONS ══════════════════ */
+
+@keyframes pfloat {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+@keyframes pop {
+  0%,100% { transform: scale(1); }
+  50%      { transform: scale(1.28); }
+}
+
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%,60% { transform: translateX(-6px); }
+  40%,80% { transform: translateX(6px); }
+}
+
+@keyframes flash {
+  0%   { filter: drop-shadow(0 4px 12px rgba(76,68,212,0.18)); }
+  40%  { filter: drop-shadow(0 4px 20px rgba(26,122,66,0.55)); }
+  100% { filter: drop-shadow(0 4px 12px rgba(76,68,212,0.18)); }
+}
+
+.a-float { animation: pfloat 3s ease-in-out infinite; }
+.a-pop   { animation: pop .3s ease; }
+.a-shake { animation: shake .42s ease; }
+.a-flash { animation: flash .7s ease; }
+
+/* ══════════════════ MOBILE ══════════════════ */
+
+@media (max-width: 480px) {
+  #app { padding: 20px 16px 36px; }
+  .home-title { font-size: 32px; }
+  .home-hero { padding: 32px 0 32px; }
+  .q-txt { font-size: 16px; }
+}
+
+</style>
+</head>
+<body>
+
+<div id="zoomBar" role="toolbar" aria-label="Kawalan zum">
+  <span class="zoom-lbl">Saiz paparan</span>
+  <button onclick="zoomOut()" aria-label="Zum keluar" title="Zum keluar">−</button>
+  <span id="zoomLvl">100%</span>
+  <button onclick="zoomIn()" aria-label="Zum masuk" title="Zum masuk">+</button>
+</div>
+
+<div id="app">
+
+  <!-- ══ HOME SCREEN ══ -->
+  <div class="screen on" id="sHome">
+    <div class="home-hero">
+      <div class="home-badge">
+        <svg width="14" height="14" viewBox="-7 -7 14 14">
+          <polygon points="0,-6 5.2,-3 5.2,3 0,6 -5.2,3 -5.2,-3" fill="none" stroke="#4C44D4" stroke-width="1.5"/>
+        </svg>
+        MATEMATIK INTERAKTIF
+      </div>
+      <div class="home-title">Poly<em>Quest</em></div>
+      <div class="home-sub">Cabaran matematik poligon</div>
+    </div>
+
+    <div class="level-list">
+
+      <button class="level-card" onclick="startGame('easy')">
+        <div class="level-ico" style="background:rgba(76,175,120,0.12);">
+          <svg width="28" height="28" viewBox="-14 -14 28 28">
+            <polygon points="0,-11 9.5,5.5 -9.5,5.5" fill="rgba(26,122,66,0.12)" stroke="#1A7A42" stroke-width="1.8" stroke-linejoin="round"/>
+            <circle cx="0" cy="-11" r="2.2" fill="#1A7A42" opacity=".8"/>
+            <circle cx="9.5" cy="5.5" r="2.2" fill="#1A7A42" opacity=".8"/>
+            <circle cx="-9.5" cy="5.5" r="2.2" fill="#1A7A42" opacity=".8"/>
+          </svg>
+        </div>
+        <div class="level-info">
+          <h3>Mudah</h3>
+          <p>Nama & bilangan sisi · Poligon 3–6</p>
+        </div>
+        <span class="level-badge b-g">MULA</span>
+      </button>
+
+      <button class="level-card" onclick="startGame('medium')">
+        <div class="level-ico" style="background:rgba(160,94,0,0.10);">
+          <svg width="28" height="28" viewBox="-14 -14 28 28">
+            <polygon points="0,-11 9.5,-5.5 9.5,5.5 0,11 -9.5,5.5 -9.5,-5.5" fill="rgba(160,94,0,0.12)" stroke="#A05E00" stroke-width="1.8" stroke-linejoin="round"/>
+            <circle cx="0" cy="-11" r="2" fill="#A05E00" opacity=".7"/>
+            <circle cx="9.5" cy="-5.5" r="2" fill="#A05E00" opacity=".7"/>
+            <circle cx="9.5" cy="5.5" r="2" fill="#A05E00" opacity=".7"/>
+            <circle cx="0" cy="11" r="2" fill="#A05E00" opacity=".7"/>
+            <circle cx="-9.5" cy="5.5" r="2" fill="#A05E00" opacity=".7"/>
+            <circle cx="-9.5" cy="-5.5" r="2" fill="#A05E00" opacity=".7"/>
+          </svg>
+        </div>
+        <div class="level-info">
+          <h3>Sederhana</h3>
+          <p>Termasuk bucu & sudut pedalaman</p>
+        </div>
+        <span class="level-badge b-y">SEDANG</span>
+      </button>
+
+      <button class="level-card" onclick="startGame('hard')">
+        <div class="level-ico" style="background:rgba(192,57,43,0.10);">
+          <svg width="28" height="28" viewBox="-14 -14 28 28">
+            <polygon points="0,-11 4.2,-10.2 9.5,-6.3 11,0 9.5,6.3 4.2,10.2 0,11 -4.2,10.2 -9.5,6.3 -11,0 -9.5,-6.3 -4.2,-10.2" fill="rgba(192,57,43,0.12)" stroke="#C0392B" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="level-info">
+          <h3>Sukar</h3>
+          <p>Semua poligon & formula (n−2)×180°</p>
+        </div>
+        <span class="level-badge b-r">PAKAR</span>
+      </button>
+
+    </div>
+
+    <p class="home-hint">10 soalan · 3 nyawa · ganda markah sehingga ×5</p>
+  </div>
+
+  <!-- ══ GAME SCREEN ══ -->
+  <div class="screen" id="sGame">
+
+    <div class="game-head">
+      <div class="stat">
+        <div class="stat-lbl">Mata</div>
+        <div class="stat-val s-score" id="gScore">0</div>
+      </div>
+      <div class="hearts" id="gHearts"></div>
+      <div class="stat">
+        <div class="stat-lbl">Ganda</div>
+        <div class="stat-val s-streak" id="gStreak">×1</div>
+      </div>
+    </div>
+
+    <div class="prog-bar">
+      <div class="prog-fill" id="gProg" style="width:0%"></div>
+    </div>
+
+    <div class="poly-area">
+      <svg id="polySVG" width="172" height="172" viewBox="-86 -86 172 172">
+        <polygon id="pFill" points="" style="fill:rgba(76,68,212,0.06);stroke:none;"/>
+        <polygon id="pLine" points="" style="fill:none;stroke:#4C44D4;stroke-width:2.2;stroke-linejoin:round;"/>
+        <g id="pDots"></g>
+      </svg>
+      <div class="poly-qmark" id="pQMark">?</div>
+    </div>
+
+    <div class="q-lbl" id="qLbl"></div>
+    <div class="q-txt" id="qTxt"></div>
+
+    <div class="opts-grid" id="qOpts"></div>
+
+    <div class="feedback" id="qFb"></div>
+
+    <button class="next-btn" id="nxtBtn" onclick="nextQ()">Seterusnya →</button>
+
+  </div>
+
+  <!-- ══ RESULT SCREEN ══ -->
+  <div class="screen" id="sResult">
+    <div class="result-wrap">
+      <div class="result-ico" id="rIco"></div>
+      <div class="result-title" id="rTitle"></div>
+      <div class="result-score" id="rScore">0</div>
+      <div class="result-lbl">jumlah mata</div>
+
+      <div class="result-stats">
+        <div class="rs">
+          <div class="rs-val c-ok" id="rOk">0</div>
+          <div class="rs-lbl">Betul</div>
+        </div>
+        <div class="rs">
+          <div class="rs-val c-err" id="rErr">0</div>
+          <div class="rs-lbl">Salah</div>
+        </div>
+        <div class="rs">
+          <div class="rs-val c-p" id="rStrk">×1</div>
+          <div class="rs-lbl">Max Ganda</div>
+        </div>
+      </div>
+
+      <div class="result-btns">
+        <button class="btn-p" onclick="replayGame()">Main semula</button>
+        <button class="btn-s" onclick="goHome()">Pilih tahap lain</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<footer>
+  <strong>© 2024–2026 Chong Ai Peng | Modul GeoMETriA</strong><br>
+  Hak cipta terpelihara. Notifikasi Hak Cipta MyIPO: CRDV2025M05601
+</footer>
+
+<script>
+
+// ══════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════
+
+const POLYS = {
+  easy: [
+    {id:'tri',  name:'Segitiga',          sides:3,  n:3,  rot:0,    aSum:180 },
+    {id:'sq',   name:'Segi Empat Sama',   sides:4,  n:4,  rot:45,   aSum:360 },
+    {id:'rect', name:'Segi Empat Tepat',  sides:4,  spec:'rect',    aSum:360 },
+    {id:'pent', name:'Pentagon',          sides:5,  n:5,  rot:0,    aSum:540 },
+    {id:'hex',  name:'Heksagon',          sides:6,  n:6,  rot:0,    aSum:720 },
+  ],
+  medium: [
+    {id:'tri',  name:'Segitiga',          sides:3,  n:3,  rot:0,    aSum:180 },
+    {id:'sq',   name:'Segi Empat Sama',   sides:4,  n:4,  rot:45,   aSum:360 },
+    {id:'rect', name:'Segi Empat Tepat',  sides:4,  spec:'rect',    aSum:360 },
+    {id:'rhom', name:'Rombus',            sides:4,  spec:'rhom',    aSum:360 },
+    {id:'trap', name:'Trapezium',         sides:4,  spec:'trap',    aSum:360 },
+    {id:'pent', name:'Pentagon',          sides:5,  n:5,  rot:0,    aSum:540 },
+    {id:'hex',  name:'Heksagon',          sides:6,  n:6,  rot:0,    aSum:720 },
+    {id:'oct',  name:'Oktagon',           sides:8,  n:8,  rot:22.5, aSum:1080},
+  ],
+  hard: [
+    {id:'tri',  name:'Segitiga',          sides:3,  n:3,  rot:0,    aSum:180 },
+    {id:'sq',   name:'Segi Empat Sama',   sides:4,  n:4,  rot:45,   aSum:360 },
+    {id:'rect', name:'Segi Empat Tepat',  sides:4,  spec:'rect',    aSum:360 },
+    {id:'rhom', name:'Rombus',            sides:4,  spec:'rhom',    aSum:360 },
+    {id:'trap', name:'Trapezium',         sides:4,  spec:'trap',    aSum:360 },
+    {id:'pent', name:'Pentagon',          sides:5,  n:5,  rot:0,    aSum:540 },
+    {id:'hex',  name:'Heksagon',          sides:6,  n:6,  rot:0,    aSum:720 },
+    {id:'hep',  name:'Heptagon',          sides:7,  n:7,  rot:0,    aSum:900 },
+    {id:'oct',  name:'Oktagon',           sides:8,  n:8,  rot:22.5, aSum:1080},
+    {id:'non',  name:'Nonagon',           sides:9,  n:9,  rot:0,    aSum:1260},
+    {id:'dec',  name:'Dekagon',           sides:10, n:10, rot:0,    aSum:1440},
+  ],
+};
+
+const Q_TYPES = {
+  easy:   ['name','sides'],
+  medium: ['name','sides','vertices','asum'],
+  hard:   ['name','sides','vertices','asum','which'],
+};
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+
+let G = {};
+
+// ══════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════
+
+const el = id => document.getElementById(id);
+
+function shuf(a) {
+  const b = [...a];
+  for (let i = b.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [b[i], b[j]] = [b[j], b[i]];
+  }
+  return b;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  el(id).classList.add('on');
+  window.scrollTo(0, 0);
+}
+
+// ══════════════════════════════════════════
+//  POLYGON DRAWING
+// ══════════════════════════════════════════
+
+function polyPts(n, r, rotDeg) {
+  const base = -Math.PI / 2 + rotDeg * Math.PI / 180;
+  return Array.from({length: n}, (_, i) => {
+    const a = base + 2 * Math.PI * i / n;
+    return `${(r * Math.cos(a)).toFixed(1)},${(r * Math.sin(a)).toFixed(1)}`;
+  }).join(' ');
+}
+
+function specPts(s) {
+  if (s === 'rect') return '-60,-28 60,-28 60,28 -60,28';
+  if (s === 'rhom') return '0,-62 48,0 0,62 -48,0';
+  if (s === 'trap') return '-28,-32 28,-32 60,32 -60,32';
+}
+
+function drawPoly(poly) {
+  const pts = poly.spec ? specPts(poly.spec) : polyPts(poly.n, 68, poly.rot || 0);
+  el('pFill').setAttribute('points', pts);
+  el('pLine').setAttribute('points', pts);
+
+  const dotsG = el('pDots');
+  dotsG.innerHTML = '';
+  pts.trim().split(' ').forEach(p => {
+    const [x, y] = p.split(',');
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('cx', x);
+    c.setAttribute('cy', y);
+    c.setAttribute('r', '3.8');
+    c.setAttribute('fill', '#4C44D4');
+    c.setAttribute('opacity', '0.6');
+    dotsG.appendChild(c);
+  });
+
+  const svg = el('polySVG');
+  svg.style.display = 'block';
+  el('pQMark').style.display = 'none';
+
+  svg.classList.remove('a-float', 'a-flash', 'a-shake');
+  void svg.offsetWidth;
+  svg.classList.add('a-float');
+  svg.style.filter = 'drop-shadow(0 4px 12px rgba(76,68,212,0.18))';
+}
+
+function showQMark() {
+  el('polySVG').style.display = 'none';
+  el('pQMark').style.display = 'flex';
+}
+
+// ══════════════════════════════════════════
+//  OPTION GENERATION
+// ══════════════════════════════════════════
+
+function nameOpts(poly, all) {
+  const others = shuf(all.filter(p => p.id !== poly.id)).slice(0, 3).map(p => p.name);
+  return shuf([poly.name, ...others]);
+}
+
+function sideOpts(correct, all) {
+  const pool = shuf([...new Set(all.map(p => p.sides))].filter(s => s !== correct));
+  const extra = [2,3,4,5,6,7,8,9,10,11,12].filter(v => v !== correct && !pool.includes(v));
+  while (pool.length < 3) pool.push(extra.shift());
+  return shuf([correct, ...pool.slice(0, 3)]).map(String);
+}
+
+function asumOpts(correct, all) {
+  const pool = shuf([...new Set(all.map(p => p.aSum))].filter(s => s !== correct));
+  const extra = [180,360,540,720,900,1080,1260,1440].filter(v => v !== correct && !pool.includes(v));
+  while (pool.length < 3) pool.push(extra.shift());
+  return shuf([correct, ...pool.slice(0, 3)]).map(s => s + '°');
+}
+
+// ══════════════════════════════════════════
+//  QUESTION BUILDER
+// ══════════════════════════════════════════
+
+function buildQ(poly, type, all) {
+  const q = {poly, type};
+  switch (type) {
+    case 'name':
+      q.lbl = '— KENALI POLIGON —';
+      q.txt = 'Apakah nama poligon ini?';
+      q.ans = poly.name;
+      q.opts = nameOpts(poly, all);
+      q.showPoly = true;
+      break;
+    case 'sides':
+      q.lbl = '— BILANGAN SISI —';
+      q.txt = 'Berapa bilangan sisi poligon ini?';
+      q.ans = String(poly.sides);
+      q.opts = sideOpts(poly.sides, all);
+      q.showPoly = true;
+      break;
+    case 'vertices':
+      q.lbl = '— BILANGAN BUCU —';
+      q.txt = 'Berapa bilangan bucu poligon ini?';
+      q.ans = String(poly.sides);
+      q.opts = sideOpts(poly.sides, all);
+      q.showPoly = true;
+      break;
+    case 'asum':
+      q.lbl = '— SUDUT PEDALAMAN —';
+      q.txt = 'Berapakah hasil tambah sudut pedalaman poligon ini?';
+      q.ans = poly.aSum + '°';
+      q.opts = asumOpts(poly.aSum, all);
+      q.showPoly = true;
+      break;
+    case 'which':
+      q.lbl = '— PADANKAN POLIGON —';
+      q.txt = `Poligon manakah yang mempunyai hasil tambah sudut pedalaman ${poly.aSum}°?`;
+      q.ans = poly.name;
+      q.opts = nameOpts(poly, all);
+      q.showPoly = false;
+      break;
+  }
+  q.opts = shuf(q.opts);
+  return q;
+}
+
+function buildQSet(level) {
+  const polys = POLYS[level];
+  const types = Q_TYPES[level];
+
+  // 'which' questions only for polygons with unique angle sums
+  const asumCount = {};
+  polys.forEach(p => asumCount[p.aSum] = (asumCount[p.aSum] || 0) + 1);
+  const uniquePolys = polys.filter(p => asumCount[p.aSum] === 1);
+
+  const pool = shuf([...polys, ...polys, ...polys]).slice(0, 10);
+  const qs = [];
+  let lastType = '';
+
+  for (let i = 0; i < 10; i++) {
+    let poly = pool[i], type, tries = 0;
+    do {
+      type = types[Math.floor(Math.random() * types.length)];
+      tries++;
+    } while (type === lastType && tries < 20);
+
+    if (type === 'which') {
+      if (uniquePolys.length > 0) poly = shuf(uniquePolys)[0];
+      else type = 'asum';
+    }
+
+    lastType = type;
+    qs.push(buildQ(poly, type, polys));
+  }
+  return qs;
+}
+
+// ══════════════════════════════════════════
+//  GAME FLOW
+// ══════════════════════════════════════════
+
+function startGame(level) {
+  G = {
+    level, score:0, lives:3, streak:0,
+    maxStreak:0, correct:0, wrong:0,
+    qi:0, total:10, answered:false,
+  };
+  G.questions = buildQSet(level);
+  showScreen('sGame');
+  renderHearts();
+  loadQ();
+}
+
+function loadQ() {
+  if (G.qi >= G.total || G.lives <= 0) { endGame(); return; }
+  G.answered = false;
+
+  const q = G.questions[G.qi];
+  el('gProg').style.width = (G.qi / G.total * 100) + '%';
+  el('gScore').textContent = G.score;
+  el('gStreak').textContent = '×' + Math.min(G.streak + 1, 5);
+  el('qLbl').textContent = q.lbl;
+  el('qTxt').textContent = q.txt;
+
+  if (q.showPoly) drawPoly(q.poly);
+  else showQMark();
+
+  const opts = el('qOpts');
+  opts.innerHTML = '';
+  q.opts.forEach(opt => {
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.textContent = opt;
+    b.onclick = () => checkAns(opt, b, q);
+    opts.appendChild(b);
+  });
+
+  const fb = el('qFb');
+  fb.className = 'feedback';
+  fb.innerHTML = '';
+  el('nxtBtn').className = 'next-btn';
+}
+
+function checkAns(sel, btn, q) {
+  if (G.answered) return;
+  G.answered = true;
+
+  const ok = sel === q.ans;
+
+  document.querySelectorAll('.opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === q.ans) b.classList.add('ok');
+  });
+  if (!ok) btn.classList.add('err');
+
+  if (ok) {
+    G.streak++;
+    G.maxStreak = Math.max(G.maxStreak, G.streak);
+    G.correct++;
+    const mult = Math.min(G.streak, 5);
+    const pts = 100 * mult;
+    G.score += pts;
+    animSVG('ok');
+    animStreak();
+    beep('ok');
+    showFb(true, q, pts, mult);
+  } else {
+    G.streak = 0;
+    G.lives--;
+    G.wrong++;
+    renderHearts();
+    animSVG('err');
+    beep('err');
+    showFb(false, q);
+    if (G.lives <= 0) { setTimeout(endGame, 1600); return; }
+  }
+
+  el('gScore').textContent = G.score;
+  el('gStreak').textContent = '×' + Math.min(G.streak + 1, 5);
+  el('nxtBtn').className = 'next-btn show';
+}
+
+function showFb(ok, q, pts, mult) {
+  const fb = el('qFb');
+  const p = q.poly;
+  const facts = {
+    name:     `${p.name} ialah poligon dengan ${p.sides} sisi dan ${p.sides} bucu.`,
+    sides:    `${p.name} mempunyai ${p.sides} sisi.`,
+    vertices: `${p.name} mempunyai ${p.sides} bucu — sama dengan bilangan sisinya.`,
+    asum:     `Formula: (n−2)×180° → (${p.sides}−2)×180° = ${p.aSum}°`,
+    which:    `${p.name} mempunyai ${p.sides} sisi dan jumlah sudut pedalaman ${p.aSum}°.`,
+  };
+  const fact = facts[q.type] || '';
+
+  if (ok) {
+    const bonus = mult > 1 ? ` · ×${mult} ganda!` : '';
+    fb.className = 'feedback fb-ok show';
+    fb.innerHTML = `<strong>✓ Betul! +${pts} mata${bonus}</strong><span class="fact">${fact}</span>`;
+  } else {
+    fb.className = 'feedback fb-err show';
+    fb.innerHTML = `<strong>✗ Jawapan: ${q.ans}</strong><span class="fact">${fact}</span>`;
+  }
+}
+
+function nextQ() { G.qi++; loadQ(); }
+
+function endGame() {
+  showScreen('sResult');
+  const pct = G.correct / G.total * 100;
+
+  let ico = '😔', title = 'Cuba lagi!';
+  if (pct >= 90) { ico = '🏆'; title = 'Luar biasa!'; }
+  else if (pct >= 70) { ico = '🎉'; title = 'Bagus sekali!'; }
+  else if (pct >= 50) { ico = '👍'; title = 'Terus semangat!'; }
+
+  el('rIco').textContent = ico;
+  el('rTitle').textContent = title;
+  el('rScore').textContent = G.score;
+  el('rOk').textContent = G.correct;
+  el('rErr').textContent = G.wrong;
+  el('rStrk').textContent = '×' + G.maxStreak;
+}
+
+// ══════════════════════════════════════════
+//  UI HELPERS
+// ══════════════════════════════════════════
+
+function renderHearts() {
+  const h = el('gHearts');
+  h.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const s = document.createElement('span');
+    s.className = 'hrt' + (i >= G.lives ? ' lost' : '');
+    s.textContent = '♥';
+    h.appendChild(s);
+  }
+}
+
+function animSVG(type) {
+  const svg = el('polySVG');
+  if (!svg || svg.style.display === 'none') return;
+  svg.classList.remove('a-float', 'a-flash', 'a-shake');
+  void svg.offsetWidth;
+  if (type === 'ok') {
+    svg.classList.add('a-flash');
+    setTimeout(() => { svg.classList.remove('a-flash'); svg.classList.add('a-float'); }, 750);
+  } else {
+    svg.classList.add('a-shake');
+    setTimeout(() => { svg.classList.remove('a-shake'); svg.classList.add('a-float'); }, 500);
+  }
+}
+
+function animStreak() {
+  const sv = el('gStreak');
+  sv.classList.remove('a-pop');
+  void sv.offsetWidth;
+  sv.classList.add('a-pop');
+}
+
+function replayGame() { startGame(G.level); }
+function goHome()     { showScreen('sHome'); }
+
+// ══════════════════════════════════════════
+//  SOUND
+// ══════════════════════════════════════════
+
+let AC;
+
+function beep(type) {
+  try {
+    if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+    const o = AC.createOscillator();
+    const g = AC.createGain();
+    o.connect(g);
+    g.connect(AC.destination);
+    if (type === 'ok') {
+      o.type = 'sine';
+      o.frequency.setValueAtTime(523, AC.currentTime);
+      o.frequency.setValueAtTime(784, AC.currentTime + 0.1);
+      g.gain.setValueAtTime(0.10, AC.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 0.38);
+      o.start(); o.stop(AC.currentTime + 0.38);
+    } else {
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(175, AC.currentTime);
+      g.gain.setValueAtTime(0.07, AC.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 0.28);
+      o.start(); o.stop(AC.currentTime + 0.28);
+    }
+  } catch (e) {}
+}
+
+// ══════════════════════════════════════════
+//  ZOOM
+// ══════════════════════════════════════════
+
+let zoomLevel = 1.0;
+const ZOOM_MIN = 0.6;
+const ZOOM_MAX = 1.6;
+const ZOOM_STEP = 0.1;
+
+function applyZoom() {
+  const app = el('app');
+  app.style.zoom = zoomLevel;
+  el('zoomLvl').textContent = Math.round(zoomLevel * 100) + '%';
+  el('app').querySelector && updateZoomBtns();
+}
+
+function updateZoomBtns() {
+  const btns = document.querySelectorAll('#zoomBar button');
+  btns[0].style.opacity = zoomLevel <= ZOOM_MIN ? '0.35' : '1';
+  btns[1].style.opacity = zoomLevel >= ZOOM_MAX ? '0.35' : '1';
+}
+
+function zoomIn() {
+  if (zoomLevel < ZOOM_MAX) {
+    zoomLevel = Math.round((zoomLevel + ZOOM_STEP) * 10) / 10;
+    applyZoom();
+  }
+}
+
+function zoomOut() {
+  if (zoomLevel > ZOOM_MIN) {
+    zoomLevel = Math.round((zoomLevel - ZOOM_STEP) * 10) / 10;
+    applyZoom();
+  }
+}
+
+</script>
+</body>
+</html>
