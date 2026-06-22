@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kisah 5 Sahabat Bentuk 3D</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal:#3DD6E0;--orange:#FF9F0A;--pink:#FF6B9D;
+  --yellow:#FFE033;--blue:#4A90FF;--green:#22c55e;--red:#ef4444;
+  --ct:#FF9F0A;--cm:#FF6B9D;--cp:#FFE033;--cr:#3DD6E0;--cl:#22c55e;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#000;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:'Fredoka One',cursive;overflow:hidden;}
+#stage{width:900px;height:506px;position:relative;overflow:hidden;border-radius:16px;box-shadow:0 0 60px rgba(61,214,224,.4);transform-origin:center;transition:transform .25s;}
+.bg{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 40%,#0a3a5c 0%,#050e1a 70%);}
+.bg-stars{position:absolute;inset:0;}
+.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle 2s infinite alternate;}
+@keyframes twinkle{from{opacity:.2}to{opacity:1}}
+.bg-floor{position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(to top,#0a2540,transparent);}
+@keyframes flashG{0%,100%{box-shadow:0 0 60px rgba(61,214,224,.4);}40%{box-shadow:0 0 80px 14px rgba(34,197,94,.95);}}
+@keyframes flashB{0%,100%{box-shadow:0 0 60px rgba(61,214,224,.4);}40%{box-shadow:0 0 80px 14px rgba(239,68,68,.95);}}
+#stage.good{animation:flashG .7s ease;}
+#stage.bad{animation:flashB .7s ease;}
+#zoomBar{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.75);border:2px solid var(--teal);border-radius:40px;padding:6px 16px;box-shadow:0 0 18px rgba(61,214,224,.45);}
+.zoom-btn{width:42px;height:42px;border:none;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;font-family:'Fredoka One',cursive;font-size:24px;cursor:pointer;transition:transform .15s;display:flex;align-items:center;justify-content:center;}
+.zoom-btn:hover{transform:scale(1.12);}
+#zoomLevel{color:#fff;font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;min-width:52px;text-align:center;}
+#zoomReset{width:auto;border-radius:30px;padding:0 14px;font-size:14px;background:linear-gradient(135deg,var(--orange),var(--pink));}
+#progress{position:absolute;top:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:50;}
+.pdot{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.18);border:2px solid rgba(61,214,224,.45);transition:all .3s;cursor:pointer;}
+.pdot:hover{transform:scale(1.4);box-shadow:0 0 12px var(--teal);}
+.pdot.on{background:var(--teal);box-shadow:0 0 10px var(--teal);}
+.pdot.done{background:var(--green);border-color:var(--green);}
+.cm-overlay{position:absolute;inset:0;z-index:120;display:none;align-items:center;justify-content:center;background:rgba(3,12,22,.72);backdrop-filter:blur(3px);}
+.cm-overlay.open{display:flex;animation:cmFade .2s ease;}
+@keyframes cmFade{from{opacity:0}to{opacity:1}}
+.cm-panel{width:500px;max-width:92%;max-height:84%;display:flex;flex-direction:column;background:linear-gradient(180deg,#0c3550,#071a2b);border:2px solid var(--teal);border-radius:18px;box-shadow:0 0 40px rgba(61,214,224,.45);overflow:hidden;animation:cmPop .28s cubic-bezier(.34,1.56,.64,1);}
+@keyframes cmPop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.cm-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(61,214,224,.3);}
+.cm-title{font-family:'Fredoka One',cursive;font-size:18px;color:var(--teal);}
+.cm-close{width:34px;height:34px;border:none;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--pink));color:#fff;font-size:18px;cursor:pointer;transition:transform .15s;}
+.cm-close:hover{transform:scale(1.12);}
+.cm-list{padding:12px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
+.cm-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:2px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.04);color:#fff;font-family:'Nunito',sans-serif;font-weight:900;font-size:14px;padding:10px 14px;cursor:pointer;transition:all .15s;}
+.cm-item:hover{border-color:var(--teal);background:rgba(61,214,224,.14);}
+.cm-num{flex:0 0 28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:14px;background:rgba(255,255,255,.12);}
+.cm-txt{flex:1;}
+.cm-state{font-size:12px;font-weight:900;}
+.cm-item.done .cm-num{background:var(--green);}
+.cm-item.done .cm-state{color:var(--green);}
+.cm-item.now{border-color:var(--teal);background:rgba(61,214,224,.18);}
+.cm-item.now .cm-num{background:var(--teal);color:#06222b;}
+.cm-item.now .cm-state{color:var(--teal);}
+.scene{position:absolute;inset:0;opacity:0;transition:opacity .6s;pointer-events:none;}
+.scene.active{opacity:1;pointer-events:all;}
+.scene-badge{position:absolute;top:36px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;border-radius:30px;padding:6px 20px;font-family:'Nunito',sans-serif;font-weight:900;font-size:13px;letter-spacing:1px;text-transform:uppercase;box-shadow:0 2px 12px rgba(61,214,224,.4);white-space:nowrap;z-index:5;cursor:pointer;animation:subPop .4s .1s cubic-bezier(.34,1.56,.64,1) both;}
+.scene-badge::after{content:" \25BE";opacity:.8;}
+.scene-badge:hover{filter:brightness(1.15);}
+.subtitle{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.88);border:2px solid var(--teal);border-radius:40px;padding:9px 28px;color:#fff;font-family:'Nunito',sans-serif;font-weight:900;font-size:17px;text-align:center;max-width:90%;line-height:1.35;box-shadow:0 0 20px rgba(61,214,224,.5);z-index:6;transition:all .35s ease;}
+@keyframes subPop{from{transform:translateX(-50%) scale(.8);opacity:0}to{transform:translateX(-50%) scale(1);opacity:1}}
+.next-btn{position:absolute;right:24px;bottom:68px;background:linear-gradient(135deg,var(--orange),var(--pink));border:none;border-radius:30px;color:#fff;font-family:'Fredoka One',cursive;font-size:17px;padding:11px 24px;cursor:pointer;box-shadow:0 4px 16px rgba(255,107,157,.5);transition:all .2s;z-index:20;}
+.next-btn:hover:not(:disabled){transform:scale(1.07);}
+.next-btn:disabled{opacity:.4;cursor:not-allowed;}
+[data-step]{opacity:0;transform:scale(.7);transition:opacity .5s ease,transform .5s cubic-bezier(.34,1.56,.64,1);}
+[data-step].vstep{opacity:1;transform:scale(1);}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes shapeIn{from{transform:scale(0) rotate(-12deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+.shape-in{animation:shapeIn .9s cubic-bezier(.34,1.56,.64,1) both;}
+.sbub{background:#fff;border-radius:18px;padding:11px 16px;box-shadow:0 4px 20px rgba(0,0,0,.35);max-width:205px;position:relative;margin-top:14px;}
+.sbub::before{content:'';position:absolute;top:-12px;left:30px;border:7px solid transparent;border-bottom-color:#fff;}
+.sbub-txt{font-family:'Nunito',sans-serif;font-weight:900;font-size:13px;color:#0a2540;line-height:1.4;text-align:center;}
+.plbl{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:7px 14px;font-family:'Nunito',sans-serif;font-weight:900;font-size:13px;box-shadow:0 3px 14px rgba(0,0,0,.5);position:absolute;white-space:nowrap;z-index:8;}
+.pt{background:var(--ct);color:#1a1a1a;}
+.pm{background:var(--cm);color:#fff;}
+.pp{background:var(--cp);color:#1a1a1a;}
+.pr{background:var(--cr);color:#1a1a1a;}
+.pl{background:var(--cl);color:#1a1a1a;}
+.pcl{position:absolute;display:flex;flex-direction:column;gap:7px;z-index:8;}
+.pci{display:flex;align-items:flex-start;gap:8px;padding:7px 12px;border-radius:11px;background:rgba(0,10,30,.78);font-family:'Nunito',sans-serif;font-weight:900;font-size:13px;color:#fff;border-left:4px solid;line-height:1.35;max-width:225px;}
+.pci.t{border-left-color:var(--ct);}
+.pci.m{border-left-color:var(--cm);}
+.pci.p{border-left-color:var(--cp);}
+.pci.r{border-left-color:var(--cr);}
+.pci.l{border-left-color:var(--cl);}
+.p3lt{fill:#FFE458;stroke:rgba(255,255,255,.92);stroke-width:2.5;stroke-linejoin:round;}
+.p3rt{fill:#3A1800;stroke:rgba(255,255,255,.35);stroke-width:1.5;stroke-linejoin:round;}
+.p3fr{fill:#E07800;stroke:rgba(255,255,255,.75);stroke-width:2;stroke-linejoin:round;}
+.p3tr{fill:#A85800;stroke:rgba(255,255,255,.5);stroke-width:1.5;stroke-linejoin:round;}
+.p3br{fill:#663000;stroke:rgba(255,255,255,.3);stroke-width:1.5;stroke-linejoin:round;}
+.p4base{fill:#7a4d00;stroke:rgba(255,255,255,.38);stroke-width:1.5;stroke-linejoin:round;}
+.p4left{fill:#B07000;stroke:rgba(255,255,255,.5);stroke-width:1.5;stroke-linejoin:round;}
+.p4right{fill:#E09000;stroke:rgba(255,255,255,.65);stroke-width:2;stroke-linejoin:round;}
+.p4front{fill:#FFD23F;stroke:rgba(255,255,255,.9);stroke-width:2.5;stroke-linejoin:round;}
+.sil{position:relative;width:155px;height:195px;}
+.sil-bot{position:absolute;left:-4px;bottom:0;width:163px;height:46px;border-radius:50%;background:radial-gradient(ellipse at 35% 32%,#1A8090 0%,#0A4E5C 55%,#052830 100%);border:3px solid rgba(255,255,255,.32);}
+.sil-body{position:absolute;left:0;bottom:30px;width:155px;height:120px;background:linear-gradient(90deg,#085A68 0%,#0E8090 15%,#1AABB8 30%,#38D0DC 43%,#80EEF6 50%,#38D0DC 57%,#1AABB8 70%,#0E8090 85%,#085A68 100%);border-left:2.5px solid rgba(0,0,0,.25);border-right:2.5px solid rgba(0,0,0,.25);border-top:2px solid rgba(255,255,255,.18);border-bottom:2px solid rgba(0,0,0,.18);}
+.sil-top{position:absolute;left:-4px;top:0;width:163px;height:46px;border-radius:50%;background:radial-gradient(ellipse at 35% 32%,#D0F8FF 0%,#60DDE8 35%,#22A8B8 70%,#126070 100%);border:4px solid rgba(255,255,255,.85);box-shadow:0 0 18px rgba(61,214,224,.6),inset 0 1px 4px rgba(255,255,255,.3);}
+.kon{position:relative;width:160px;height:200px;}
+.kon-body{position:absolute;left:0;bottom:34px;width:160px;height:158px;background:linear-gradient(90deg,#1A7A3A 0%,#22c55e 45%,#7dff7d 55%,#22c55e 70%,#1A7A3A 100%);clip-path:polygon(50% 0,0 100%,100% 100%);}
+.kon-base{position:absolute;left:-4px;bottom:0;width:168px;height:46px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#22c55e);border:3px solid rgba(255,255,255,.55);}
+.kon-tip{position:absolute;top:2px;left:50%;transform:translateX(-50%);width:20px;height:20px;border-radius:50%;background:var(--yellow);box-shadow:0 0 16px var(--yellow);}
+.sfe{position:relative;width:180px;height:180px;}
+.sfe-ball{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 34% 30%,#ffaadd 0%,#d4408a 50%,#8b1d5a 100%);box-shadow:0 0 32px rgba(255,100,180,.4);}
+.sfe-ctr{position:absolute;left:50%;top:50%;width:14px;height:14px;border-radius:50%;background:#fff;transform:translate(-50%,-50%);box-shadow:0 0 10px #fff;z-index:2;}
+@keyframes glOr{from{filter:brightness(1.15)}to{filter:brightness(2) drop-shadow(0 0 12px var(--ct));}}
+@keyframes glPk{from{filter:brightness(1.15)}to{filter:brightness(2) drop-shadow(0 0 12px var(--cm));}}
+@keyframes glYl{from{filter:brightness(1.15)}to{filter:brightness(2) drop-shadow(0 0 12px var(--cp));}}
+@keyframes glTl{from{filter:brightness(1.15)}to{filter:brightness(2) drop-shadow(0 0 12px var(--cr));}}
+@keyframes glGr{from{filter:brightness(1.15)}to{filter:brightness(2) drop-shadow(0 0 12px var(--cl));}}
+.hl-tapak{animation:glOr .75s infinite alternate;}
+.hl-muka{animation:glPk .75s infinite alternate;}
+.hl-puncak{animation:glYl .75s infinite alternate;}
+.hl-rentas{animation:glTl .75s infinite alternate;}
+.hl-lengkung{animation:glGr .75s infinite alternate;}
+polygon.hl-tapak{fill:var(--ct) !important;}
+polygon.hl-muka{fill:var(--cm) !important;}
+polygon.hl-puncak{fill:var(--cp) !important;}
+@keyframes wowPop{0%{transform:translateX(-50%) scale(0) rotate(-10deg);opacity:0}60%{transform:translateX(-50%) scale(1.3) rotate(5deg);opacity:1}100%{transform:translateX(-50%) scale(1) rotate(0);opacity:1}}
+.wow-pop{position:absolute;font-size:30px;font-family:'Fredoka One',cursive;color:var(--yellow);text-shadow:0 0 20px var(--orange);z-index:100;opacity:0;pointer-events:none;top:158px;left:50%;transform:translateX(-50%);}
+.wow-pop.show{animation:wowPop .55s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes sparkA{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--sx),var(--sy)) scale(0);opacity:0}}
+.sparkle{position:absolute;pointer-events:none;animation:sparkA 1.6s ease forwards;}
+.t-cnt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
+.t-main{font-size:42px;color:var(--teal);text-shadow:0 0 28px rgba(61,214,224,.85);text-align:center;line-height:1.15;}
+.t-sub{font-family:'Nunito',sans-serif;font-weight:900;font-size:16px;color:var(--yellow);text-align:center;margin:4px 0 10px;}
+.t-row{display:flex;gap:16px;align-items:center;justify-content:center;margin:6px 0;}
+.te{font-size:46px;display:inline-block;animation:bounce 2s ease-in-out infinite;}
+.te:nth-child(2){animation-delay:.15s}
+.te:nth-child(3){animation-delay:.3s}
+.te:nth-child(4){animation-delay:.45s}
+.te:nth-child(5){animation-delay:.6s}
+.t-btn{background:linear-gradient(135deg,var(--orange),var(--pink));border:none;border-radius:40px;color:#fff;font-family:'Fredoka One',cursive;font-size:22px;padding:14px 42px;cursor:pointer;box-shadow:0 6px 24px rgba(255,107,157,.5);transition:transform .2s;margin-top:10px;}
+.t-btn:hover{transform:scale(1.09);}
+.ig{position:absolute;display:flex;gap:14px;}
+.igc{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 11px 10px;border-radius:14px;border:2px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);cursor:pointer;transition:transform .2s;}
+.igc:hover{transform:translateY(-5px) scale(1.04);}
+.ig-em{font-size:44px;display:block;}
+.ig-nm{font-family:'Nunito',sans-serif;font-weight:900;font-size:13px;color:#fff;text-align:center;}
+.ig-hint{font-size:11px;color:rgba(255,255,255,.55);font-family:'Nunito',sans-serif;text-align:center;}
+.qtxt{font-family:'Nunito',sans-serif;font-weight:900;font-size:19px;color:#fff;text-align:center;max-width:700px;line-height:1.45;}
+.qrow{display:flex;gap:12px;margin-top:4px;}
+.qc{display:flex;flex-direction:column;align-items:center;gap:7px;background:rgba(255,255,255,.06);border:3px solid rgba(255,255,255,.22);border-radius:16px;padding:13px 16px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:900;color:#fff;font-size:13px;transition:all .2s;min-width:100px;}
+.qc:hover:not(:disabled){background:rgba(61,214,224,.15);border-color:var(--teal);transform:translateY(-5px);}
+.qc.ok{background:rgba(34,197,94,.3);border-color:var(--green);}
+.qc.no{background:rgba(239,68,68,.2);border-color:var(--red);animation:shake .4s ease;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.qce{font-size:36px;}
+.fn-row{display:flex;gap:10px;}
+.fn-c{display:flex;flex-direction:column;align-items:center;gap:3px;border:2px solid rgba(255,255,255,.18);border-radius:14px;padding:10px 12px;background:rgba(255,255,255,.04);min-width:114px;}
+.fn-e{font-size:32px;display:block;}
+.fn-n{font-family:'Nunito',sans-serif;font-weight:900;font-size:13px;color:var(--yellow);}
+.fn-p{font-family:'Nunito',sans-serif;font-weight:700;font-size:10px;color:rgba(255,255,255,.78);line-height:1.35;margin-top:3px;text-align:center;}
+@keyframes celebAnim{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.celebRow{animation:celebAnim 1.2s ease-in-out infinite;}
+</style>
+</head>
+<body>
+<div id="zoomBar">
+  <button class="zoom-btn" onclick="zO()">&#8722;</button>
+  <span id="zoomLevel">100%</span>
+  <button class="zoom-btn" onclick="zI()">+</button>
+  <button class="zoom-btn" id="zoomReset" onclick="zR()">Reset</button>
+</div>
+
+<div id="stage">
+  <div class="bg"></div>
+  <div class="bg-stars" id="bgStars"></div>
+  <div class="bg-floor"></div>
+
+  <div class="cm-overlay" id="chapterMenu" aria-hidden="true">
+    <div class="cm-panel" role="dialog">
+      <div class="cm-head">
+        <span class="cm-title">&#128218; Pilih Babak</span>
+        <button class="cm-close" id="cmClose">&#x2715;</button>
+      </div>
+      <div class="cm-list" id="cmList"></div>
+    </div>
+  </div>
+
+  <div id="progress">
+    <div class="pdot" id="pd0"></div><div class="pdot" id="pd1"></div>
+    <div class="pdot" id="pd2"></div><div class="pdot" id="pd3"></div>
+    <div class="pdot" id="pd4"></div><div class="pdot" id="pd5"></div>
+    <div class="pdot" id="pd6"></div><div class="pdot" id="pd7"></div>
+    <div class="pdot" id="pd8"></div>
+  </div>
+
+  <!-- S1: TAJUK -->
+  <div id="s1" class="scene">
+    <div class="t-cnt">
+      <div style="font-size:46px;margin-bottom:4px;">&#127757;&#10024;</div>
+      <div class="t-main">Kisah 5 Sahabat<br>Bentuk 3D</div>
+      <div class="t-sub">Di Planet Geometri, ada 5 sahabat istimewa!</div>
+      <div class="t-row">
+        <span class="te">&#127968;</span><span class="te">&#128314;</span><span class="te">&#129483;</span><span class="te">&#127846;</span><span class="te">&#9917;</span>
+      </div>
+      <button class="t-btn" onclick="go(2)">&#9654; Mula Cerita!</button>
+    </div>
+    <div class="scene-badge" onclick="openMenu()">Babak 1 &#8226; Tajuk</div>
+    <div class="subtitle">Selamat datang! Tekan butang untuk mulakan cerita! &#127881;</div>
+  </div>
+
+  <!-- S2: PERKENALAN -->
+  <div id="s2" class="scene">
+    <div class="scene-badge" onclick="openMenu()">Babak 2 &#8226; 5 Sahabat</div>
+    <div style="position:absolute;top:68px;left:0;right:0;text-align:center;font-size:24px;color:var(--teal);text-shadow:0 0 16px rgba(61,214,224,.7);">Kenali 5 sahabat dari Planet Geometri! &#128640;</div>
+    <div class="ig" style="top:120px;left:28px;right:28px;justify-content:center;">
+      <div class="igc" onclick="go(3)">
+        <span class="ig-em" style="animation:bounce 2s infinite;">&#127968;</span>
+        <span class="ig-nm">PRISMA</span><span class="ig-hint">Si Bumbung</span>
+      </div>
+      <div class="igc" onclick="go(4)">
+        <span class="ig-em" style="animation:bounce 2s .2s infinite;">&#128314;</span>
+        <span class="ig-nm">PIRAMID</span><span class="ig-hint">Si Misteri</span>
+      </div>
+      <div class="igc" onclick="go(5)">
+        <span class="ig-em" style="animation:bounce 2s .4s infinite;">&#129483;</span>
+        <span class="ig-nm">SILINDER</span><span class="ig-hint">Si Tin</span>
+      </div>
+      <div class="igc" onclick="go(6)">
+        <span class="ig-em" style="animation:bounce 2s .6s infinite;">&#127846;</span>
+        <span class="ig-nm">KON</span><span class="ig-hint">Si Aiskrim</span>
+      </div>
+      <div class="igc" onclick="go(7)">
+        <span class="ig-em" style="animation:bounce 2s .8s infinite;">&#9917;</span>
+        <span class="ig-nm">SFERA</span><span class="ig-hint">Si Bola</span>
+      </div>
+    </div>
+    <div style="position:absolute;bottom:80px;left:0;right:0;text-align:center;font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;color:var(--yellow);">
+      Klik sahabat untuk kenal mereka! Atau tekan Seterusnya &#9654;
+    </div>
+    <button class="next-btn" onclick="go(3)">Seterusnya &#9654;</button>
+    <div class="subtitle">Setiap bentuk ada SIFAT tersendiri yang unik! &#127775;</div>
+  </div>
+
+  <!-- S3: PRISMA -->
+  <div id="s3" class="scene">
+    <div class="scene-badge" onclick="openMenu()">Babak 3 &#8226; PRISMA &#127968;</div>
+    <!-- SVG PRISMA (left) -->
+    <div style="position:absolute;left:18px;top:52px;">
+      <!--
+        PRISMA SEGITIGA — orientasi mendatar, puncak tapak ke ATAS
+        
+        Tapak 1 (kiri-depan, KUNING TERANG): T(95,22) BL(22,162) BR(168,162)
+          → segitiga sama sisi (puncak atas), sisi ≈ 160px, menghadap penonton
+        
+        Tapak 2 (kanan-belakang, GELAP): T2(240,40) BL2(167,180) BR2(313,180)
+          → sama bentuk, ditolak ke kanan+bawah (kesan perspektif)
+        
+        Muka tepi (3 segi empat):
+          Kiri-belakang (oren): T-BL-BL2-T2
+          Kanan (sederhana)  : T-BR-BR2-T2
+          Bawah (gelap)      : BL-BR-BR2-BL2
+      -->
+      <svg width="328" height="205" viewBox="0 0 328 205" class="shape-in" style="overflow:visible;">
+        <!-- 1) BAWAH — muka tepi bawah (paling gelap) -->
+        <polygon id="p3br" class="p3br" points="22,162 168,162 313,180 167,180"/>
+        <!-- 2) TAPAK 2 — kanan-belakang (sangat gelap, jauh) -->
+        <polygon id="p3rt" class="p3rt" points="240,40 167,180 313,180"/>
+        <!-- 3) KANAN — muka tepi kanan (sederhana, visible from right) -->
+        <polygon id="p3tr" class="p3tr" points="95,22 168,162 313,180 240,40"/>
+        <!-- 4) KIRI-BELAKANG — muka tepi kiri (oren, paling nampak) -->
+        <polygon id="p3fr" class="p3fr" points="95,22 22,162 167,180 240,40"/>
+        <!-- 5) TAPAK 1 — kiri-depan, KUNING TERANG, puncak atas, menghadap penonton -->
+        <polygon id="p3lt" class="p3lt" points="95,22 22,162 168,162"/>
+        <!-- Garisan tepi Tapak 1 supaya jelas -->
+        <line x1="95" y1="22" x2="22" y2="162" stroke="rgba(255,255,255,.7)" stroke-width="2.2"/>
+        <line x1="95" y1="22" x2="168" y2="162" stroke="rgba(255,255,255,.7)" stroke-width="2.2"/>
+        <line x1="22" y1="162" x2="168" y2="162" stroke="rgba(255,255,255,.6)" stroke-width="2"/>
+        <!-- Muka watak pada Tapak 1 (pusat ≈ 95,115) -->
+        <circle cx="80" cy="108" r="9" fill="white" opacity=".95"/>
+        <circle cx="108" cy="108" r="9" fill="white" opacity=".95"/>
+        <circle cx="81" cy="109" r="4.5" fill="#3a1800"/>
+        <circle cx="109" cy="109" r="4.5" fill="#3a1800"/>
+        <path d="M72,126 Q95,141 118,126" stroke="#3a1800" stroke-width="3" fill="none" stroke-linecap="round"/>
+      </svg>
+
+      <!-- Step 1: TAPAK labels (kiri dan kanan) -->
+      <div data-step="1" class="plbl pt" style="left:-12px;top:72px;font-size:12px;">&#9650; TAPAK 1</div>
+      <div data-step="1" class="plbl pt" style="left:248px;top:72px;font-size:12px;">&#9650; TAPAK 2</div>
+      <svg data-step="1" style="position:absolute;left:0;top:0;width:328px;height:205px;pointer-events:none;overflow:visible;">
+        <!-- anak panah ke Tapak 1 -->
+        <line x1="76" y1="88" x2="82" y2="108" stroke="var(--ct)" stroke-width="2" stroke-dasharray="5,3"/>
+        <!-- anak panah ke Tapak 2 -->
+        <line x1="248" y1="88" x2="258" y2="110" stroke="var(--ct)" stroke-width="2" stroke-dasharray="5,3"/>
+      </svg>
+
+      <!-- Step 2: MUKA TEPI label -->
+      <div data-step="2" class="plbl pm" style="left:78px;top:-34px;font-size:12px;">&#128302; MUKA TEPI = SEGI EMPAT</div>
+      <svg data-step="2" style="position:absolute;left:0;top:0;width:328px;height:205px;pointer-events:none;overflow:visible;">
+        <!-- anak panah ke muka tepi oren (p3fr, kiri-belakang) -->
+        <line x1="140" y1="5" x2="130" y2="50" stroke="var(--cm)" stroke-width="2" stroke-dasharray="5,3"/>
+      </svg>
+
+      <!-- Step 3: KERATAN RENTAS (cut-plane at prism midpoint t=0.5) -->
+      <div data-step="3" class="plbl pr" style="left:52px;bottom:-40px;font-size:12px;">&#9986; KERATAN RENTAS = SENTIASA SAMA!</div>
+      <!-- Cut plane SVG overlay — cross-section triangle at midpoint -->
+      <svg id="p3rentas" data-step="3" style="position:absolute;left:0;top:0;width:328px;height:205px;pointer-events:none;z-index:9;overflow:visible;">
+        <!-- Garisan keratan pada muka tepi kiri-belakang (t=0.5 sepanjang prisma) -->
+        <line x1="168" y1="31" x2="94" y2="171" stroke="var(--cr)" stroke-width="3" stroke-dasharray="7,4"/>
+        <!-- Keratan rentas = SEGITIGA yang SAMA dengan Tapak 1! -->
+        <polygon points="168,31 94,171 240,171" fill="rgba(61,214,224,.5)" stroke="var(--cr)" stroke-width="2.5"/>
+        <!-- Label kecil tunjuk segitiga -->
+        <text x="168" y="170" text-anchor="middle" font-family="Nunito" font-weight="900" font-size="13" fill="var(--cr)">= SAMA!</text>
+      </svg>
+    </div>
+    <!-- Character (right) -->
+    <div style="position:absolute;right:32px;top:58px;display:flex;flex-direction:column;align-items:center;width:215px;">
+      <div style="font-size:64px;animation:bounce 2.5s ease-in-out infinite;line-height:1;">&#127968;</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:23px;color:var(--orange);margin-top:4px;">PRISMA</div>
+      <div class="sbub"><div class="sbub-txt" id="sb3">Hai! Aku PRISMA! &#128075;<br>Tekan untuk belajar!</div></div>
+    </div>
+    <!-- Checklist -->
+    <div class="pcl" style="right:26px;bottom:125px;">
+      <div data-step="1" class="pci t">&#128992; Ada 2 tapak poligon (sejajar)</div>
+      <div data-step="2" class="pci m">&#128305; Muka tepi = Segi Empat</div>
+      <div data-step="3" class="pci r">&#128311; Keratan rentas sentiasa sama</div>
+    </div>
+    <button class="next-btn" id="btn3" onclick="advStep(3)">Seterusnya &#9654;</button>
+    <div class="subtitle" id="sub3">Tekan &quot;Seterusnya&quot; untuk mula belajar! &#128070;</div>
+  </div>
+
+  <!-- S4: PIRAMID -->
+  <div id="s4" class="scene">
+    <div class="scene-badge" onclick="openMenu()">Babak 4 &#8226; PIRAMID &#128314;</div>
+    <div style="position:absolute;left:30px;top:48px;">
+      <svg width="298" height="215" viewBox="0 0 298 215" class="shape-in" style="overflow:visible;">
+        <polygon id="p4base" class="p4base" points="52,190 228,190 254,148 78,148"/>
+        <polygon id="p4left" class="p4left" points="52,190 78,148 148,28"/>
+        <polygon id="p4right" class="p4right" points="228,190 254,148 148,28"/>
+        <polygon id="p4front" class="p4front" points="52,190 228,190 148,28"/>
+        <circle id="p4apex" cx="148" cy="28" r="1" fill="transparent"/>
+        <circle cx="126" cy="156" r="9" fill="white" opacity=".9"/>
+        <circle cx="146" cy="156" r="9" fill="white" opacity=".9"/>
+        <circle cx="127" cy="157" r="4.5" fill="#1a3a5c"/>
+        <circle cx="147" cy="157" r="4.5" fill="#1a3a5c"/>
+        <path d="M120,172 Q136,184 153,172" stroke="#1a3a5c" stroke-width="3" fill="none" stroke-linecap="round"/>
+      </svg>
+      <!-- Step 1: TAPAK -->
+      <div data-step="1" class="plbl pt" style="left:52px;bottom:-34px;font-size:12px;">&#9650; 1 TAPAK sahaja (bawah)</div>
+      <svg data-step="1" style="position:absolute;left:0;top:0;width:298px;height:215px;pointer-events:none;overflow:visible;">
+        <line x1="140" y1="218" x2="140" y2="196" stroke="var(--ct)" stroke-width="2" stroke-dasharray="5,3"/>
+      </svg>
+      <!-- Step 2: MUKA SEGI TIGA -->
+      <div data-step="2" class="plbl pm" style="right:-15px;top:95px;font-size:12px;">&#128302; MUKA TEPI = SEGI TIGA</div>
+      <svg data-step="2" style="position:absolute;left:0;top:0;width:298px;height:215px;pointer-events:none;overflow:visible;">
+        <line x1="270" y1="112" x2="244" y2="112" stroke="var(--cm)" stroke-width="2" stroke-dasharray="5,3"/>
+      </svg>
+      <!-- Step 3: PUNCAK -->
+      <div data-step="3" class="plbl pp" style="left:152px;top:-26px;font-size:12px;">&#11088; PUNCAK</div>
+      <svg data-step="3" style="position:absolute;left:0;top:0;width:298px;height:215px;pointer-events:none;overflow:visible;">
+        <circle cx="148" cy="28" r="18" fill="none" stroke="var(--cp)" stroke-width="3" stroke-dasharray="5,3"/>
+        <line x1="175" y1="5" x2="155" y2="24" stroke="var(--cp)" stroke-width="2" stroke-dasharray="4,3"/>
+      </svg>
+    </div>
+    <div style="position:absolute;right:32px;top:58px;display:flex;flex-direction:column;align-items:center;width:215px;">
+      <div style="font-size:64px;animation:bounce 2.5s ease-in-out infinite;line-height:1;">&#128314;</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:23px;color:var(--yellow);margin-top:4px;">PIRAMID</div>
+      <div class="sbub"><div class="sbub-txt" id="sb4">Aku PIRAMID!<br>Macam monumen Mesir! &#127868;</div></div>
+    </div>
+    <div class="pcl" style="right:26px;bottom:125px;">
+      <div data-step="1" class="pci t">&#128992; Ada 1 tapak berbentuk poligon</div>
+      <div data-step="2" class="pci m">&#128305; Muka tepi = Segi Tiga</div>
+      <div data-step="3" class="pci p">&#11088; Semua muka bertemu di PUNCAK</div>
+    </div>
+    <button class="next-btn" id="btn4" onclick="advStep(4)">Seterusnya &#9654;</button>
+    <div class="subtitle" id="sub4">Tekan &quot;Seterusnya&quot; untuk mula belajar! &#128070;</div>
+  </div>
+
+  <!-- S5: SILINDER -->
+  <div id="s5" class="scene">
+    <div class="scene-badge" onclick="openMenu()">Babak 5 &#8226; SILINDER &#129483;</div>
+    <div style="position:absolute;left:46px;top:36px;width:165px;height:240px;">
+      <!--
+        SVG Silinder — gaya buku teks:
+        • Badan pepejal + garisan tepi hitam tebal
+        • Tapak atas: elips PENUH (nampak jelas)
+        • Tapak bawah: garisan depan = pepejal, garisan belakang = PUTUS-PUTUS
+        
+        Koordinat utama:
+          Tapak atas (sil5top): ellipse cx=82 cy=30 rx=81 ry=27
+          Badan (sil5body): rect x=2 y=30 hingga y=207
+          Tapak bawah (sil5bot): ellipse cx=82 cy=207 rx=81 ry=27
+
+        DOM/render order: sil5body → sil5bot → sil5top
+        (sil5top paling akhir = di depan = tapak atas nampak betul)
+      -->
+      <svg id="sil-svg" width="165" height="240" viewBox="0 0 165 240" class="shape-in" style="overflow:visible;">
+
+        <!-- 1) BADAN: rect + tepi kiri & kanan (untuk hl-lengkung) -->
+        <g id="sil5body">
+          <!-- Badan utama (pepejal, warna teal) -->
+          <rect x="2" y="30" width="161" height="177" fill="#3DD6E0"/>
+          <!-- Tepi kiri -->
+          <line x1="2" y1="30" x2="2" y2="207" stroke="#0a3845" stroke-width="4" stroke-linecap="round"/>
+          <!-- Tepi kanan -->
+          <line x1="163" y1="30" x2="163" y2="207" stroke="#0a3845" stroke-width="4" stroke-linecap="round"/>
+        </g>
+
+        <!-- 2) TAPAK BAWAH: elips bawah (untuk hl-tapak) -->
+        <g id="sil5bot">
+          <!-- Bahagian bawah elips (arc depan, nampak): isi warna sedikit gelap -->
+          <path d="M 2 207 A 81 27 0 0 1 163 207" fill="#1CBDCC"/>
+          <!-- Arc depan: garisan pepejal (nampak) -->
+          <path d="M 2 207 A 81 27 0 0 1 163 207" fill="none" stroke="#0a3845" stroke-width="4"/>
+          <!-- Arc belakang: putus-putus (tersembunyi, konvensyen buku teks) -->
+          <path d="M 2 207 A 81 27 0 0 0 163 207" fill="none" stroke="#0a3845" stroke-width="2.5" stroke-dasharray="11,8"/>
+        </g>
+
+        <!-- 3) TAPAK ATAS: elips PENUH (paling akhir = di depan badan) -->
+        <g id="sil5top">
+          <!-- Isi tapak atas (sedikit lebih cerah) -->
+          <ellipse cx="82" cy="30" rx="81" ry="27" fill="#5CE4EE"/>
+          <!-- Garisan tapak atas (tebal, jelas) -->
+          <ellipse cx="82" cy="30" rx="81" ry="27" fill="none" stroke="#0a3845" stroke-width="4"/>
+        </g>
+
+        <!-- Muka watak (di tengah badan) -->
+        <circle cx="66" cy="120" r="9" fill="white" opacity=".95"/>
+        <circle cx="98" cy="120" r="9" fill="white" opacity=".95"/>
+        <circle cx="67" cy="121" r="4.5" fill="#083040"/>
+        <circle cx="99" cy="121" r="4.5" fill="#083040"/>
+        <path d="M59,137 Q82,152 105,137" stroke="#083040" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      </svg>
+
+      <!-- Step 1: TAPAK labels (atas dan bawah) -->
+      <div data-step="1" class="plbl pt" style="left:-14px;top:4px;font-size:12px;">&#11093; TAPAK 1 (atas)</div>
+      <div data-step="1" class="plbl pt" style="left:-14px;top:194px;font-size:12px;">&#11093; TAPAK 2 (bawah)</div>
+
+      <!-- Step 2: sejajar sama besar -->
+      <div data-step="2" class="plbl pt" style="left:168px;top:82px;font-size:12px;">&#8597; SEJAJAR &amp; SAMA BESAR</div>
+      <svg data-step="2" style="position:absolute;left:0;top:0;width:165px;height:240px;pointer-events:none;overflow:visible;">
+        <!-- Anak panah dari tapak atas ke label -->
+        <line x1="163" y1="30" x2="170" y2="96" stroke="var(--ct)" stroke-width="2" stroke-dasharray="4,3"/>
+        <!-- Anak panah dari tapak bawah ke label -->
+        <line x1="163" y1="207" x2="170" y2="110" stroke="var(--ct)" stroke-width="2" stroke-dasharray="4,3"/>
+      </svg>
+
+      <!-- Step 3: permukaan melengkung -->
+      <div data-step="3" class="plbl pl" style="left:168px;top:116px;font-size:12px;">&#127754; PERMUKAAN MELENGKUNG</div>
+      <svg data-step="3" style="position:absolute;left:0;top:0;width:165px;height:240px;pointer-events:none;overflow:visible;">
+        <line x1="163" y1="140" x2="170" y2="130" stroke="var(--cl)" stroke-width="2" stroke-dasharray="4,3"/>
+      </svg>
+    </div>
+    <div style="position:absolute;right:32px;top:58px;display:flex;flex-direction:column;align-items:center;width:215px;">
+      <div style="font-size:64px;animation:bounce 2.5s ease-in-out infinite;line-height:1;">&#129483;</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:23px;color:var(--teal);margin-top:4px;">SILINDER</div>
+      <div class="sbub"><div class="sbub-txt" id="sb5">Aku SILINDER!<br>Macam tin sardin! &#129483;</div></div>
+    </div>
+    <div class="pcl" style="right:26px;bottom:125px;">
+      <div data-step="1" class="pci t">&#11093; Ada 2 tapak berbentuk bulatan</div>
+      <div data-step="2" class="pci t">&#8597; Dua tapak sejajar &amp; sama besar</div>
+      <div data-step="3" class="pci l">&#127754; Permukaan sisi melengkung</div>
+    </div>
+    <button class="next-btn" id="btn5" onclick="advStep(5)">Seterusnya &#9654;</button>
+    <div class="subtitle" id="sub5">Tekan &quot;Seterusnya&quot; untuk mula belajar! &#128070;</div>
+  </div>
+
+  <!-- S6: KON -->
+  <div id="s6" class="scene">
+    <div class="scene-badge" onclick="openMenu()">Babak 6 &#8226; KON &#127846;</div>
+    <div style="position:absolute;left:62px;top:48px;">
+      <div class="kon shape-in">
+        <div id="kon6tip" class="kon-tip"></div>
+        <div id="kon6body" class="kon-body"></div>
+        <div id="kon6base" class="kon-base"></div>
+      </div>
+      <div style="position:absolute;left:56px;top:118px;font-size:30px;pointer-events:none;z-index:3;">&#128516;</div>
+      <!-- Step 1: tapak bulatan -->
+      <div data-step="1" class="plbl pt" style="left:-14px;bottom:30px;font-size:12px;">&#11093; 1 TAPAK (bulatan)</div>
+      <svg data-step="1" style="position:absolute;left:0;top:0;width:160px;height:200px;pointer-events:none;overflow:visible;">
+        <line x1="42" y1="196" x2="42" y2="182" stroke="var(--ct)" stroke-width="2" stroke-dasharray="4,3"/>
+      </svg>
+      <!-- Step 2: puncak -->
+      <div data-step="2" class="plbl pp" style="left:132px;top:-16px;font-size:12px;">&#11088; PUNCAK</div>
+      <svg data-step="2" style="position:absolute;left:0;top:0;width:160px;height:200px;pointer-events:none;overflow:visible;">
+        <circle cx="80" cy="38" r="18" fill="none" stroke="var(--cp)" stroke-width="2.5" stroke-dasharray="4,3"/>
+        <line x1="132" y1="2" x2="94" y2="34" stroke="var(--cp)" stroke-width="2" stroke-dasharray="4,3"/>
+      </svg>
+      <!-- Step 3: melengkung -->
+      <div data-step="3" class="plbl pl" style="right:-148px;top:92px;font-size:12px;">&#127754; MELENGKUNG ke PUNCAK</div>
+      <svg data-step="3" style="position:absolute;left:0;top:0;width:160px;height:200px;pointer-events:none;overflow:visible;">
+        <line x1="160" y1="110" x2="150" y2="106" stroke="var(--cl)" stroke-width="2" stroke-dasharray="4,3"/>
+      </svg>
+    </div>
+    <div style="position:absolute;right:32px;top:58px;display:flex;flex-direction:column;align-items:center;width:215px;">
+      <div style="font-size:64px;animation:bounce 2.5s ease-in-out infinite;line-height:1;">&#127846;</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:23px;color:var(--green);margin-top:4px;">KON</div>
+      <div class="sbub"><div class="sbub-txt" id="sb6">Aku KON!<br>Macam aiskrim! &#127846;</div></div>
+    </div>
+    <div class="pcl" style="right:26px;bottom:125px;">
+      <div data-step="1" class="pci t">&#11093; Ada 1 tapak berbentuk bulatan</div>
+      <div data-step="2" class="pci p">&#11088; Ada 1 puncak yang tajam</div>
+      <div data-step="3" class="pci l">&#127754; Permukaan sisi melengkung</div>
+    </div>
+    <button class="next-btn" id="btn6" onclick="advStep(6)">Seterusnya &#9654;</button>
+    <div class="subtitle" id="sub6">Tekan &quot;Seterusnya&quot; untuk mula belajar! &#128070;</div>
+  </div>
+
+  <!-- S7: SFERA -->
+  <div id="s7" class="scene">
+    <div class="scene-badge" onclick="openMenu()">Babak 7 &#8226; SFERA &#9917;</div>
+    <div style="position:absolute;left:55px;top:56px;">
+      <div class="sfe shape-in">
+        <div id="sfe7ball" class="sfe-ball"></div>
+        <svg style="position:absolute;inset:0;width:180px;height:180px;" viewBox="0 0 180 180">
+          <ellipse cx="90" cy="90" rx="88" ry="26" fill="none" stroke="rgba(255,255,255,.38)" stroke-width="2"/>
+          <ellipse cx="90" cy="90" rx="26" ry="88" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2"/>
+          <ellipse cx="90" cy="90" rx="88" ry="50" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="1.5"/>
+        </svg>
+        <div id="sfe7ctr" class="sfe-ctr"></div>
+        <!-- Radii lines (step 1) -->
+        <svg id="sfe7radii" data-step="1" style="position:absolute;inset:0;width:180px;height:180px;" viewBox="0 0 180 180">
+          <line x1="90" y1="90" x2="90" y2="4" stroke="var(--ct)" stroke-width="2.5" stroke-dasharray="5,3"/>
+          <line x1="90" y1="90" x2="174" y2="90" stroke="var(--ct)" stroke-width="2.5" stroke-dasharray="5,3"/>
+          <line x1="90" y1="90" x2="152" y2="150" stroke="var(--ct)" stroke-width="2.5" stroke-dasharray="5,3"/>
+          <line x1="90" y1="90" x2="20" y2="150" stroke="var(--ct)" stroke-width="2.5" stroke-dasharray="5,3"/>
+          <circle cx="90" cy="4" r="6" fill="var(--ct)"/><circle cx="174" cy="90" r="6" fill="var(--ct)"/>
+          <circle cx="152" cy="150" r="6" fill="var(--ct)"/><circle cx="20" cy="150" r="6" fill="var(--ct)"/>
+          <text x="90" y="96" text-anchor="middle" font-family="Nunito" font-weight="900" font-size="13" fill="white">PUSAT</text>
+        </svg>
+        <div style="position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);font-size:34px;pointer-events:none;">&#128522;</div>
+      </div>
+      <!-- Step 1: sama jauh -->
+      <div data-step="1" class="plbl pt" style="left:184px;top:4px;font-size:12px;">&#128205; SAMA JAUH dari PUSAT</div>
+      <!-- Step 2: melengkung -->
+      <div data-step="2" class="plbl pl" style="left:-22px;top:78px;font-size:12px;">&#127754; 1 permukaan MELENGKUNG</div>
+    </div>
+    <div style="position:absolute;right:32px;top:58px;display:flex;flex-direction:column;align-items:center;width:215px;">
+      <div style="font-size:64px;animation:bounce 2.5s ease-in-out infinite;line-height:1;">&#9917;</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:23px;color:var(--pink);margin-top:4px;">SFERA</div>
+      <div class="sbub"><div class="sbub-txt" id="sb7">Aku SFERA!<br>Bulatan yang sempurna! &#9917;</div></div>
+    </div>
+    <div class="pcl" style="right:26px;bottom:125px;">
+      <div data-step="1" class="pci t">&#128205; Semua titik SAMA JAUH dari pusat</div>
+      <div data-step="2" class="pci l">&#127754; Ada 1 permukaan melengkung sahaja</div>
+    </div>
+    <button class="next-btn" id="btn7" onclick="advStep(7)">Seterusnya &#9654;</button>
+    <div class="subtitle" id="sub7">Tekan &quot;Seterusnya&quot; untuk mula belajar! &#128070;</div>
+  </div>
+
+  <!-- S8: KUIZ -->
+  <div id="s8" class="scene">
+    <div class="scene-badge" onclick="openMenu()">Babak 8 &#8226; Kuiz! &#129504;</div>
+    <div id="qnum" style="position:absolute;font-family:'Nunito',sans-serif;font-weight:900;font-size:13px;color:rgba(255,255,255,.55);top:42px;right:24px;">Soalan 1/3</div>
+    <!-- Q1 -->
+    <div id="q1" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:60px 20px 72px;">
+      <div class="qtxt">Bentuk mana ada <span style="color:var(--cr);background:rgba(61,214,224,.14);padding:2px 10px;border-radius:8px;">KERATAN RENTAS yang sentiasa SAMA</span>? &#9986;</div>
+      <div class="qrow">
+        <button class="qc" onclick="ansQ(1,this,true)"><span class="qce">&#127968;</span>Prisma</button>
+        <button class="qc" onclick="ansQ(1,this,false)"><span class="qce">&#128314;</span>Piramid</button>
+        <button class="qc" onclick="ansQ(1,this,false)"><span class="qce">&#129483;</span>Silinder</button>
+        <button class="qc" onclick="ansQ(1,this,false)"><span class="qce">&#127846;</span>Kon</button>
+        <button class="qc" onclick="ansQ(1,this,false)"><span class="qce">&#9917;</span>Sfera</button>
+      </div>
+    </div>
+    <!-- Q2 -->
+    <div id="q2" style="position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:60px 20px 72px;">
+      <div class="qtxt">Bentuk mana ada <span style="color:var(--ct);background:rgba(255,159,10,.14);padding:2px 10px;border-radius:8px;">2 TAPAK berbentuk BULATAN sejajar</span>? &#11093;&#11093;</div>
+      <div class="qrow">
+        <button class="qc" onclick="ansQ(2,this,false)"><span class="qce">&#127968;</span>Prisma</button>
+        <button class="qc" onclick="ansQ(2,this,false)"><span class="qce">&#128314;</span>Piramid</button>
+        <button class="qc" onclick="ansQ(2,this,true)"><span class="qce">&#129483;</span>Silinder</button>
+        <button class="qc" onclick="ansQ(2,this,false)"><span class="qce">&#127846;</span>Kon</button>
+        <button class="qc" onclick="ansQ(2,this,false)"><span class="qce">&#9917;</span>Sfera</button>
+      </div>
+    </div>
+    <!-- Q3 -->
+    <div id="q3" style="position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:60px 20px 72px;">
+      <div class="qtxt">Bentuk mana semua titik permukaannya <span style="color:var(--ct);background:rgba(255,159,10,.14);padding:2px 10px;border-radius:8px;">SAMA JAUH dari PUSAT</span>? &#128205;</div>
+      <div class="qrow">
+        <button class="qc" onclick="ansQ(3,this,false)"><span class="qce">&#127968;</span>Prisma</button>
+        <button class="qc" onclick="ansQ(3,this,false)"><span class="qce">&#128314;</span>Piramid</button>
+        <button class="qc" onclick="ansQ(3,this,false)"><span class="qce">&#129483;</span>Silinder</button>
+        <button class="qc" onclick="ansQ(3,this,false)"><span class="qce">&#127846;</span>Kon</button>
+        <button class="qc" onclick="ansQ(3,this,true)"><span class="qce">&#9917;</span>Sfera</button>
+      </div>
+    </div>
+    <div class="subtitle" id="sub8">Pilih jawapan yang BETUL! Tekan bentuk yang sesuai! &#129504;</div>
+  </div>
+
+  <!-- S9: TAMAT -->
+  <div id="s9" class="scene">
+    <div class="scene-badge" onclick="openMenu()">Babak 9 &#8226; Tamat! &#127881;</div>
+    <div style="position:absolute;top:58px;left:0;right:0;text-align:center;">
+      <div style="font-size:36px;font-family:'Fredoka One',cursive;color:var(--yellow);text-shadow:0 0 20px var(--orange);">&#127942; TAHNIAH! KAMU HEBAT! &#127942;</div>
+      <div style="font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;color:rgba(255,255,255,.9);margin-top:5px;">Kamu sudah tahu sifat-sifat 5 bentuk 3D!</div>
+    </div>
+    <div class="fn-row celebRow" style="position:absolute;top:122px;left:50%;transform:translateX(-50%);">
+      <div class="fn-c">
+        <span class="fn-e">&#127968;</span>
+        <span class="fn-n">PRISMA</span>
+        <span class="fn-p">&#10003; 2 tapak poligon sejajar<br>&#10003; Muka tepi = segi empat<br>&#10003; Keratan rentas sama</span>
+      </div>
+      <div class="fn-c">
+        <span class="fn-e">&#128314;</span>
+        <span class="fn-n">PIRAMID</span>
+        <span class="fn-p">&#10003; 1 tapak poligon<br>&#10003; Muka tepi = segi tiga<br>&#10003; Bertemu di puncak</span>
+      </div>
+      <div class="fn-c">
+        <span class="fn-e">&#129483;</span>
+        <span class="fn-n">SILINDER</span>
+        <span class="fn-p">&#10003; 2 tapak bulatan<br>&#10003; Sejajar &amp; sama besar<br>&#10003; Permukaan melengkung</span>
+      </div>
+      <div class="fn-c">
+        <span class="fn-e">&#127846;</span>
+        <span class="fn-n">KON</span>
+        <span class="fn-p">&#10003; 1 tapak bulatan<br>&#10003; 1 puncak<br>&#10003; Permukaan melengkung</span>
+      </div>
+      <div class="fn-c">
+        <span class="fn-e">&#9917;</span>
+        <span class="fn-n">SFERA</span>
+        <span class="fn-p">&#10003; Semua titik sama jauh<br>&nbsp;&nbsp;dari pusat<br>&#10003; 1 permukaan melengkung</span>
+      </div>
+    </div>
+    <div style="position:absolute;bottom:78px;left:0;right:0;text-align:center;">
+      <button class="t-btn" onclick="go(1)" style="font-size:16px;padding:10px 28px;">&#128260; Main Semula</button>
+    </div>
+    <div class="subtitle">&#11088; BIJAK SEKALI! Kamu sudah kuasai 5 bentuk 3D! &#11088;</div>
+  </div>
+</div>
+
+<script>
+const TOTAL=9;
+let current=0;
+const sMaxSteps={3:3,4:3,5:3,6:3,7:2};
+const sSteps={};
+const sTxts={
+  3:['Hai! Aku PRISMA! Tekan untuk belajar!','Tengok! Aku ada DUA TAPAK sejajar!','Muka tepi aku = SEGI EMPAT!','Potong di mana pun = hasilnya SAMA!'],
+  4:['Aku PIRAMID! Macam monumen kuno!','Aku ada SATU TAPAK sahaja di bawah!','Muka tepi aku = SEGI TIGA semua!','Semua muka bertemu di 1 PUNCAK!'],
+  5:['Aku SILINDER! Macam tin sardin!','Aku ada DUA TAPAK berbentuk BULATAN!','Dua tapak itu SAMA BESAR dan SEJAJAR!','Tepi aku MELENGKUNG cantumkan dua tapak!'],
+  6:['Aku KON! Macam aiskrim kesukaan!','Aku ada SATU TAPAK berbentuk BULATAN!','Aku ada SATU PUNCAK yang tajam!','Dari tapak ke puncak = MELENGKUNG!'],
+  7:['Aku SFERA! Bulatan yang sempurna!','Semua titik SAMA JAUH dari PUSAT!','Aku ada 1 permukaan MELENGKUNG sahaja!']
+};
+const sSubTxts={
+  3:['Tekan "Seterusnya" untuk mula belajar!',
+     'PRISMA ada 2 TAPAK berbentuk poligon yang SEJAJAR!',
+     'Muka tepi PRISMA berbentuk SEGI EMPAT!',
+     'Keratan rentas PRISMA SENTIASA SAMA di mana pun!'],
+  4:['Tekan "Seterusnya" untuk mula belajar!',
+     'PIRAMID ada 1 TAPAK sahaja di bahagian bawah!',
+     'Muka tepi PIRAMID semua berbentuk SEGI TIGA!',
+     'Semua muka segi tiga bertemu di 1 PUNCAK!'],
+  5:['Tekan "Seterusnya" untuk mula belajar!',
+     'SILINDER ada 2 TAPAK berbentuk BULATAN!',
+     'Dua tapak SAMA BESAR dan SEJAJAR antara satu sama lain!',
+     'Permukaan SISI SILINDER adalah MELENGKUNG!'],
+  6:['Tekan "Seterusnya" untuk mula belajar!',
+     'KON ada 1 TAPAK berbentuk BULATAN di bawah!',
+     'KON ada 1 PUNCAK yang tajam di atas!',
+     'Dari tapak ke puncak, permukaan KON = MELENGKUNG!'],
+  7:['Tekan "Seterusnya" untuk mula belajar!',
+     'Semua titik pada permukaan SFERA SAMA JAUH dari PUSAT!',
+     'SFERA ada 1 permukaan MELENGKUNG sahaja! Tiada tapak!']
+};
+const sHl={
+  3:{1:{els:['p3lt','p3rt'],cls:'hl-tapak'},2:{els:['p3fr','p3tr','p3br'],cls:'hl-muka'},3:{els:['p3rentas'],cls:'hl-rentas'}},
+  4:{1:{els:['p4base'],cls:'hl-tapak'},2:{els:['p4front','p4right','p4left'],cls:'hl-muka'},3:{els:['p4apex'],cls:'hl-puncak'}},
+  5:{1:{els:['sil5top','sil5bot'],cls:'hl-tapak'},2:{els:['sil5top','sil5bot'],cls:'hl-tapak'},3:{els:['sil5body'],cls:'hl-lengkung'}},
+  6:{1:{els:['kon6base'],cls:'hl-tapak'},2:{els:['kon6tip'],cls:'hl-puncak'},3:{els:['kon6body'],cls:'hl-lengkung'}},
+  7:{1:{els:['sfe7ctr'],cls:'hl-tapak'},2:{els:['sfe7ball'],cls:'hl-lengkung'}}
+};
+const BADGE_LABELS=['','Tajuk','5 Sahabat Bentuk 3D','PRISMA','PIRAMID','SILINDER','KON','SFERA','Kuiz!','Tamat!'];
+
+function go(n){
+  if(n<1||n>TOTAL)return;
+  const prev=document.getElementById('s'+current);
+  if(prev)prev.classList.remove('active');
+  current=n;
+  const cur=document.getElementById('s'+n);
+  if(cur)cur.classList.add('active');
+  for(let i=0;i<TOTAL;i++){
+    const d=document.getElementById('pd'+i);
+    if(!d)continue;
+    if(i+1<n)d.className='pdot done';
+    else if(i+1===n)d.className='pdot on';
+    else d.className='pdot';
+  }
+  playDing();
+  if(sMaxSteps[n]!==undefined)resetScene(n);
+  syncBadge(n);markCM();
+}
+
+function resetScene(sId){
+  sSteps[sId]=0;
+  const sc=document.getElementById('s'+sId);
+  if(!sc)return;
+  sc.querySelectorAll('[data-step]').forEach(el=>el.classList.remove('vstep'));
+  sc.querySelectorAll('.hl-tapak,.hl-muka,.hl-puncak,.hl-rentas,.hl-lengkung').forEach(el=>{
+    el.classList.remove('hl-tapak','hl-muka','hl-puncak','hl-rentas','hl-lengkung');
+  });
+  const sb=document.getElementById('sb'+sId);
+  if(sb&&sTxts[sId])sb.textContent=sTxts[sId][0];
+  const sub=document.getElementById('sub'+sId);
+  if(sub&&sSubTxts[sId])sub.textContent=sSubTxts[sId][0];
+  const btn=document.getElementById('btn'+sId);
+  if(btn){btn.disabled=false;btn.textContent='Seterusnya \u25B6';}
+}
+
+function advStep(sId){
+  const max=sMaxSteps[sId]||0;
+  sSteps[sId]=(sSteps[sId]||0)+1;
+  const step=sSteps[sId];
+  const sc=document.getElementById('s'+sId);
+  if(sc)sc.querySelectorAll('[data-step]').forEach(el=>{
+    if(Number(el.dataset.step)<=step)el.classList.add('vstep');
+  });
+  const sb=document.getElementById('sb'+sId);
+  if(sb&&sTxts[sId]&&sTxts[sId][step])sb.textContent=sTxts[sId][step];
+  const sub=document.getElementById('sub'+sId);
+  if(sub&&sSubTxts[sId]&&sSubTxts[sId][step])sub.textContent=sSubTxts[sId][step];
+  applyHl(sId,step);
+  playDing(0.85+step*0.12);
+  if(step>=max){
+    const btn=document.getElementById('btn'+sId);
+    if(btn)btn.disabled=true;
+    setTimeout(()=>{
+      cheer(sc);playWow();
+      setTimeout(()=>go(sId+1),2100);
+    },600);
+  }
+}
+
+function applyHl(sId,step){
+  const sc=document.getElementById('s'+sId);
+  if(!sc)return;
+  sc.querySelectorAll('.hl-tapak,.hl-muka,.hl-puncak,.hl-rentas,.hl-lengkung').forEach(el=>{
+    el.classList.remove('hl-tapak','hl-muka','hl-puncak','hl-rentas','hl-lengkung');
+  });
+  const h=sHl[sId]&&sHl[sId][step];
+  if(h)h.els.forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add(h.cls);});
+}
+
+const qLocked={1:false,2:false,3:false};
+function ansQ(qn,el,isOk){
+  if(qLocked[qn])return;
+  qLocked[qn]=true;
+  el.classList.add(isOk?'ok':'no');
+  const sub=document.getElementById('sub8');
+  if(isOk){
+    flashStage('good');playWow();
+    if(sub)sub.textContent='\u2705 TEPAT SEKALI! Sangat bagus! \uD83C\uDF1F';
+    cheer(document.getElementById('s8'));
+    setTimeout(()=>{
+      if(qn<3){
+        document.getElementById('q'+qn).style.display='none';
+        const nxt=document.getElementById('q'+(qn+1));
+        if(nxt)nxt.style.display='flex';
+        const qnum=document.getElementById('qnum');
+        if(qnum)qnum.textContent='Soalan '+(qn+1)+'/3';
+        if(sub)sub.textContent='Pilih jawapan yang BETUL! Tekan bentuk yang sesuai! \uD83E\uDDE0';
+      }else{setTimeout(()=>go(9),800);}
+    },1900);
+  }else{
+    flashStage('bad');playBoing();
+    if(sub)sub.textContent='\u274C Cuba lagi! Jangan putus asa! \uD83D\uDCAA';
+    setTimeout(()=>{el.classList.remove('no');qLocked[qn]=false;if(sub)sub.textContent='Pilih jawapan yang BETUL! Tekan bentuk yang sesuai! \uD83E\uDDE0';},1200);
+  }
+}
+
+let zV=1;
+function zI(){zV=Math.min(2.5,zV+.1);applyZ();}
+function zO(){zV=Math.max(.4,zV-.1);applyZ();}
+function zR(){zV=1;applyZ();}
+function applyZ(){document.getElementById('stage').style.transform='scale('+zV+')';document.getElementById('zoomLevel').textContent=Math.round(zV*100)+'%';}
+
+(function(){
+  const w=document.getElementById('bgStars');
+  for(let i=0;i<48;i++){
+    const s=document.createElement('div');s.className='star';
+    const z=Math.random()*2.4+.8;
+    s.style.cssText=`width:${z}px;height:${z}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*2}s;`;
+    w.appendChild(s);
+  }
+})();
+
+let AC=null;
+function ac(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();return AC;}
+function tone(f,d,t,v,dl){
+  try{const c=ac(),o=c.createOscillator(),g=c.createGain();o.type=t||'sine';o.frequency.value=f;
+  g.gain.setValueAtTime(0,c.currentTime+(dl||0));g.gain.linearRampToValueAtTime(v||.18,c.currentTime+(dl||0)+.02);
+  g.gain.exponentialRampToValueAtTime(.001,c.currentTime+(dl||0)+d);
+  o.connect(g);g.connect(c.destination);o.start(c.currentTime+(dl||0));o.stop(c.currentTime+(dl||0)+d+.05);}catch(e){}
+}
+function playDing(p){tone(580*(p||1),.22,'sine',.16);tone(880*(p||1),.28,'sine',.1,.06);}
+function playWow(){
+  try{const c=ac(),o=c.createOscillator(),g=c.createGain();o.type='sawtooth';
+  o.frequency.setValueAtTime(220,c.currentTime);o.frequency.linearRampToValueAtTime(680,c.currentTime+.18);
+  o.frequency.linearRampToValueAtTime(340,c.currentTime+.55);
+  g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.14,c.currentTime+.05);
+  g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.6);
+  o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.65);
+  for(let i=0;i<5;i++)tone(140+Math.random()*55,.06,'square',.07,.12+i*.1);}catch(e){}
+}
+function playBoing(){tone(280,.25,'sawtooth',.09);tone(170,.3,'sawtooth',.07,.1);}
+
+function flashStage(type){const s=document.getElementById('stage');s.classList.remove('good','bad');void s.offsetWidth;s.classList.add(type);}
+
+function cheer(sc){
+  if(!sc)return;
+  const w=document.createElement('div');w.className='wow-pop';w.textContent='\uD83C\uDF1F HEBAT! \uD83C\uDF1F';
+  sc.appendChild(w);requestAnimationFrame(()=>requestAnimationFrame(()=>w.classList.add('show')));
+  const emojis=['\u2B50','\uD83C\uDF1F','\u2728','\uD83C\uDF89','\uD83C\uDFC6'];
+  for(let i=0;i<12;i++){
+    const sp=document.createElement('span');sp.className='sparkle';sp.textContent=emojis[i%emojis.length];
+    sp.style.cssText=`left:${18+Math.random()*64}%;top:${100+Math.random()*200}px;--sx:${(Math.random()-.5)*280}px;--sy:${-80-Math.random()*150}px;animation-delay:${Math.random()*.9}s;font-size:${20+Math.random()*14}px;`;
+    sc.appendChild(sp);setTimeout(()=>sp.remove(),2800);
+  }
+  setTimeout(()=>w.remove(),2400);
+}
+
+function syncBadge(n){document.querySelectorAll('.scene').forEach(sc=>{const b=sc.querySelector('.scene-badge');if(b)b.tabIndex=(sc.id==='s'+n)?0:-1;});}
+
+function buildCM(){
+  const list=document.getElementById('cmList');
+  if(!list||list.children.length)return;
+  for(let n=1;n<=TOTAL;n++){
+    const row=document.createElement('button');row.type='button';row.className='cm-item';row.dataset.n=n;
+    row.innerHTML='<span class="cm-num">'+n+'</span><span class="cm-txt">'+BADGE_LABELS[n]+'</span><span class="cm-state"></span>';
+    row.addEventListener('click',()=>{closeMenu();if(n!==current)go(n);});
+    list.appendChild(row);
+  }
+}
+function markCM(){
+  document.querySelectorAll('.cm-item').forEach(row=>{
+    const n=Number(row.dataset.n),st=row.querySelector('.cm-state');
+    row.classList.remove('now','done');
+    if(n===current){row.classList.add('now');st.textContent='\u25B6 Kini';}
+    else if(n<current){row.classList.add('done');st.textContent='\u2713 Siap';}
+    else st.textContent='';
+  });
+}
+function openMenu(){if(current<1)return;buildCM();markCM();const o=document.getElementById('chapterMenu');o.classList.add('open');o.setAttribute('aria-hidden','false');}
+function closeMenu(){const o=document.getElementById('chapterMenu');o.classList.remove('open');o.setAttribute('aria-hidden','true');}
+document.getElementById('cmClose').addEventListener('click',closeMenu);
+document.getElementById('chapterMenu').addEventListener('click',e=>{if(e.target===e.currentTarget)closeMenu();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
+for(let i=0;i<TOTAL;i++){const d=document.getElementById('pd'+i);if(d){const n=i+1;d.addEventListener('click',()=>{if(n!==current)go(n);});}}
+go(1);
+</script>
+</body>
+</html>
