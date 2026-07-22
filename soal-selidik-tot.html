@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Borang Soal Selidik Kesediaan Guru Selepas Training of Trainers (TOT) GeoMETriA">
+  <title>Borang Kesediaan Guru Selepas TOT GeoMETriA</title>
+
+  <style>
+    :root {
+      --navy: #123a63;
+      --blue: #1967a3;
+      --blue-soft: #eaf4fc;
+      --teal: #147d78;
+      --teal-soft: #e8f7f5;
+      --orange: #bf650e;
+      --orange-soft: #fff2e4;
+      --purple: #65429a;
+      --purple-soft: #f2ecfb;
+      --green: #287a45;
+      --green-soft: #eaf7ee;
+      --ink: #1f2937;
+      --muted: #5f6b7a;
+      --line: #d8e0e8;
+      --surface: #ffffff;
+      --background: #f2f6fa;
+      --danger: #b42318;
+      --shadow: 0 14px 36px rgba(18, 58, 99, 0.11);
+      --radius-xl: 22px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(25, 103, 163, 0.10), transparent 34rem),
+        linear-gradient(180deg, #f8fbfe 0%, var(--background) 100%);
+      font-family: "Segoe UI", Arial, sans-serif;
+      line-height: 1.55;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    .hero {
+      padding: 34px 18px 22px;
+    }
+
+    .hero-card {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 34px;
+      color: #fff;
+      background:
+        linear-gradient(135deg, rgba(18, 58, 99, 0.98), rgba(25, 103, 163, 0.94)),
+        var(--navy);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      right: -125px;
+      top: -165px;
+      border: 44px solid rgba(255, 255, 255, 0.10);
+      border-radius: 50%;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      margin-bottom: 14px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border: 1px solid rgba(255, 255, 255, 0.30);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.10);
+    }
+
+    h1 {
+      max-width: 800px;
+      margin: 0;
+      font-size: clamp(1.75rem, 4vw, 2.8rem);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-subtitle {
+      max-width: 820px;
+      margin: 14px 0 0;
+      color: rgba(255, 255, 255, 0.90);
+      font-size: 1.03rem;
+    }
+
+    .page-shell {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 0 18px 70px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .notice {
+      padding: 17px 18px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 6px 22px rgba(31, 41, 55, 0.05);
+    }
+
+    .notice strong {
+      color: var(--navy);
+    }
+
+    .progress-panel {
+      position: sticky;
+      top: 10px;
+      z-index: 30;
+      margin: 0 0 20px;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(216, 224, 232, 0.92);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 8px 22px rgba(18, 58, 99, 0.10);
+      backdrop-filter: blur(10px);
+    }
+
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.93rem;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .progress-track {
+      height: 10px;
+      overflow: hidden;
+      background: #e9eef3;
+      border-radius: 999px;
+    }
+
+    .progress-bar {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--teal), var(--blue));
+      border-radius: inherit;
+      transition: width 220ms ease;
+    }
+
+    .section-card {
+      margin-top: 20px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 20px 24px;
+      color: var(--navy);
+      background: var(--blue-soft);
+      border-bottom: 1px solid rgba(25, 103, 163, 0.18);
+    }
+
+    .section-head.orange {
+      color: #8a4608;
+      background: var(--orange-soft);
+      border-bottom-color: rgba(191, 101, 14, 0.18);
+    }
+
+    .section-head.purple {
+      color: #50317f;
+      background: var(--purple-soft);
+      border-bottom-color: rgba(101, 66, 154, 0.18);
+    }
+
+    .section-head.green {
+      color: #1f6538;
+      background: var(--green-soft);
+      border-bottom-color: rgba(40, 122, 69, 0.18);
+    }
+
+    .section-head.teal {
+      color: #0c625e;
+      background: var(--teal-soft);
+      border-bottom-color: rgba(20, 125, 120, 0.18);
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 1.18rem;
+      line-height: 1.3;
+    }
+
+    .section-count {
+      flex: 0 0 auto;
+      padding: 5px 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .section-body {
+      padding: 24px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    .field label {
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .required-mark {
+      color: var(--danger);
+    }
+
+    .text-input,
+    .number-input,
+    textarea {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 14px;
+      color: var(--ink);
+      background: #fff;
+      border: 1.5px solid #cbd5df;
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .text-input:focus,
+    .number-input:focus,
+    textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(25, 103, 163, 0.13);
+    }
+
+    .helper {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .scale-guide {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      margin: 0 0 22px;
+    }
+
+    .scale-chip {
+      padding: 9px 6px;
+      text-align: center;
+      font-size: 0.76rem;
+      font-weight: 650;
+      line-height: 1.25;
+      color: var(--muted);
+      background: #f7f9fb;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+
+    .scale-chip b {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--navy);
+      font-size: 1rem;
+    }
+
+    .question-list {
+      display: grid;
+      gap: 16px;
+    }
+
+    .question {
+      padding: 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      scroll-margin-top: 105px;
+      transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    .question:focus-within {
+      border-color: rgba(25, 103, 163, 0.55);
+      box-shadow: 0 7px 20px rgba(18, 58, 99, 0.08);
+    }
+
+    .question.invalid {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.10);
+    }
+
+    .question-title {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 11px;
+      align-items: start;
+      margin-bottom: 14px;
+      font-size: 1rem;
+      font-weight: 650;
+    }
+
+    .q-number {
+      display: inline-grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      color: #fff;
+      background: var(--blue);
+      border-radius: 50%;
+      font-weight: 800;
+    }
+
+    .rating-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .rating-option {
+      position: relative;
+    }
+
+    .rating-option input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .rating-option label {
+      display: grid;
+      place-items: center;
+      min-height: 58px;
+      padding: 8px 5px;
+      cursor: pointer;
+      user-select: none;
+      text-align: center;
+      color: var(--muted);
+      background: #f8fafc;
+      border: 1.5px solid #d7dfe7;
+      border-radius: 11px;
+      transition: all 150ms ease;
+    }
+
+    .rating-option label:hover {
+      border-color: #86acd0;
+      background: #f1f7fc;
+      transform: translateY(-1px);
+    }
+
+    .rating-option input:focus-visible + label {
+      outline: 3px solid rgba(25, 103, 163, 0.28);
+      outline-offset: 2px;
+    }
+
+    .rating-option input:checked + label {
+      color: #fff;
+      background: linear-gradient(135deg, var(--blue), var(--navy));
+      border-color: var(--navy);
+      box-shadow: 0 7px 16px rgba(18, 58, 99, 0.19);
+      transform: translateY(-1px);
+    }
+
+    .rating-value {
+      font-size: 1.15rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .rating-text {
+      display: none;
+      margin-top: 4px;
+      font-size: 0.68rem;
+      line-height: 1.12;
+    }
+
+    .validation-text {
+      display: none;
+      margin: 10px 0 0 49px;
+      color: var(--danger);
+      font-size: 0.87rem;
+      font-weight: 650;
+    }
+
+    .question.invalid .validation-text {
+      display: block;
+    }
+
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .check-option {
+      position: relative;
+    }
+
+    .check-option input {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .check-option label {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      min-height: 58px;
+      padding: 13px 14px;
+      cursor: pointer;
+      background: #f9fbfc;
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      transition: all 150ms ease;
+    }
+
+    .check-option label::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 21px;
+      height: 21px;
+      margin-top: 1px;
+      background: #fff;
+      border: 2px solid #9dacba;
+      border-radius: 6px;
+    }
+
+    .check-option input:checked + label {
+      color: var(--navy);
+      background: var(--blue-soft);
+      border-color: #78a8d0;
+      font-weight: 650;
+    }
+
+    .check-option input:checked + label::before {
+      content: "✓";
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--blue);
+      border-color: var(--blue);
+      font-weight: 900;
+    }
+
+    .check-option input:focus-visible + label {
+      outline: 3px solid rgba(25, 103, 163, 0.22);
+      outline-offset: 2px;
+    }
+
+    textarea {
+      min-height: 105px;
+      resize: vertical;
+    }
+
+    .submit-card {
+      margin-top: 22px;
+      padding: 24px;
+      text-align: center;
+      background: linear-gradient(180deg, #ffffff, #f7fbff);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+    }
+
+    .submit-card p {
+      max-width: 690px;
+      margin: 0 auto 16px;
+      color: var(--muted);
+    }
+
+    .submit-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: min(100%, 470px);
+      min-height: 56px;
+      padding: 14px 24px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      border: 0;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 1.08rem;
+      font-weight: 800;
+      box-shadow: 0 12px 25px rgba(20, 125, 120, 0.22);
+      transition: transform 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
+    }
+
+    .submit-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(20, 125, 120, 0.28);
+    }
+
+    .submit-button:disabled {
+      cursor: wait;
+      opacity: 0.7;
+      transform: none;
+    }
+
+    .submit-note {
+      margin-top: 11px;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .form-alert {
+      display: none;
+      margin: 0 0 18px;
+      padding: 13px 15px;
+      color: #7a271a;
+      background: #fff1ef;
+      border: 1px solid #f3b7ae;
+      border-radius: 12px;
+      font-weight: 650;
+    }
+
+    .form-alert.show {
+      display: block;
+    }
+
+    .footer {
+      padding: 28px 10px 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    @media (min-width: 920px) {
+      .rating-text {
+        display: block;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .hero-card {
+        padding: 25px 20px;
+      }
+
+      .info-grid,
+      .field-grid,
+      .checkbox-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section-head,
+      .section-body {
+        padding-left: 17px;
+        padding-right: 17px;
+      }
+
+      .scale-guide {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .question {
+        padding: 15px;
+      }
+
+      .rating-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .rating-option label {
+        min-height: 52px;
+      }
+
+      .progress-panel {
+        top: 5px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .hero {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .page-shell {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .section-count {
+        display: none;
+      }
+
+      .question-title {
+        grid-template-columns: 34px 1fr;
+      }
+
+      .q-number {
+        width: 32px;
+        height: 32px;
+      }
+    }
+
+    @media print {
+      .progress-panel,
+      .submit-card {
+        display: none;
+      }
+
+      body {
+        background: #fff;
+      }
+
+      .hero-card,
+      .section-card {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="hero">
+    <div class="hero-card">
+      <div class="eyebrow">GeoMETriA · Maklum Balas Guru</div>
+      <h1>Borang Soal Selidik Training of Trainers (TOT) GeoMETriA</h1>
+      <p class="hero-subtitle">
+        Borang ini menilai kesediaan guru selepas mengikuti TOT, sebelum GeoMETriA digunakan sepenuhnya dalam pengajaran sebenar.
+      </p>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <div class="info-grid">
+      <div class="notice">
+        <strong>Tujuan:</strong> Jawapan hendaklah berdasarkan pengalaman semasa latihan, penerokaan sistem dan keadaan sekolah yang dijangka.
+      </div>
+      <div class="notice">
+        <strong>Kerahsiaan:</strong> Gunakan kod guru, bukan nama. Maklumat digunakan untuk tujuan penyelidikan dan penambahbaikan GeoMETriA.
+      </div>
+    </div>
+
+    <div class="progress-panel" aria-live="polite">
+      <div class="progress-row">
+        <span>Kemajuan jawapan</span>
+        <span id="progressText">0 daripada 26 item dijawab</span>
+      </div>
+      <div class="progress-track" aria-hidden="true">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+
+    <!--
+      TETAPAN PENGHANTARAN E-MEL
+      1. Gantikan GANTIKAN_DENGAN_EMAIL_AP dalam bahagian JavaScript di hujung fail.
+      2. URL halaman terima kasih ditetapkan secara automatik selepas fail dimuat naik ke GitHub Pages.
+    -->
+
+    <form id="totForm" method="POST" novalidate>
+      <input type="hidden" name="_subject" value="Respons Baharu — Soal Selidik Selepas TOT GeoMETriA">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="Instrumen" value="Borang Kesediaan Guru Selepas TOT GeoMETriA">
+      <input type="hidden" name="Tarikh_dan_Masa_Hantar" id="timestampField">
+      <input type="text" name="_honey" tabindex="-1" autocomplete="off" style="display:none">
+
+      <section class="section-card" aria-labelledby="maklumat-guru">
+        <div class="section-head">
+          <h2 class="section-title" id="maklumat-guru">Maklumat Guru</h2>
+          <span class="section-count">Gunakan kod, bukan nama</span>
+        </div>
+        <div class="section-body">
+          <div class="field-grid">
+            <div class="field">
+              <label for="kodGuru">Kod guru <span class="required-mark">*</span></label>
+              <input class="text-input" id="kodGuru" name="Kod_Guru" type="text" placeholder="Contoh: G01" required autocomplete="off">
+            </div>
+
+            <div class="field">
+              <label for="sekolah">Sekolah <span class="required-mark">*</span></label>
+              <input class="text-input" id="sekolah" name="Sekolah" type="text" placeholder="Nama sekolah" required autocomplete="organization">
+            </div>
+
+            <div class="field">
+              <label for="pengalamanMengajar">Pengalaman mengajar <span class="required-mark">*</span></label>
+              <input class="number-input" id="pengalamanMengajar" name="Pengalaman_Mengajar_Tahun" type="number" min="0" max="60" step="1" inputmode="numeric" placeholder="Bilangan tahun" required>
+            </div>
+
+            <div class="field">
+              <label for="pengalamanDeaf">Pengalaman mengajar murid Deaf <span class="required-mark">*</span></label>
+              <input class="number-input" id="pengalamanDeaf" name="Pengalaman_Mengajar_Murid_Deaf_Tahun" type="number" min="0" max="60" step="1" inputmode="numeric" placeholder="Bilangan tahun" required>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card" aria-labelledby="bahagian-1">
+        <div class="section-head">
+          <h2 class="section-title" id="bahagian-1">Bahagian 1: Soal Selidik Kesediaan</h2>
+          <span class="section-count">Satu jawapan bagi setiap item</span>
+        </div>
+        <div class="section-body">
+          <p class="helper" style="margin-bottom:16px;">
+            Pilih satu jawapan yang paling menggambarkan pandangan cikgu bagi setiap pernyataan.
+          </p>
+
+          <div class="scale-guide" aria-label="Panduan skala jawapan">
+            <div class="scale-chip"><b>1</b>Sangat tidak setuju</div>
+            <div class="scale-chip"><b>2</b>Tidak setuju</div>
+            <div class="scale-chip"><b>3</b>Tidak pasti</div>
+            <div class="scale-chip"><b>4</b>Setuju</div>
+            <div class="scale-chip"><b>5</b>Sangat setuju</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card" aria-labelledby="seksyen-a">
+        <div class="section-head">
+          <h2 class="section-title" id="seksyen-a">A. Jangkaan Kegunaan Pedagogi</h2>
+          <span class="section-count">Item 1–6</span>
+        </div>
+        <div class="section-body">
+          <div class="question-list">
+
+            <div class="question" data-question="Q01">
+              <div class="question-title"><span class="q-number">1</span><span>GeoMETriA berpotensi membantu untuk menerangkan konsep geometri tiga dimensi yang abstrak.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 1">
+                <div class="rating-option"><input id="q01_1" type="radio" name="Q01_Konsep_3D_Abstrak" value="1 - Sangat tidak setuju" required><label for="q01_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q01_2" type="radio" name="Q01_Konsep_3D_Abstrak" value="2 - Tidak setuju"><label for="q01_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q01_3" type="radio" name="Q01_Konsep_3D_Abstrak" value="3 - Tidak pasti"><label for="q01_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q01_4" type="radio" name="Q01_Konsep_3D_Abstrak" value="4 - Setuju"><label for="q01_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q01_5" type="radio" name="Q01_Konsep_3D_Abstrak" value="5 - Sangat setuju"><label for="q01_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q02">
+              <div class="question-title"><span class="q-number">2</span><span>GeoMETriA berpotensi meningkatkan kefahaman murid terhadap topik geometri.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 2">
+                <div class="rating-option"><input id="q02_1" type="radio" name="Q02_Kefahaman_Geometri" value="1 - Sangat tidak setuju" required><label for="q02_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q02_2" type="radio" name="Q02_Kefahaman_Geometri" value="2 - Tidak setuju"><label for="q02_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q02_3" type="radio" name="Q02_Kefahaman_Geometri" value="3 - Tidak pasti"><label for="q02_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q02_4" type="radio" name="Q02_Kefahaman_Geometri" value="4 - Setuju"><label for="q02_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q02_5" type="radio" name="Q02_Kefahaman_Geometri" value="5 - Sangat setuju"><label for="q02_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q03">
+              <div class="question-title"><span class="q-number">3</span><span>GeoMETriA berpotensi meningkatkan minat dan penglibatan murid dalam pembelajaran.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 3">
+                <div class="rating-option"><input id="q03_1" type="radio" name="Q03_Minat_dan_Penglibatan" value="1 - Sangat tidak setuju" required><label for="q03_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q03_2" type="radio" name="Q03_Minat_dan_Penglibatan" value="2 - Tidak setuju"><label for="q03_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q03_3" type="radio" name="Q03_Minat_dan_Penglibatan" value="3 - Tidak pasti"><label for="q03_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q03_4" type="radio" name="Q03_Minat_dan_Penglibatan" value="4 - Setuju"><label for="q03_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q03_5" type="radio" name="Q03_Minat_dan_Penglibatan" value="5 - Sangat setuju"><label for="q03_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q04">
+              <div class="question-title"><span class="q-number">4</span><span>GeoMETriA boleh menyokong pembelajaran kendiri bagi murid yang mampu belajar dengan bimbingan minimum.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 4">
+                <div class="rating-option"><input id="q04_1" type="radio" name="Q04_Pembelajaran_Kendiri" value="1 - Sangat tidak setuju" required><label for="q04_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q04_2" type="radio" name="Q04_Pembelajaran_Kendiri" value="2 - Tidak setuju"><label for="q04_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q04_3" type="radio" name="Q04_Pembelajaran_Kendiri" value="3 - Tidak pasti"><label for="q04_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q04_4" type="radio" name="Q04_Pembelajaran_Kendiri" value="4 - Setuju"><label for="q04_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q04_5" type="radio" name="Q04_Pembelajaran_Kendiri" value="5 - Sangat setuju"><label for="q04_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q05">
+              <div class="question-title"><span class="q-number">5</span><span>GeoMETriA boleh membantu guru memberi lebih tumpuan kepada murid yang memerlukan bimbingan individu.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 5">
+                <div class="rating-option"><input id="q05_1" type="radio" name="Q05_Tumpuan_Bimbingan_Individu" value="1 - Sangat tidak setuju" required><label for="q05_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q05_2" type="radio" name="Q05_Tumpuan_Bimbingan_Individu" value="2 - Tidak setuju"><label for="q05_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q05_3" type="radio" name="Q05_Tumpuan_Bimbingan_Individu" value="3 - Tidak pasti"><label for="q05_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q05_4" type="radio" name="Q05_Tumpuan_Bimbingan_Individu" value="4 - Setuju"><label for="q05_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q05_5" type="radio" name="Q05_Tumpuan_Bimbingan_Individu" value="5 - Sangat setuju"><label for="q05_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q06">
+              <div class="question-title"><span class="q-number">6</span><span>GeoMETriA boleh memperkayakan pengajaran berbanding penggunaan bahan konvensional sahaja.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 6">
+                <div class="rating-option"><input id="q06_1" type="radio" name="Q06_Memperkayakan_Pengajaran" value="1 - Sangat tidak setuju" required><label for="q06_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q06_2" type="radio" name="Q06_Memperkayakan_Pengajaran" value="2 - Tidak setuju"><label for="q06_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q06_3" type="radio" name="Q06_Memperkayakan_Pengajaran" value="3 - Tidak pasti"><label for="q06_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q06_4" type="radio" name="Q06_Memperkayakan_Pengajaran" value="4 - Setuju"><label for="q06_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q06_5" type="radio" name="Q06_Memperkayakan_Pengajaran" value="5 - Sangat setuju"><label for="q06_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Nota penyelidik: Borang PDF sumber tidak mengandungi Seksyen B atau item 7–10. -->
+
+      <section class="section-card" aria-labelledby="seksyen-c">
+        <div class="section-head orange">
+          <h2 class="section-title" id="seksyen-c">C. Kemudahan Pembelajaran dan Penggunaan</h2>
+          <span class="section-count">Item 11–14</span>
+        </div>
+        <div class="section-body">
+          <div class="question-list">
+
+            <div class="question" data-question="Q11">
+              <div class="question-title"><span class="q-number">11</span><span>Navigasi asas dalam GeoMETriA kelihatan mudah untuk digunakan.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 11">
+                <div class="rating-option"><input id="q11_1" type="radio" name="Q11_Navigasi_Asas_Mudah" value="1 - Sangat tidak setuju" required><label for="q11_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q11_2" type="radio" name="Q11_Navigasi_Asas_Mudah" value="2 - Tidak setuju"><label for="q11_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q11_3" type="radio" name="Q11_Navigasi_Asas_Mudah" value="3 - Tidak pasti"><label for="q11_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q11_4" type="radio" name="Q11_Navigasi_Asas_Mudah" value="4 - Setuju"><label for="q11_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q11_5" type="radio" name="Q11_Navigasi_Asas_Mudah" value="5 - Sangat setuju"><label for="q11_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q12">
+              <div class="question-title"><span class="q-number">12</span><span>Saya boleh mempelajari fungsi utama GeoMETriA dalam masa yang munasabah.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 12">
+                <div class="rating-option"><input id="q12_1" type="radio" name="Q12_Mempelajari_Fungsi_Utama" value="1 - Sangat tidak setuju" required><label for="q12_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q12_2" type="radio" name="Q12_Mempelajari_Fungsi_Utama" value="2 - Tidak setuju"><label for="q12_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q12_3" type="radio" name="Q12_Mempelajari_Fungsi_Utama" value="3 - Tidak pasti"><label for="q12_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q12_4" type="radio" name="Q12_Mempelajari_Fungsi_Utama" value="4 - Setuju"><label for="q12_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q12_5" type="radio" name="Q12_Mempelajari_Fungsi_Utama" value="5 - Sangat setuju"><label for="q12_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q13">
+              <div class="question-title"><span class="q-number">13</span><span>Saya mudah mengakses video BIM, objek 3D, bahan penerangan dan aktiviti dalam GeoMETriA.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 13">
+                <div class="rating-option"><input id="q13_1" type="radio" name="Q13_Akses_Bahan_GeoMETriA" value="1 - Sangat tidak setuju" required><label for="q13_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q13_2" type="radio" name="Q13_Akses_Bahan_GeoMETriA" value="2 - Tidak setuju"><label for="q13_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q13_3" type="radio" name="Q13_Akses_Bahan_GeoMETriA" value="3 - Tidak pasti"><label for="q13_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q13_4" type="radio" name="Q13_Akses_Bahan_GeoMETriA" value="4 - Setuju"><label for="q13_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q13_5" type="radio" name="Q13_Akses_Bahan_GeoMETriA" value="5 - Sangat setuju"><label for="q13_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q14">
+              <div class="question-title"><span class="q-number">14</span><span>Langkah untuk menyediakan dan menjalankan satu sesi pembelajaran GeoMETriA adalah jelas.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 14">
+                <div class="rating-option"><input id="q14_1" type="radio" name="Q14_Langkah_Pelaksanaan_Jelas" value="1 - Sangat tidak setuju" required><label for="q14_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q14_2" type="radio" name="Q14_Langkah_Pelaksanaan_Jelas" value="2 - Tidak setuju"><label for="q14_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q14_3" type="radio" name="Q14_Langkah_Pelaksanaan_Jelas" value="3 - Tidak pasti"><label for="q14_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q14_4" type="radio" name="Q14_Langkah_Pelaksanaan_Jelas" value="4 - Setuju"><label for="q14_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q14_5" type="radio" name="Q14_Langkah_Pelaksanaan_Jelas" value="5 - Sangat setuju"><label for="q14_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card" aria-labelledby="seksyen-d">
+        <div class="section-head purple">
+          <h2 class="section-title" id="seksyen-d">D. Keyakinan dan Kesediaan Guru</h2>
+          <span class="section-count">Item 15–18</span>
+        </div>
+        <div class="section-body">
+          <div class="question-list">
+
+            <div class="question" data-question="Q15">
+              <div class="question-title"><span class="q-number">15</span><span>Saya yakin boleh memasuki dan menavigasi persekitaran GeoMETriA tanpa banyak bantuan.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 15">
+                <div class="rating-option"><input id="q15_1" type="radio" name="Q15_Keyakinan_Navigasi" value="1 - Sangat tidak setuju" required><label for="q15_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q15_2" type="radio" name="Q15_Keyakinan_Navigasi" value="2 - Tidak setuju"><label for="q15_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q15_3" type="radio" name="Q15_Keyakinan_Navigasi" value="3 - Tidak pasti"><label for="q15_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q15_4" type="radio" name="Q15_Keyakinan_Navigasi" value="4 - Setuju"><label for="q15_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q15_5" type="radio" name="Q15_Keyakinan_Navigasi" value="5 - Sangat setuju"><label for="q15_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q16">
+              <div class="question-title"><span class="q-number">16</span><span>Saya yakin boleh membimbing murid menggunakan fungsi asas GeoMETriA.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 16">
+                <div class="rating-option"><input id="q16_1" type="radio" name="Q16_Membimbing_Murid" value="1 - Sangat tidak setuju" required><label for="q16_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q16_2" type="radio" name="Q16_Membimbing_Murid" value="2 - Tidak setuju"><label for="q16_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q16_3" type="radio" name="Q16_Membimbing_Murid" value="3 - Tidak pasti"><label for="q16_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q16_4" type="radio" name="Q16_Membimbing_Murid" value="4 - Setuju"><label for="q16_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q16_5" type="radio" name="Q16_Membimbing_Murid" value="5 - Sangat setuju"><label for="q16_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q17">
+              <div class="question-title"><span class="q-number">17</span><span>Saya yakin boleh menangani masalah mudah seperti log masuk, navigasi atau membuka bahan.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 17">
+                <div class="rating-option"><input id="q17_1" type="radio" name="Q17_Menangani_Masalah_Mudah" value="1 - Sangat tidak setuju" required><label for="q17_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q17_2" type="radio" name="Q17_Menangani_Masalah_Mudah" value="2 - Tidak setuju"><label for="q17_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q17_3" type="radio" name="Q17_Menangani_Masalah_Mudah" value="3 - Tidak pasti"><label for="q17_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q17_4" type="radio" name="Q17_Menangani_Masalah_Mudah" value="4 - Setuju"><label for="q17_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q17_5" type="radio" name="Q17_Menangani_Masalah_Mudah" value="5 - Sangat setuju"><label for="q17_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q18">
+              <div class="question-title"><span class="q-number">18</span><span>Saya bersedia menjalankan sekurang-kurangnya satu sesi pembelajaran GeoMETriA dengan sokongan minimum.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 18">
+                <div class="rating-option"><input id="q18_1" type="radio" name="Q18_Bersedia_Menjalankan_Sesi" value="1 - Sangat tidak setuju" required><label for="q18_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q18_2" type="radio" name="Q18_Bersedia_Menjalankan_Sesi" value="2 - Tidak setuju"><label for="q18_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q18_3" type="radio" name="Q18_Bersedia_Menjalankan_Sesi" value="3 - Tidak pasti"><label for="q18_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q18_4" type="radio" name="Q18_Bersedia_Menjalankan_Sesi" value="4 - Setuju"><label for="q18_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q18_5" type="radio" name="Q18_Bersedia_Menjalankan_Sesi" value="5 - Sangat setuju"><label for="q18_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card" aria-labelledby="seksyen-e">
+        <div class="section-head green">
+          <h2 class="section-title" id="seksyen-e">E. Kesesuaian untuk Murid Deaf</h2>
+          <span class="section-count">Item 19–23</span>
+        </div>
+        <div class="section-body">
+          <div class="question-list">
+
+            <div class="question" data-question="Q19">
+              <div class="question-title"><span class="q-number">19</span><span>Video BIM dalam GeoMETriA berpotensi meningkatkan akses murid kepada penerangan pembelajaran.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 19">
+                <div class="rating-option"><input id="q19_1" type="radio" name="Q19_Akses_Video_BIM" value="1 - Sangat tidak setuju" required><label for="q19_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q19_2" type="radio" name="Q19_Akses_Video_BIM" value="2 - Tidak setuju"><label for="q19_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q19_3" type="radio" name="Q19_Akses_Video_BIM" value="3 - Tidak pasti"><label for="q19_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q19_4" type="radio" name="Q19_Akses_Video_BIM" value="4 - Setuju"><label for="q19_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q19_5" type="radio" name="Q19_Akses_Video_BIM" value="5 - Sangat setuju"><label for="q19_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q20">
+              <div class="question-title"><span class="q-number">20</span><span>Gabungan gambar, teks, objek 3D dan aktiviti interaktif sesuai dengan keperluan pembelajaran visual murid Deaf.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 20">
+                <div class="rating-option"><input id="q20_1" type="radio" name="Q20_Kesesuaian_Pembelajaran_Visual" value="1 - Sangat tidak setuju" required><label for="q20_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q20_2" type="radio" name="Q20_Kesesuaian_Pembelajaran_Visual" value="2 - Tidak setuju"><label for="q20_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q20_3" type="radio" name="Q20_Kesesuaian_Pembelajaran_Visual" value="3 - Tidak pasti"><label for="q20_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q20_4" type="radio" name="Q20_Kesesuaian_Pembelajaran_Visual" value="4 - Setuju"><label for="q20_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q20_5" type="radio" name="Q20_Kesesuaian_Pembelajaran_Visual" value="5 - Sangat setuju"><label for="q20_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q21">
+              <div class="question-title"><span class="q-number">21</span><span>Arahan dan susunan aktiviti dalam GeoMETriA sesuai untuk murid Deaf.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 21">
+                <div class="rating-option"><input id="q21_1" type="radio" name="Q21_Arahan_dan_Susunan_Aktiviti" value="1 - Sangat tidak setuju" required><label for="q21_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q21_2" type="radio" name="Q21_Arahan_dan_Susunan_Aktiviti" value="2 - Tidak setuju"><label for="q21_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q21_3" type="radio" name="Q21_Arahan_dan_Susunan_Aktiviti" value="3 - Tidak pasti"><label for="q21_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q21_4" type="radio" name="Q21_Arahan_dan_Susunan_Aktiviti" value="4 - Setuju"><label for="q21_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q21_5" type="radio" name="Q21_Arahan_dan_Susunan_Aktiviti" value="5 - Sangat setuju"><label for="q21_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q22">
+              <div class="question-title"><span class="q-number">22</span><span>GeoMETriA boleh digunakan dengan murid yang mempunyai tahap kebolehan pembelajaran yang berbeza.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 22">
+                <div class="rating-option"><input id="q22_1" type="radio" name="Q22_Pelbagai_Tahap_Kebolehan" value="1 - Sangat tidak setuju" required><label for="q22_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q22_2" type="radio" name="Q22_Pelbagai_Tahap_Kebolehan" value="2 - Tidak setuju"><label for="q22_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q22_3" type="radio" name="Q22_Pelbagai_Tahap_Kebolehan" value="3 - Tidak pasti"><label for="q22_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q22_4" type="radio" name="Q22_Pelbagai_Tahap_Kebolehan" value="4 - Setuju"><label for="q22_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q22_5" type="radio" name="Q22_Pelbagai_Tahap_Kebolehan" value="5 - Sangat setuju"><label for="q22_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q23">
+              <div class="question-title"><span class="q-number">23</span><span>Paparan GeoMETriA membantu mengarahkan perhatian visual murid tanpa menyebabkan terlalu banyak gangguan.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 23">
+                <div class="rating-option"><input id="q23_1" type="radio" name="Q23_Perhatian_Visual_Tanpa_Gangguan" value="1 - Sangat tidak setuju" required><label for="q23_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q23_2" type="radio" name="Q23_Perhatian_Visual_Tanpa_Gangguan" value="2 - Tidak setuju"><label for="q23_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q23_3" type="radio" name="Q23_Perhatian_Visual_Tanpa_Gangguan" value="3 - Tidak pasti"><label for="q23_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q23_4" type="radio" name="Q23_Perhatian_Visual_Tanpa_Gangguan" value="4 - Setuju"><label for="q23_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q23_5" type="radio" name="Q23_Perhatian_Visual_Tanpa_Gangguan" value="5 - Sangat setuju"><label for="q23_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card" aria-labelledby="seksyen-f">
+        <div class="section-head teal">
+          <h2 class="section-title" id="seksyen-f">F. Kemudahan dan Sokongan Pelaksanaan</h2>
+          <span class="section-count">Item 24–27</span>
+        </div>
+        <div class="section-body">
+          <div class="question-list">
+
+            <div class="question" data-question="Q24">
+              <div class="question-title"><span class="q-number">24</span><span>Sekolah saya mempunyai atau boleh menyediakan peranti yang mencukupi untuk pelaksanaan GeoMETriA.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 24">
+                <div class="rating-option"><input id="q24_1" type="radio" name="Q24_Peranti_Mencukupi" value="1 - Sangat tidak setuju" required><label for="q24_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q24_2" type="radio" name="Q24_Peranti_Mencukupi" value="2 - Tidak setuju"><label for="q24_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q24_3" type="radio" name="Q24_Peranti_Mencukupi" value="3 - Tidak pasti"><label for="q24_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q24_4" type="radio" name="Q24_Peranti_Mencukupi" value="4 - Setuju"><label for="q24_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q24_5" type="radio" name="Q24_Peranti_Mencukupi" value="5 - Sangat setuju"><label for="q24_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q25">
+              <div class="question-title"><span class="q-number">25</span><span>Sambungan Internet di sekolah saya dijangka mencukupi untuk menggunakan GeoMETriA.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 25">
+                <div class="rating-option"><input id="q25_1" type="radio" name="Q25_Internet_Mencukupi" value="1 - Sangat tidak setuju" required><label for="q25_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q25_2" type="radio" name="Q25_Internet_Mencukupi" value="2 - Tidak setuju"><label for="q25_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q25_3" type="radio" name="Q25_Internet_Mencukupi" value="3 - Tidak pasti"><label for="q25_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q25_4" type="radio" name="Q25_Internet_Mencukupi" value="4 - Setuju"><label for="q25_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q25_5" type="radio" name="Q25_Internet_Mencukupi" value="5 - Sangat setuju"><label for="q25_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q26">
+              <div class="question-title"><span class="q-number">26</span><span>Masa pengajaran yang tersedia membolehkan GeoMETriA digunakan secara praktikal.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 26">
+                <div class="rating-option"><input id="q26_1" type="radio" name="Q26_Masa_Pengajaran_Mencukupi" value="1 - Sangat tidak setuju" required><label for="q26_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q26_2" type="radio" name="Q26_Masa_Pengajaran_Mencukupi" value="2 - Tidak setuju"><label for="q26_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q26_3" type="radio" name="Q26_Masa_Pengajaran_Mencukupi" value="3 - Tidak pasti"><label for="q26_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q26_4" type="radio" name="Q26_Masa_Pengajaran_Mencukupi" value="4 - Setuju"><label for="q26_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q26_5" type="radio" name="Q26_Masa_Pengajaran_Mencukupi" value="5 - Sangat setuju"><label for="q26_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q27">
+              <div class="question-title"><span class="q-number">27</span><span>Saya boleh mendapatkan sokongan teknikal atau pentadbiran apabila diperlukan.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 27">
+                <div class="rating-option"><input id="q27_1" type="radio" name="Q27_Sokongan_Teknikal_Pentadbiran" value="1 - Sangat tidak setuju" required><label for="q27_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q27_2" type="radio" name="Q27_Sokongan_Teknikal_Pentadbiran" value="2 - Tidak setuju"><label for="q27_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q27_3" type="radio" name="Q27_Sokongan_Teknikal_Pentadbiran" value="3 - Tidak pasti"><label for="q27_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q27_4" type="radio" name="Q27_Sokongan_Teknikal_Pentadbiran" value="4 - Setuju"><label for="q27_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q27_5" type="radio" name="Q27_Sokongan_Teknikal_Pentadbiran" value="5 - Sangat setuju"><label for="q27_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card" aria-labelledby="seksyen-g">
+        <div class="section-head">
+          <h2 class="section-title" id="seksyen-g">G. Niat Pelaksanaan</h2>
+          <span class="section-count">Item 28–30</span>
+        </div>
+        <div class="section-body">
+          <div class="question-list">
+
+            <div class="question" data-question="Q28">
+              <div class="question-title"><span class="q-number">28</span><span>Saya berniat mencuba GeoMETriA dalam sekurang-kurangnya satu sesi pengajaran jika kemudahan mencukupi.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 28">
+                <div class="rating-option"><input id="q28_1" type="radio" name="Q28_Niat_Mencuba_Satu_Sesi" value="1 - Sangat tidak setuju" required><label for="q28_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q28_2" type="radio" name="Q28_Niat_Mencuba_Satu_Sesi" value="2 - Tidak setuju"><label for="q28_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q28_3" type="radio" name="Q28_Niat_Mencuba_Satu_Sesi" value="3 - Tidak pasti"><label for="q28_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q28_4" type="radio" name="Q28_Niat_Mencuba_Satu_Sesi" value="4 - Setuju"><label for="q28_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q28_5" type="radio" name="Q28_Niat_Mencuba_Satu_Sesi" value="5 - Sangat setuju"><label for="q28_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q29">
+              <div class="question-title"><span class="q-number">29</span><span>Saya bercadang mengintegrasikan GeoMETriA dalam topik geometri yang sesuai.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 29">
+                <div class="rating-option"><input id="q29_1" type="radio" name="Q29_Integrasi_Topik_Geometri" value="1 - Sangat tidak setuju" required><label for="q29_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q29_2" type="radio" name="Q29_Integrasi_Topik_Geometri" value="2 - Tidak setuju"><label for="q29_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q29_3" type="radio" name="Q29_Integrasi_Topik_Geometri" value="3 - Tidak pasti"><label for="q29_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q29_4" type="radio" name="Q29_Integrasi_Topik_Geometri" value="4 - Setuju"><label for="q29_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q29_5" type="radio" name="Q29_Integrasi_Topik_Geometri" value="5 - Sangat setuju"><label for="q29_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+
+            <div class="question" data-question="Q30">
+              <div class="question-title"><span class="q-number">30</span><span>Saya akan mencadangkan GeoMETriA kepada guru Matematik atau guru Pendidikan Khas yang lain.</span></div>
+              <div class="rating-grid" role="radiogroup" aria-label="Item 30">
+                <div class="rating-option"><input id="q30_1" type="radio" name="Q30_Mencadangkan_Kepada_Guru_Lain" value="1 - Sangat tidak setuju" required><label for="q30_1"><span class="rating-value">1</span><span class="rating-text">Sangat tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q30_2" type="radio" name="Q30_Mencadangkan_Kepada_Guru_Lain" value="2 - Tidak setuju"><label for="q30_2"><span class="rating-value">2</span><span class="rating-text">Tidak setuju</span></label></div>
+                <div class="rating-option"><input id="q30_3" type="radio" name="Q30_Mencadangkan_Kepada_Guru_Lain" value="3 - Tidak pasti"><label for="q30_3"><span class="rating-value">3</span><span class="rating-text">Tidak pasti</span></label></div>
+                <div class="rating-option"><input id="q30_4" type="radio" name="Q30_Mencadangkan_Kepada_Guru_Lain" value="4 - Setuju"><label for="q30_4"><span class="rating-value">4</span><span class="rating-text">Setuju</span></label></div>
+                <div class="rating-option"><input id="q30_5" type="radio" name="Q30_Mencadangkan_Kepada_Guru_Lain" value="5 - Sangat setuju"><label for="q30_5"><span class="rating-value">5</span><span class="rating-text">Sangat setuju</span></label></div>
+              </div>
+              <p class="validation-text">Sila pilih satu jawapan.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card" aria-labelledby="bahagian-2">
+        <div class="section-head teal">
+          <h2 class="section-title" id="bahagian-2">Bahagian 2: Sokongan yang Diperlukan</h2>
+          <span class="section-count">Boleh pilih lebih daripada satu</span>
+        </div>
+        <div class="section-body">
+          <p class="helper" style="margin-bottom:16px;">Tandakan semua sokongan yang berkaitan dengan keperluan cikgu dan sekolah.</p>
+
+          <div class="checkbox-grid">
+            <div class="check-option"><input id="s1" type="checkbox" name="Sokongan_Diperlukan[]" value="Panduan langkah demi langkah untuk guru"><label for="s1">Panduan langkah demi langkah untuk guru</label></div>
+            <div class="check-option"><input id="s2" type="checkbox" name="Sokongan_Diperlukan[]" value="Tutorial ringkas untuk murid"><label for="s2">Tutorial ringkas untuk murid</label></div>
+            <div class="check-option"><input id="s3" type="checkbox" name="Sokongan_Diperlukan[]" value="Sokongan teknikal semasa pelaksanaan pertama"><label for="s3">Sokongan teknikal semasa pelaksanaan pertama</label></div>
+            <div class="check-option"><input id="s4" type="checkbox" name="Sokongan_Diperlukan[]" value="Komputer riba atau peranti tambahan"><label for="s4">Komputer riba atau peranti tambahan</label></div>
+            <div class="check-option"><input id="s5" type="checkbox" name="Sokongan_Diperlukan[]" value="Internet atau rangkaian yang lebih stabil"><label for="s5">Internet atau rangkaian yang lebih stabil</label></div>
+            <div class="check-option"><input id="s6" type="checkbox" name="Sokongan_Diperlukan[]" value="Masa tambahan dalam jadual pengajaran"><label for="s6">Masa tambahan dalam jadual pengajaran</label></div>
+            <div class="check-option"><input id="s7" type="checkbox" name="Sokongan_Diperlukan[]" value="Bahan BIM atau sari kata tambahan"><label for="s7">Bahan BIM atau sari kata tambahan</label></div>
+            <div class="check-option"><input id="s8" type="checkbox" name="Sokongan_Diperlukan[]" value="Aktiviti mengikut tahap kebolehan murid"><label for="s8">Aktiviti mengikut tahap kebolehan murid</label></div>
+            <div class="check-option"><input id="s9" type="checkbox" name="Sokongan_Diperlukan[]" value="Perkongsian amalan bersama guru lain"><label for="s9">Perkongsian amalan bersama guru lain</label></div>
+          </div>
+
+          <div class="field full" style="margin-top:18px;">
+            <label for="lainLain">Lain-lain</label>
+            <textarea id="lainLain" name="Sokongan_Lain_Lain" placeholder="Nyatakan sokongan lain yang diperlukan, jika ada."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <div class="submit-card">
+        <div class="form-alert" id="formAlert" role="alert"></div>
+        <p>
+          Sila semak jawapan sebelum menghantar. Selepas menekan butang di bawah, respons akan dihantar kepada penyelidik.
+        </p>
+        <button class="submit-button" id="submitButton" type="submit">
+          <span aria-hidden="true">✓</span>
+          <span>Hantar Soal Selidik</span>
+        </button>
+        <div class="submit-note">Item bertanda * dan semua item skala mesti dijawab.</div>
+      </div>
+    </form>
+
+    <footer class="footer">
+      GeoMETriA · Borang Kesediaan Guru Selepas TOT
+    </footer>
+  </main>
+
+  <script>
+    /* ============================================================
+       UBAH DUA BARIS INI SEBELUM UPLOAD KE GITHUB PAGES
+       ============================================================ */
+    const EMAIL_PENERIMA = "GANTIKAN_DENGAN_EMAIL_AP";
+    const URL_TERIMA_KASIH = new URL("terima-kasih.html", window.location.href).href;
+
+    const form = document.getElementById("totForm");
+    const questions = Array.from(document.querySelectorAll(".question[data-question]"));
+    const progressText = document.getElementById("progressText");
+    const progressBar = document.getElementById("progressBar");
+    const formAlert = document.getElementById("formAlert");
+    const submitButton = document.getElementById("submitButton");
+    const timestampField = document.getElementById("timestampField");
+
+    form.action = `https://formsubmit.co/${EMAIL_PENERIMA}`;
+
+    const nextField = document.createElement("input");
+    nextField.type = "hidden";
+    nextField.name = "_next";
+    nextField.value = URL_TERIMA_KASIH;
+    form.appendChild(nextField);
+
+    function updateProgress() {
+      const answered = questions.filter((question) =>
+        question.querySelector('input[type="radio"]:checked')
+      ).length;
+      const percentage = Math.round((answered / questions.length) * 100);
+      progressText.textContent = `${answered} daripada ${questions.length} item dijawab`;
+      progressBar.style.width = `${percentage}%`;
+    }
+
+    function clearQuestionError(event) {
+      const question = event.target.closest(".question");
+      if (question) question.classList.remove("invalid");
+      updateProgress();
+    }
+
+    document.querySelectorAll('input[type="radio"]').forEach((radio) => {
+      radio.addEventListener("change", clearQuestionError);
+    });
+
+    form.addEventListener("submit", function (event) {
+      formAlert.classList.remove("show");
+      formAlert.textContent = "";
+
+      const configurationMissing =
+        EMAIL_PENERIMA.includes("GANTIKAN_") ||
+        false;
+
+      if (configurationMissing) {
+        event.preventDefault();
+        formAlert.textContent = "Borang belum dikonfigurasi. Penyelidik perlu memasukkan alamat e-mel dan URL halaman terima kasih dalam fail HTM sebelum digunakan.";
+        formAlert.classList.add("show");
+        formAlert.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+
+      let firstInvalidQuestion = null;
+      questions.forEach((question) => {
+        const answered = question.querySelector('input[type="radio"]:checked');
+        question.classList.toggle("invalid", !answered);
+        if (!answered && !firstInvalidQuestion) firstInvalidQuestion = question;
+      });
+
+      if (!form.checkValidity() || firstInvalidQuestion) {
+        event.preventDefault();
+        formAlert.textContent = "Masih terdapat maklumat atau item yang belum dijawab. Sila lengkapkan bahagian yang ditandakan.";
+        formAlert.classList.add("show");
+
+        const firstInvalidField = form.querySelector(":invalid");
+        const target = firstInvalidQuestion || firstInvalidField;
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "center" });
+          if (firstInvalidField && typeof firstInvalidField.focus === "function") {
+            setTimeout(() => firstInvalidField.focus({ preventScroll: true }), 350);
+          }
+        }
+        return;
+      }
+
+      timestampField.value = new Intl.DateTimeFormat("ms-MY", {
+        dateStyle: "full",
+        timeStyle: "long"
+      }).format(new Date());
+
+      submitButton.disabled = true;
+      submitButton.querySelector("span:last-child").textContent = "Sedang menghantar…";
+    });
+
+    updateProgress();
+  </script>
+</body>
+</html>
