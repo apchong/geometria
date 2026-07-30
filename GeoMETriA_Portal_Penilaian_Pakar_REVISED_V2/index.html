@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GeoMETriA | Portal Penilaian Pakar Fasa 2</title>
+  <meta name="description" content="Portal semakan pakar untuk pengesahan kandungan prototaip Modul GeoMETriA." />
+  <style>
+    :root {
+      --navy:#061A4D;
+      --blue:#0B4FE8;
+      --cyan:#10D7FF;
+      --purple:#8F4DFF;
+      --pink:#FF3DAE;
+      --gold:#FFD84D;
+      --green:#19B56B;
+      --white:#FFFFFF;
+      --soft:#F5F9FF;
+      --ink:#132247;
+      --muted:#61708D;
+      --line:rgba(20,70,160,.18);
+      --card:rgba(255,255,255,.88);
+      --shadow:0 24px 70px rgba(6,26,77,.16);
+      --radius:28px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 8% 6%, rgba(16,215,255,.22), transparent 28%),
+        radial-gradient(circle at 90% 8%, rgba(143,77,255,.20), transparent 28%),
+        linear-gradient(180deg,#f7fbff 0%, #eef6ff 48%, #ffffff 100%);
+      overflow-x:hidden;
+    }
+    body::before{
+      content:"";
+      position:fixed; inset:0; z-index:-2;
+      background-image:
+        linear-gradient(rgba(11,79,232,.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(11,79,232,.055) 1px, transparent 1px);
+      background-size:42px 42px;
+      mask-image:linear-gradient(180deg, rgba(0,0,0,.9), rgba(0,0,0,.25));
+    }
+    a{color:inherit;text-decoration:none}
+    img{display:block; max-width:100%; height:auto}
+    .wrap{width:min(1180px, calc(100% - 34px)); margin-inline:auto}
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      background:rgba(255,255,255,.78);
+      backdrop-filter: blur(18px);
+      border-bottom:1px solid var(--line);
+    }
+    .nav{height:72px; display:flex; align-items:center; justify-content:space-between; gap:20px}
+    .brand{display:flex; align-items:center; gap:12px; font-weight:900; letter-spacing:.2px}
+    .brand-mark{
+      width:44px;height:44px;border-radius:15px;
+      background:linear-gradient(135deg,var(--blue),var(--cyan));
+      display:grid; place-items:center; color:white; font-weight:1000; box-shadow:0 8px 22px rgba(11,79,232,.25)
+    }
+    .brand small{display:block;color:var(--muted);font-size:12px;font-weight:700;margin-top:1px}
+    .links{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .links a{font-size:13.5px;font-weight:800;color:#25406e;padding:9px 11px;border-radius:999px}
+    .links a:hover{background:#eef5ff;color:var(--blue)}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:9px;
+      padding:13px 18px; border-radius:999px; font-weight:900; border:1px solid transparent;
+      box-shadow:0 12px 28px rgba(11,79,232,.18); transition:.25s ease; cursor:pointer;
+    }
+    .btn.primary{color:white;background:linear-gradient(135deg,var(--blue),var(--purple))}
+    .btn.light{color:var(--blue);background:white;border-color:rgba(11,79,232,.18)}
+    .btn.gold{color:#172042;background:linear-gradient(135deg,#fff2a7,var(--gold)); box-shadow:0 12px 28px rgba(255,216,77,.26)}
+    .btn:hover{transform:translateY(-2px)}
+    .hero{position:relative; padding:78px 0 46px}
+    .hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:34px;align-items:center}
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:10px;padding:9px 13px;border-radius:999px;
+      background:rgba(255,255,255,.74);border:1px solid var(--line);font-weight:900;color:#2556b6;font-size:13px;
+      box-shadow:0 8px 20px rgba(6,26,77,.06)
+    }
+    h1{font-size:clamp(42px,5vw,76px);line-height:.96;margin:18px 0 16px;letter-spacing:-3px;color:var(--navy)}
+    h1 span{background:linear-gradient(90deg,var(--blue),var(--cyan),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}
+    .lead{font-size:clamp(17px,1.45vw,21px);line-height:1.65;color:#34466f;margin:0 0 25px;max-width:670px}
+    .hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px}
+    .hero-card{
+      position:relative;border-radius:36px;padding:14px;background:linear-gradient(135deg,rgba(255,255,255,.75),rgba(255,255,255,.36));
+      border:1px solid rgba(255,255,255,.7);box-shadow:var(--shadow);overflow:hidden;
+    }
+    .hero-card::before{content:"";position:absolute;inset:-2px;background:radial-gradient(circle at 20% 10%, rgba(16,215,255,.28), transparent 38%),radial-gradient(circle at 100% 5%, rgba(255,61,174,.2), transparent 34%);z-index:0}
+    .hero-card img{position:relative;z-index:1;border-radius:25px;object-fit:cover;width:100%;aspect-ratio:16/10}
+    .floating-chip{
+      position:absolute;z-index:3;right:24px;bottom:24px;background:rgba(6,26,77,.92);color:white;border:1px solid rgba(255,255,255,.2);
+      padding:12px 15px;border-radius:18px;font-weight:900;box-shadow:0 14px 26px rgba(0,0,0,.22)
+    }
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:34px}
+    .stat{
+      background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px 16px;text-align:center;box-shadow:0 10px 30px rgba(6,26,77,.08)
+    }
+    .stat b{font-size:28px;color:var(--blue);display:block}
+    .stat span{font-size:13px;font-weight:800;color:#52627e}
+    section{padding:58px 0}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:28px;margin-bottom:26px}
+    .section-title{margin:0;color:var(--navy);font-size:clamp(30px,3vw,44px);letter-spacing:-1.4px;line-height:1.05}
+    .section-sub{margin:10px 0 0;color:var(--muted);font-size:16px;line-height:1.62;max-width:760px}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#eef6ff;color:#1451c5;border:1px solid var(--line);font-weight:900;font-size:12.5px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+    .card{
+      background:var(--card); border:1px solid rgba(33,86,175,.14); border-radius:var(--radius); padding:24px;
+      box-shadow:0 16px 44px rgba(6,26,77,.09); position:relative; overflow:hidden;
+    }
+    .card::after{content:"";position:absolute;right:-80px;top:-80px;width:160px;height:160px;border-radius:50%;background:rgba(16,215,255,.12)}
+    .icon{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;color:white;font-size:24px;font-weight:1000;background:linear-gradient(135deg,var(--blue),var(--cyan));box-shadow:0 10px 22px rgba(11,79,232,.18)}
+    .card h3{font-size:21px;color:var(--navy);margin:15px 0 8px}
+    .card p,.card li{color:#425172;line-height:1.58;font-size:15.5px}
+    .card ul{padding-left:20px;margin:10px 0 0}
+    .feature{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center}
+    .image-frame{background:white;border:1px solid var(--line);border-radius:28px;padding:10px;box-shadow:var(--shadow);overflow:hidden}
+    .image-frame img{border-radius:20px;width:100%}
+    .world-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+    .world{padding:0;overflow:hidden}
+    .world .top{padding:22px;background:linear-gradient(135deg,#f8fbff,#ffffff)}
+    .world .num{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:white;font-size:24px;font-weight:1000;background:linear-gradient(135deg,var(--blue),var(--purple));margin-bottom:12px}
+    .world h3{margin:0;color:var(--navy);font-size:22px}
+    .world em{display:block;color:var(--purple);font-weight:900;margin-top:5px;font-style:normal}
+    .world p{margin:12px 0 0;color:#455676;line-height:1.5}
+    .world img{height:150px;width:100%;object-fit:cover}
+    .gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+    .gallery-card{background:white;border-radius:26px;border:1px solid var(--line);box-shadow:0 16px 42px rgba(6,26,77,.09);overflow:hidden}
+    .gallery-card img{width:100%;height:330px;object-fit:cover;object-position:top}
+    .gallery-card .cap{padding:15px 18px;font-weight:900;color:var(--navy);display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .cap small{font-weight:800;color:var(--muted)}
+    .objectives{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+    .objectives img{border-radius:23px;box-shadow:0 15px 36px rgba(6,26,77,.11);border:1px solid var(--line)}
+    .process{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+    .step{background:white;border:1px solid var(--line);border-radius:22px;padding:17px 14px;text-align:center;box-shadow:0 10px 25px rgba(6,26,77,.06)}
+    .step b{display:grid;place-items:center;margin:0 auto 11px;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));color:white}
+    .step span{font-weight:900;color:var(--navy);font-size:14px}
+    .validation{background:linear-gradient(135deg,#061A4D,#0B2C82);color:white;border-radius:36px;padding:34px;box-shadow:0 24px 70px rgba(6,26,77,.28);position:relative;overflow:hidden}
+    .validation::before{content:"";position:absolute;right:-12%;top:-45%;width:55%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(16,215,255,.30),transparent 62%)}
+    .validation h2{color:white;margin:0 0 12px;font-size:38px;letter-spacing:-1px}
+    .validation p{color:#dce8ff;line-height:1.65}
+    .domain-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:23px}
+    .domain{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.17);border-radius:20px;padding:16px;backdrop-filter:blur(12px)}
+    .domain b{display:block;color:#fff;font-size:16px;margin-bottom:6px}
+    .domain span{font-size:13px;color:#d7e7ff;line-height:1.45;display:block}
+    .scale{margin-top:20px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:16px}
+    .scale-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .score{background:white;color:var(--navy);border-radius:14px;padding:12px;text-align:center;font-weight:900}
+    .score small{display:block;color:#687797;font-size:12px;margin-top:5px;font-weight:800}
+    .downloads{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .download-card{background:white;border:1px solid var(--line);border-radius:22px;padding:19px;box-shadow:0 12px 30px rgba(6,26,77,.07)}
+    .download-card b{display:block;font-size:17px;color:var(--navy);margin-bottom:6px}
+    .download-card span{display:block;color:var(--muted);font-size:14px;line-height:1.45;margin-bottom:14px}
+    .placeholder{border:2px dashed rgba(11,79,232,.26);border-radius:18px;padding:14px;color:#315a99;background:#f7fbff;font-weight:800;font-size:13px}
+    footer{background:#061A4D;color:#dfeaff;padding:42px 0;margin-top:40px}
+    footer .foot{display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap}
+    footer b{color:white;font-size:22px}
+    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;background:#edf5ff;color:#1246ad;border:1px solid var(--line);border-radius:8px;padding:2px 7px;font-size:12px}
+    @media (max-width:980px){
+      .hero-grid,.feature,.grid-2{grid-template-columns:1fr}
+      .stats,.world-strip,.domain-grid{grid-template-columns:repeat(2,1fr)}
+      .gallery,.objectives,.downloads{grid-template-columns:1fr}
+      .process{grid-template-columns:repeat(3,1fr)}
+      .links{display:none}
+      .gallery-card img{height:auto}
+    }
+    @media (max-width:620px){
+      .stats,.world-strip,.domain-grid,.grid-3,.process{grid-template-columns:1fr}
+      h1{letter-spacing:-1.6px}
+      .section-head{display:block}
+      .hero{padding-top:42px}
+    }
+  </style>
+<style>
+  .character-hero{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:center}
+  .character-panel{
+      background:linear-gradient(180deg, rgba(255,255,255,.96), rgba(248,251,255,.92));
+      border:1px solid rgba(70,120,255,.12);
+      box-shadow: var(--shadow);
+      border-radius:28px;
+      padding:28px;
+  }
+  .taglist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
+  .tag{
+      background:#fff;border:1px solid rgba(70,120,255,.15);border-radius:16px;padding:14px 16px;
+      font-weight:700;color:var(--ink)
+  }
+  .mini-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:24px}
+  .mini-card{background:rgba(255,255,255,.9);border:1px solid rgba(70,120,255,.14);border-radius:24px;padding:18px}
+  .mini-card h3{margin:10px 0 8px}
+  .mini-card p{margin:0;color:var(--muted)}
+  @media (max-width: 980px){
+    .character-hero{grid-template-columns:1fr}
+    .mini-grid{grid-template-columns:1fr}
+    .taglist{grid-template-columns:1fr}
+  }
+</style>
+
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap nav">
+      <a class="brand" href="#home" aria-label="GeoMETriA home"><div class="brand-mark">G</div><div>GeoMETriA<small>Expert Review Portal · Phase 2</small></div></a>
+      <nav class="links" aria-label="Main navigation">
+        <a href="#overview">Ringkasan</a>
+        <a href="#characters">Watak</a>
+        <a href="#maps">Pelan</a>
+        <a href="#objectives">Objektif</a>
+        <a href="#materials">Aktiviti</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="home">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <span class="eyebrow">⭐ Fasa 2 · Pengesahan Kandungan Prototaip Modul</span>
+          <h1><span>GeoMETriA</span><br>Portal Penilaian Pakar</h1>
+          <p class="lead">Portal ini disediakan untuk memudahkan panel pakar meneliti prototaip Modul GeoMETriA secara sistematik melalui ringkasan kajian, video walkthrough, paparan empat dunia metaverse, sampel bahan pembelajaran, dan borang kesahan kandungan.</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="#characters">Lihat Watak Modul</a>
+            <a class="btn light" href="#maps">Lihat Pelan Modul</a>
+            <a class="btn gold" href="#materials">Sampel Aktiviti</a>
+          </div>
+          <div class="stats">
+            <div class="stat"><b>4</b><span>Dunia Pembelajaran</span></div>
+            <div class="stat"><b>BIM</b><span>Sokongan Bahasa</span></div>
+            <div class="stat"><b>3D</b><span>Visualisasi Geometri</span></div>
+            <div class="stat"><b>CVI</b><span>Semakan Pakar</span></div>
+          </div>
+        </div>
+        <div class="hero-card">
+          <img src="assets/student_manual_cover.webp" alt="Poster / cover Modul GeoMETriA">
+          <div class="floating-chip">Imersif · Inklusif · Interaktif</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="overview">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <span class="pill">01 · Ringkasan kajian</span>
+            <h2 class="section-title">Latar belakang pembangunan modul</h2>
+            <p class="section-sub">GeoMETriA dibangunkan sebagai modul pembelajaran geometri tiga dimensi berasaskan metaverse untuk menyokong akses visual, interaksi, bahasa isyarat, dan pengalaman pembelajaran bertahap bagi murid ketidakupayaan pendengaran.</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <article class="card"><div class="icon">🎯</div><h3>Tujuan Modul</h3><p>Membantu murid memahami konsep bentuk 3D, bentangan, luas permukaan, dan isi padu melalui pengalaman visual, interaktif, dan berstruktur.</p></article>
+          <article class="card"><div class="icon">👥</div><h3>Sasaran Pengguna</h3><p>Murid ketidakupayaan pendengaran Tingkatan 2 dan guru Matematik Pendidikan Khas yang melaksanakan PdP geometri.</p></article>
+          <article class="card"><div class="icon">🧩</div><h3>Komponen Prototaip</h3><p>Metaverse GeoMETriA, video BIM, Buku Aktiviti Interaktif Murid, Panduan Pelaksanaan Guru, aktiviti digital, dan sistem badge.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="characters">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <span class="pill">02 · Watak pembelajaran</span>
+            <h2 class="section-title">Kenali watak utama dalam GeoMETriA</h2>
+            <p class="section-sub">Watak dalam modul membantu murid memahami konsep geometri secara visual, berstruktur, dan mesra bahasa isyarat. Setiap watak memainkan peranan khusus agar pengalaman pembelajaran lebih jelas, menyeronokkan, dan mudah diikuti oleh murid ketidakupayaan pendengaran.</p>
+          </div>
+        </div>
+
+        <div class="character-hero">
+          <div class="character-panel">
+            <span class="pill" style="margin-bottom:10px">Watak & fungsi</span>
+            <h3 style="font-size:2rem;margin:0 0 12px">Cikgu Lumi · Geo · Cikgu Neza</h3>
+            <p class="section-sub" style="margin:0">Cikgu Lumi memperkenalkan konsep asas geometri melalui BIM dan penerangan visual. Geo pula bertindak sebagai avatar sokongan yang memberi arahan ringkas, galakan, dan interaksi mesra murid. Cikgu Neza memandu murid menyelesaikan tugasan dan masalah geometri secara langkah demi langkah.</p>
+            <div class="taglist">
+              <div class="tag">🤟 Bahasa Isyarat Malaysia (BIM)</div>
+              <div class="tag">👁️ Visual jelas & berwarna</div>
+              <div class="tag">🧭 Arahan ringkas dan mudah</div>
+              <div class="tag">🧩 Strategi penyelesaian masalah</div>
+            </div>
+          </div>
+          <div class="image-frame">
+            <img src="assets/characters_access.webp" alt="Watak utama GeoMETriA iaitu Cikgu Lumi, Geo dan Cikgu Neza">
+          </div>
+        </div>
+
+        <div class="mini-grid">
+          <article class="mini-card">
+            <div class="icon">🤟</div>
+            <h3>Cikgu Lumi</h3>
+            <p>Guru konsep asas yang membantu murid mengenal bentuk 3D, istilah, dan ciri geometri melalui bahasa isyarat yang jelas serta sokongan visual.</p>
+          </article>
+          <article class="mini-card">
+            <div class="icon">🤖</div>
+            <h3>Geo</h3>
+            <p>Avatar arahan dan sokongan yang memberikan galakan, panduan ringkas, serta interaksi mesra murid sepanjang penerokaan dalam modul.</p>
+          </article>
+          <article class="mini-card">
+            <div class="icon">📝</div>
+            <h3>Cikgu Neza</h3>
+            <p>Guru penyelesaian masalah yang membimbing murid menggunakan langkah demi langkah untuk menjawab tugasan bentangan, luas permukaan, dan isi padu.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+<section id="maps">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <span class="pill">04 · Reka bentuk metaverse</span>
+            <h2 class="section-title">Pelan dunia dan zon pembelajaran</h2>
+            <p class="section-sub">Peta dunia membantu panel pakar melihat organisasi zon, laluan murid, aktiviti interaktif, video/multimedia, kuiz, refleksi, dan sokongan navigasi.</p>
+          </div>
+        </div>
+        <div class="gallery">
+          <figure class="gallery-card"><img src="assets/map_dunia1.webp" alt="Pelan Dunia 1"><figcaption class="cap">Pelan Dunia 1 <small>Bandar Geometri (3D)</small></figcaption></figure>
+          <figure class="gallery-card"><img src="assets/map_dunia2.webp" alt="Pelan Dunia 2"><figcaption class="cap">Pelan Dunia 2 <small>Muzium Bentangan</small></figcaption></figure>
+          <figure class="gallery-card"><img src="assets/map_dunia3.webp" alt="Pelan Dunia 3"><figcaption class="cap">Pelan Dunia 3 <small>Laman Luas</small></figcaption></figure>
+          <figure class="gallery-card"><img src="assets/map_dunia4.webp" alt="Pelan Dunia 4"><figcaption class="cap">Pelan Dunia 4 <small>Taman Isipadu</small></figcaption></figure>
+        </div>
+      </div>
+    </section>
+<section id="objectives">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <span class="pill">05 · Keselarasan pembelajaran</span>
+            <h2 class="section-title">Objektif pembelajaran mengikut topik</h2>
+            <p class="section-sub">Objektif disusun bagi memastikan kandungan geometri, aktiviti, latihan, dan pengalaman metaverse bergerak secara bertahap dan selaras dengan keperluan pembelajaran murid.</p>
+          </div>
+        </div>
+        <div class="objectives">
+          <img src="assets/obj_sifat.webp" alt="Objektif sifat geometri bentuk tiga dimensi">
+          <img src="assets/obj_bentangan.webp" alt="Objektif bentangan bentuk tiga dimensi">
+          <img src="assets/obj_luas.webp" alt="Objektif luas permukaan bentuk tiga dimensi">
+          <img src="assets/obj_isipadu.webp" alt="Objektif isi padu bentuk tiga dimensi">
+        </div>
+      </div>
+    </section>
+<section id="materials">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <span class="pill">06 · Sampel bahan</span>
+            <h2 class="section-title">Aktiviti murid dan pengukuhan pembelajaran</h2>
+            <p class="section-sub">Bahan pembelajaran disediakan dalam format visual dan langkah demi langkah untuk membantu murid menjejak, melukis, memadankan, mengira, dan membuat refleksi.</p>
+          </div>
+        </div>
+        <div class="gallery">
+          <figure class="gallery-card"><img src="assets/activity_sample_1.webp" alt="Latihan pengukuhan"><figcaption class="cap">Latihan Pengukuhan <small>Sifat geometri objek 3D</small></figcaption></figure>
+          <figure class="gallery-card"><img src="assets/activity_sample_2.webp" alt="Aktiviti lukis bentangan"><figcaption class="cap">Aktiviti Lukis Bentangan <small>Visual, grid, langkah jelas</small></figcaption></figure>
+          <figure class="gallery-card"><img src="assets/activity_sample_3.webp" alt="Aktiviti jejaki dan luas"><figcaption class="cap">Aktiviti Jejaki & Kira <small>Bentangan dan luas permukaan</small></figcaption></figure>
+          <figure class="gallery-card"><img src="assets/badge_system.webp" alt="Sistem badge GeoMETriA"><figcaption class="cap">Sistem Badge <small>Gamifikasi dan motivasi</small></figcaption></figure>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="footer"><div class="wrap">GeoMETriA · Portal Penilaian Pakar · Fasa 2</div></footer>
+</body>
+</html>
