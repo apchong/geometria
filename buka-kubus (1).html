@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BUKA KUBUS — Isi Padu ➜ Luas Permukaan</title>
+<style>
+:root{
+  --paper:#ECEFE8;
+  --card:#FBFCF9;
+  --ink:#141C22;
+  --muted:#6E7B76;
+  --kraft:#D9A441;
+  --kraft-soft:#F3E2B8;
+  --kraft-dark:#9A7020;
+  --blue:#1D4E89;
+  --blue-soft:#DCE6F2;
+  --go:#14775A;
+  --go-soft:#D6EAE2;
+  --stop:#B8371F;
+  --stop-soft:#F6DED9;
+  --rule:rgba(20,28,34,.07);
+  --mono: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --cs: clamp(46px, 13vw, 76px);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none !important}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--sans);
+  color:var(--ink);
+  background:
+    linear-gradient(var(--rule) 1px, transparent 1px) 0 0/28px 28px,
+    linear-gradient(90deg, var(--rule) 1px, transparent 1px) 0 0/28px 28px,
+    var(--paper);
+  min-height:100vh;
+  padding:0 0 40px;
+}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+
+/* ---------- top bar ---------- */
+.topbar{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  padding:14px clamp(12px,4vw,32px);
+  background:var(--ink);color:var(--card);
+}
+.brand{font-family:var(--mono);font-weight:700;letter-spacing:.14em;font-size:17.7px}
+.brand em{font-style:normal;color:var(--kraft)}
+.tag{
+  font-family:var(--mono);font-size:13.5px;letter-spacing:.18em;
+  color:#A9B6B1;border:1px solid #3A4650;padding:4px 8px;border-radius:2px;
+}
+.qwrap{display:flex;align-items:center;gap:10px;margin-left:auto}
+.qlbl{font-size:13.5px;letter-spacing:.18em;color:#93A19C}
+.qnav{display:flex;gap:6px;align-items:center}
+.qbtn{
+  position:relative;width:48px;height:50px;border-radius:4px;
+  border:1.5px solid #3A4650;background:#28333B;color:#A9B6B1;
+  font-weight:700;font-size:16px;display:grid;place-items:center;align-content:center;gap:3px;
+  transition:background-color .15s,border-color .15s,color .15s,transform .12s;
+}
+.qbtn:hover:not(.lock){border-color:var(--kraft);color:var(--card)}
+.qbtn:active:not(.lock){transform:scale(.93)}
+.qbtn.on{background:var(--kraft);border-color:var(--kraft);color:var(--ink)}
+.qbtn.lock{opacity:.4;cursor:not-allowed}
+.qbtn svg{width:19px;height:19px}
+.qdots{display:flex;gap:3px}
+.qdots b{width:6px;height:6px;border-radius:50%;background:#4A565F;display:block}
+.qdots b.lit{background:var(--kraft)}
+.qbtn.on .qdots b{background:rgba(20,28,34,.25)}
+.qbtn.on .qdots b.lit{background:var(--ink)}
+.starchip{
+  display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:4px;
+  border:1.5px solid #3A4650;color:var(--kraft);font-weight:700;font-size:15px;
+}
+.starchip u{text-decoration:none;color:#93A19C;font-weight:400}
+
+/* ---------- ganjaran ---------- */
+.reward{text-align:center;padding:6px 0 2px}
+.rstars{display:flex;justify-content:center;gap:12px;margin-bottom:18px}
+.rs{
+  font-size:46px;line-height:1;color:#D5DAD4;
+  animation:starpop .55s cubic-bezier(.2,1.5,.4,1) both;
+}
+.rs.on{color:var(--kraft);text-shadow:0 3px 0 var(--kraft-dark)}
+@keyframes starpop{
+  0%{transform:scale(0) rotate(-45deg);opacity:0}
+  60%{transform:scale(1.3) rotate(10deg);opacity:1}
+  100%{transform:scale(1) rotate(0);opacity:1}
+}
+
+/* ---------- mod BINA ---------- */
+.bgrid{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:4px;
+  max-width:340px;margin:0 auto;
+}
+.bcell{
+  aspect-ratio:1;border:2px dashed #C9D0C8;border-radius:3px;background:#fff;
+  transition:background-color .15s,border-color .15s,transform .12s;
+}
+.bcell:hover{border-color:var(--blue)}
+.bcell.on{background:var(--kraft);border:2px solid var(--kraft-dark);box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)}
+.bcell.good{background:var(--go);border-color:#0B5A45}
+.bcell.bad{background:var(--stop);border-color:#7E240F}
+.bcell.shake{animation:shake .34s}
+.bbar{display:flex;align-items:center;gap:10px;justify-content:center;margin:16px 0 4px}
+.bcount{
+  display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;color:var(--muted);
+}
+.bcount b{
+  font-size:24px;color:var(--ink);background:var(--kraft-soft);border:1.5px solid var(--kraft-dark);
+  border-radius:3px;padding:2px 12px;
+}
+.bcount.full b{background:var(--go-soft);border-color:var(--go);color:var(--go)}
+.coll{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
+.collitem{
+  display:grid;grid-template-columns:repeat(4,9px);grid-template-rows:repeat(4,9px);gap:1px;
+  padding:5px;border:1.5px solid var(--kraft-dark);border-radius:3px;background:#fff;
+  animation:starpop .5s cubic-bezier(.2,1.5,.4,1) both;
+}
+.collitem i{background:var(--kraft);border-radius:1px}
+.collslot{
+  width:52px;height:52px;border:1.5px dashed #C9D0C8;border-radius:3px;background:#fff;
+  display:grid;place-items:center;color:#C9D0C8;font-size:22px;font-weight:700;
+}
+.zoomctl{display:flex;align-items:center;gap:4px;border:1.5px solid #3A4650;border-radius:3px;padding:3px}
+.zbtn{
+  width:38px;height:38px;display:grid;place-items:center;border-radius:2px;
+  background:#28333B;color:var(--card);transition:background-color .15s,transform .12s;
+}
+.zbtn:hover:not(:disabled){background:var(--kraft);color:var(--ink)}
+.zbtn:active:not(:disabled){transform:scale(.92)}
+.zbtn:disabled{opacity:.3;cursor:default}
+.zbtn svg{width:20px;height:20px}
+.zval{
+  font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.04em;
+  min-width:60px;height:38px;display:grid;place-items:center;color:var(--kraft);
+  font-variant-numeric:tabular-nums;border-radius:2px;
+}
+.zval:hover{background:#28333B}
+#zoomable{zoom:var(--z,1)}
+.pip{width:26px;height:8px;border-radius:2px;background:#39454E}
+.pip.on{background:var(--kraft)}
+.pip.done{background:var(--go)}
+
+/* ---------- pipeline map ---------- */
+.pipeline{
+  display:flex;align-items:center;gap:0;overflow-x:auto;
+  padding:12px clamp(12px,4vw,32px);
+  border-bottom:1px solid #D3D9D1;background:rgba(255,255,255,.55);
+}
+.node{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.node b{
+  font-family:var(--mono);font-size:15px;letter-spacing:.1em;font-weight:700;
+  padding:7px 11px;border-radius:3px;border:1.5px solid #C4CCC3;color:var(--muted);
+  background:var(--card);white-space:nowrap;
+}
+.node.live b{border-color:var(--ink);color:var(--ink);background:var(--kraft-soft)}
+.node.past b{border-color:var(--go);color:var(--go);background:var(--go-soft)}
+.arrow{width:22px;height:1.5px;background:#C4CCC3;position:relative;flex:0 0 auto}
+.arrow::after{content:"";position:absolute;right:0;top:-3px;border-left:6px solid #C4CCC3;border-top:4px solid transparent;border-bottom:4px solid transparent}
+
+/* ---------- board ---------- */
+.board{
+  max-width:1080px;margin:0 auto;padding:clamp(14px,3vw,26px) clamp(12px,4vw,32px);
+  display:grid;gap:clamp(14px,3vw,26px);
+  grid-template-columns:minmax(0,1fr);
+}
+@media(min-width:900px){ .board{grid-template-columns:minmax(0,340px) minmax(0,1fr);align-items:start} }
+
+.card{
+  background:var(--card);border:1.5px solid #D3D9D1;border-radius:4px;
+  box-shadow:0 1px 0 #fff inset, 0 6px 18px rgba(20,28,34,.06);
+}
+.card-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 14px;border-bottom:1.5px dashed #D3D9D1;
+}
+.eyebrow{font-family:var(--mono);font-size:14.18px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+.card-body{padding:16px 14px 18px}
+
+/* ---------- stage: tank + net ---------- */
+.stage{display:grid;place-items:center;min-height:300px}
+.layer{grid-area:1/1;display:grid;place-items:center;width:100%}
+.layer[hidden]{display:none}
+
+.vstamp{
+  font-family:var(--mono);font-weight:700;font-variant-numeric:tabular-nums;
+  font-size:clamp(22px,5.94vw,30.8px);letter-spacing:.02em;
+  background:var(--blue);color:#fff;padding:8px 14px;border-radius:3px;
+  display:inline-flex;align-items:baseline;gap:8px;
+}
+.vstamp small{font-size:13.75px;letter-spacing:.18em;opacity:.75}
+.lidflag{
+  display:inline-flex;align-items:center;gap:7px;margin-top:12px;
+  font-family:var(--mono);font-size:13.75px;letter-spacing:.16em;
+  padding:5px 10px;border-radius:3px;border:1.5px solid var(--kraft-dark);color:var(--kraft-dark);
+  background:var(--kraft-soft);
+}
+.lidflag.open{border-color:var(--stop);color:var(--stop);background:var(--stop-soft)}
+
+/* net */
+.net{
+  display:grid;
+  grid-template-columns:repeat(3,var(--cs));
+  grid-template-rows:repeat(4,var(--cs));
+  gap:3px;
+}
+.face{
+  border:2.5px dashed var(--kraft-dark);border-radius:3px;background:#fff;
+  display:grid;place-items:center;position:relative;
+  font-family:var(--mono);font-weight:700;font-size:clamp(19.8px,5.06vw,28.6px);color:transparent;
+  transition:transform .55s cubic-bezier(.2,.85,.25,1), opacity .35s ease, background-color .18s, color .18s;
+  transform:translate(var(--dx,0), var(--dy,0)) scale(.15);opacity:0;
+}
+.net.open .face{transform:none;opacity:1}
+.face.done{background:var(--kraft);border-style:solid;border-color:var(--kraft-dark);color:#2A1F04}
+.face.hole{border-color:#B8C0B7;background:repeating-linear-gradient(45deg,#fff 0 7px,#EDEFEA 7px 14px);cursor:not-allowed}
+.face.hole::before,.face.hole::after{content:"";position:absolute;width:56%;height:2.5px;background:#B8C0B7}
+.face.hole::before{transform:rotate(45deg)}
+.face.hole::after{transform:rotate(-45deg)}
+.face.nudge{animation:nudge .5s ease}
+@keyframes nudge{0%,100%{box-shadow:0 0 0 0 rgba(29,78,137,0)}50%{box-shadow:0 0 0 7px rgba(29,78,137,.28)}}
+.sdim{
+  position:absolute;bottom:5px;left:0;right:0;text-align:center;
+  font-family:var(--mono);font-size:13.5px;color:#6B5310;letter-spacing:.04em;
+}
+
+.counter{
+  margin-top:14px;display:inline-flex;align-items:center;gap:10px;
+  font-family:var(--mono);letter-spacing:.16em;font-size:13.75px;color:var(--muted);
+}
+.counter b{
+  font-size:26.4px;letter-spacing:0;color:var(--ink);background:var(--kraft-soft);
+  border:1.5px solid var(--kraft-dark);border-radius:3px;padding:2px 12px;font-variant-numeric:tabular-nums;
+}
+
+/* ---------- panel / steps ---------- */
+.steptitle{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.stepno{
+  font-family:var(--mono);font-weight:700;font-size:15.34px;
+  width:30px;height:30px;display:grid;place-items:center;border-radius:50%;
+  background:var(--ink);color:var(--card);flex:0 0 auto;
+}
+.steptext{font-family:var(--mono);font-size:15.62px;letter-spacing:.14em;text-transform:uppercase}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px}
+.tile{
+  border:2.5px solid #C9D0C8;border-radius:4px;background:#fff;
+  min-height:74px;padding:8px;display:grid;place-items:center;gap:2px;
+  font-family:var(--mono);font-weight:700;font-variant-numeric:tabular-nums;
+  font-size:clamp(22px,4.84vw,28.6px);transition:transform .12s, border-color .15s, background-color .15s;
+}
+.tile small{font-size:13.75px;font-weight:400;letter-spacing:.06em;color:var(--muted)}
+.tile:hover:not(:disabled){border-color:var(--blue);transform:translateY(-2px)}
+.tile:disabled{cursor:default}
+.tile.good{border-color:var(--go);background:var(--go-soft);color:var(--go)}
+.tile.good small{color:var(--go)}
+.tile.bad{border-color:var(--stop);background:var(--stop-soft);color:var(--stop);text-decoration:line-through}
+.tile.bad small{color:var(--stop);text-decoration:none}
+.tile.shake{animation:shake .34s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+
+.mark{width:22px;height:22px;display:block}
+
+/* equation rows */
+.eq{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+.eq-label{font-family:var(--mono);font-size:14.18px;letter-spacing:.18em;color:var(--muted);width:100%;text-transform:uppercase}
+.chip{
+  font-family:var(--mono);font-weight:700;font-variant-numeric:tabular-nums;
+  font-size:clamp(18.7px,3.96vw,23.1px);min-width:56px;text-align:center;
+  padding:9px 12px;border-radius:3px;border:2px solid #C9D0C8;background:#fff;
+}
+.chip.k{background:var(--kraft-soft);border-color:var(--kraft-dark)}
+.chip.b{background:var(--blue-soft);border-color:var(--blue);color:var(--blue)}
+.chip.g{background:var(--go-soft);border-color:var(--go);color:var(--go)}
+.chip.q{background:#fff;border-style:dashed;color:var(--muted)}
+.op{font-family:var(--mono);font-size:19.8px;color:var(--muted)}
+
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.btn{
+  font-family:var(--mono);font-size:15.62px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;
+  padding:14px 20px;border-radius:3px;border:2px solid var(--ink);background:var(--ink);color:var(--card);
+  display:inline-flex;align-items:center;gap:10px;min-height:52px;transition:transform .12s,opacity .15s;
+}
+.btn:hover{transform:translateY(-2px)}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.wide{width:100%;justify-content:center}
+.btn:disabled{opacity:.35;cursor:default;transform:none}
+
+.hintbar{
+  display:flex;align-items:center;gap:10px;margin-top:14px;padding:10px 12px;
+  border-left:4px solid var(--blue);background:var(--blue-soft);border-radius:0 3px 3px 0;
+  font-family:var(--mono);font-size:14.38px;letter-spacing:.06em;color:var(--blue);
+}
+.hintbar[hidden]{display:none}
+
+/* ---------- glossary ---------- */
+.glossary{max-width:1080px;margin:0 auto;padding:6px clamp(12px,4vw,32px) 0}
+.gtitle{font-family:var(--mono);font-size:14.18px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+.gstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px}
+.gcard{
+  background:var(--card);border:1.5px solid #D3D9D1;border-radius:4px;padding:10px;
+  display:grid;justify-items:center;gap:6px;text-align:center;
+}
+.gcard svg{width:68px;height:56px}
+.gword{font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.06em}
+.gsym{font-family:var(--mono);font-size:13.75px;color:var(--blue)}
+
+/* ---------- score ---------- */
+.score{display:grid;gap:12px}
+.srow{display:flex;align-items:center;gap:12px;padding:10px;border:1.5px solid #D3D9D1;border-radius:4px;background:#fff}
+.srow .n{font-family:var(--mono);font-weight:700;font-size:15.34px;width:26px}
+.srow .txt{font-family:var(--mono);font-size:15px;letter-spacing:.08em;color:var(--muted)}
+.srow .val{margin-left:auto;font-family:var(--mono);font-weight:700;font-size:18.88px}
+.formula-card{margin-top:6px;border:2px solid var(--ink);border-radius:4px;overflow:hidden}
+.frow{display:flex;align-items:center;gap:14px;padding:12px 14px;border-bottom:1.5px dashed #D3D9D1}
+.frow:last-child{border-bottom:0}
+.frow .mini{display:grid;grid-template-columns:repeat(3,15px);grid-template-rows:repeat(4,15px);gap:2px;flex:0 0 auto}
+.mini i{background:var(--kraft);border:1px solid var(--kraft-dark);border-radius:1px}
+.mini i.off{background:repeating-linear-gradient(45deg,#fff 0 4px,#EDEFEA 4px 8px);border-color:#B8C0B7}
+.frow .fx{font-family:var(--mono);font-weight:700;font-size:clamp(17.7px,4.01vw,20.9px)}
+.frow .fl{font-family:var(--mono);font-size:13.5px;letter-spacing:.18em;color:var(--muted)}
+
+/* ---------- teacher note ---------- */
+.teacher{max-width:1080px;margin:22px auto 0;padding:0 clamp(12px,4vw,32px)}
+details{background:var(--card);border:1.5px solid #D3D9D1;border-radius:4px}
+summary{padding:12px 14px;font-family:var(--mono);font-size:14.38px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
+.tbody{padding:0 14px 16px;font-size:16.52px;line-height:1.65;color:#33413B}
+.tbody ul{margin:8px 0 0 18px}
+.tbody li{margin-bottom:5px}
+.tbody code{font-family:var(--mono);font-size:15.62px;background:#EDEFEA;padding:1px 5px;border-radius:2px}
+
+
+
+/* ---------- model kubus 3D ---------- */
+.scene{
+  --S: clamp(42px, 11.5vw, 60px);
+  position:relative;width:100%;height:calc(var(--S) * 5.25);
+  perspective:900px;perspective-origin:50% 45%;
+  touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;
+}
+.scene.dragging{cursor:grabbing}
+.model{
+  position:absolute;left:50%;top:58%;width:0;height:0;
+  transform-style:preserve-3d;will-change:transform;
+}
+.pivot{
+  position:absolute;left:calc(var(--S) / -2);top:calc(var(--S) / -2);
+  width:var(--S);height:var(--S);transform-style:preserve-3d;
+}
+.f3{
+  position:absolute;width:var(--S);height:var(--S);box-sizing:border-box;
+  border:2px solid var(--kraft-dark);transform-style:preserve-3d;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);
+}
+.f3.front { inset:0;             background:#D9A441 }
+.f3.top   { left:0; top:calc(var(--S) * -1); transform-origin:50% 100%; background:#E8C378 }
+.f3.bottom{ left:0; top:var(--S);            transform-origin:50% 0%;   background:#B07F22 }
+.f3.left  { left:calc(var(--S) * -1); top:0; transform-origin:100% 50%; background:#C08F2E }
+.f3.right { left:var(--S); top:0;            transform-origin:0% 50%;   background:#CE9A38 }
+.f3.back  { left:0; top:var(--S);            transform-origin:50% 0%;   background:#C89434 }
+.f3.hole{
+  background:transparent !important;border-style:dashed;border-color:var(--stop);
+  box-shadow:none;
+}
+
+/* satu penanda ukuran s, di atas sekali, di luar lukisan.
+   lebarnya mengikut lebar sebenar satu muka, jadi ia sentiasa bermakna */
+.dimtop{
+  position:absolute;left:50%;top:4px;z-index:1;transform:translateX(-50%);
+  width:calc(var(--S) * var(--kk,1));height:31px;pointer-events:none;
+}
+.dimtop i{position:absolute;left:0;right:0;bottom:4px;height:2px;background:var(--kraft-dark)}
+.dimtop i::before,.dimtop i::after{
+  content:"";position:absolute;width:2px;top:-5px;bottom:-5px;background:var(--kraft-dark);
+}
+.dimtop i::before{left:0}
+.dimtop i::after{right:0}
+.dimtop span{
+  position:absolute;left:50%;bottom:13px;transform:translateX(-50%);
+  font-family:var(--mono);font-weight:700;font-size:15.93px;line-height:1;
+  color:var(--ink);white-space:nowrap;
+}
+
+.r3d{
+  position:absolute;top:4px;right:4px;z-index:2;
+  width:34px;height:34px;display:grid;place-items:center;
+  border:1.5px solid #D3D9D1;border-radius:4px;background:rgba(255,255,255,.9);
+}
+.r3d:hover{border-color:var(--blue);color:var(--blue)}
+.r3d svg{width:17px;height:17px}
+.draghint{
+  position:absolute;left:50%;bottom:2px;transform:translateX(-50%);
+  display:flex;align-items:center;gap:6px;pointer-events:none;
+  color:var(--muted);animation:hintpulse 1.9s ease-in-out infinite;
+}
+.draghint svg{width:26px;height:26px}
+@keyframes hintpulse{0%,100%{opacity:.35;transform:translateX(-50%) scale(.94)}50%{opacity:1;transform:translateX(-50%) scale(1.06)}}
+
+.foldbar{display:flex;align-items:center;gap:9px;width:100%;max-width:268px;margin-top:2px}
+.foldbtn{
+  width:40px;height:40px;flex:0 0 auto;display:grid;place-items:center;
+  border:1.5px solid #C9D0C8;border-radius:4px;background:#fff;transition:border-color .15s,transform .12s;
+}
+.foldbtn:hover{border-color:var(--blue);transform:translateY(-1px)}
+.foldbtn svg{width:24px;height:24px}
+#fold{flex:1;min-width:0;-webkit-appearance:none;appearance:none;height:38px;background:transparent;cursor:grab}
+#fold:active{cursor:grabbing}
+#fold::-webkit-slider-runnable-track{height:10px;border-radius:5px;background:var(--kraft-soft);border:1.5px solid var(--kraft-dark)}
+#fold::-webkit-slider-thumb{
+  -webkit-appearance:none;width:32px;height:32px;border-radius:50%;margin-top:-12.5px;
+  background:var(--ink);border:3px solid var(--card);box-shadow:0 2px 7px rgba(20,28,34,.35);
+}
+#fold::-moz-range-track{height:10px;border-radius:5px;background:var(--kraft-soft);border:1.5px solid var(--kraft-dark)}
+#fold::-moz-range-thumb{
+  width:32px;height:32px;border-radius:50%;border:3px solid var(--card);
+  background:var(--ink);box-shadow:0 2px 7px rgba(20,28,34,.35);
+}
+.sline{font-family:var(--mono);font-size:15px;letter-spacing:.14em;color:var(--muted);margin-top:9px}
+.sline b{color:var(--blue);font-size:18.88px;letter-spacing:0}
+
+/* ---------- nota murid ---------- */
+.note{
+  max-width:1080px;margin:22px auto 0;
+  background:var(--card);border:2px solid var(--ink);border-radius:4px;overflow:hidden;
+}
+.note-wrap{padding:0 clamp(12px,4vw,32px)}
+.n-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:12px 16px;background:var(--ink);color:var(--card);
+}
+.n-title{font-family:var(--mono);font-size:15.34px;font-weight:700;letter-spacing:.2em}
+.n-print{
+  font-family:var(--mono);font-size:13.75px;letter-spacing:.14em;font-weight:700;
+  border:1.5px solid #46525C;border-radius:3px;padding:8px 14px;color:var(--card);
+  display:inline-flex;align-items:center;gap:7px;
+}
+.n-print:hover{background:var(--kraft);color:var(--ink);border-color:var(--kraft)}
+.n-body{padding:16px}
+
+.n-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.n-step{
+  border:1.5px solid #D3D9D1;border-radius:4px;padding:12px 10px;
+  display:grid;justify-items:center;gap:7px;text-align:center;position:relative;
+}
+.n-no{
+  position:absolute;top:-11px;left:10px;
+  width:24px;height:24px;display:grid;place-items:center;border-radius:50%;
+  background:var(--ink);color:var(--card);font-family:var(--mono);font-weight:700;font-size:15px;
+}
+.n-step svg{width:52px;height:42px;margin-top:4px}
+.n-lbl{font-family:var(--mono);font-size:15.62px;font-weight:700;letter-spacing:.1em}
+.n-f{
+  font-family:var(--mono);font-size:15.34px;font-weight:700;color:var(--blue);
+  background:var(--blue-soft);border-radius:3px;padding:4px 9px;
+}
+
+.n-block{margin-top:18px}
+.n-cap{
+  font-family:var(--mono);font-size:14.18px;letter-spacing:.2em;color:var(--muted);
+  text-transform:uppercase;margin-bottom:9px;
+}
+.n-chain{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.n-chip{
+  font-family:var(--mono);font-weight:700;font-variant-numeric:tabular-nums;
+  font-size:clamp(16.52px,4.01vw,19.8px);padding:9px 12px;border-radius:3px;
+  border:2px solid #C9D0C8;background:#fff;
+}
+.n-chip.b{background:var(--blue-soft);border-color:var(--blue);color:var(--blue)}
+.n-chip.k{background:var(--kraft-soft);border-color:var(--kraft-dark)}
+.n-chip.g{background:var(--go-soft);border-color:var(--go);color:var(--go)}
+.n-ar{
+  font-family:var(--mono);font-size:18.7px;color:var(--muted);
+}
+
+.mininet{display:grid;grid-template-columns:repeat(3,13px);grid-template-rows:repeat(4,13px);gap:2px;flex:0 0 auto}
+.mininet i{background:var(--kraft);border:1px solid var(--kraft-dark);border-radius:1px}
+.mininet i.off{background:#fff;border:1.5px dashed var(--stop)}
+
+.n-rule{
+  display:flex;align-items:center;gap:14px;padding:11px 12px;
+  border:1.5px solid #D3D9D1;border-radius:4px;margin-bottom:8px;background:#fff;
+}
+.n-rule .rl{font-family:var(--mono);font-size:13.75px;letter-spacing:.16em;min-width:88px}
+.n-rule .rf{font-family:var(--mono);font-weight:700;font-size:clamp(16.52px,4.01vw,18.7px);margin-left:auto}
+.n-rule.closed{border-left:5px solid var(--go)}
+.n-rule.open{border-left:5px solid var(--stop)}
+
+.n-err{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:4px;margin-bottom:7px}
+.n-err.no{background:var(--stop-soft);color:var(--stop)}
+.n-err.yes{background:var(--go-soft);color:var(--go)}
+.n-err b{font-family:var(--mono);font-size:clamp(16.52px,4.01vw,18.7px);font-variant-numeric:tabular-nums}
+.n-err span{font-family:var(--mono);font-size:13.75px;letter-spacing:.1em;margin-left:auto;opacity:.85}
+.n-err svg{width:19px;height:19px;flex:0 0 auto}
+
+.n-words{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:8px;margin-top:18px}
+.n-word{
+  border:1.5px dashed #C9D0C8;border-radius:4px;padding:9px 8px;text-align:center;
+}
+.n-word b{display:block;font-family:var(--mono);font-size:14.38px;letter-spacing:.06em}
+.n-word i{display:block;font-style:normal;font-family:var(--mono);font-size:15px;color:var(--blue);margin-top:2px}
+
+/* ---------- cetak ---------- */
+@media print{
+  @page{size:A4 portrait;margin:11mm}
+  body{background:#fff !important;padding:0}
+  #zoomable{zoom:1 !important}
+  .topbar,.pipeline,.board,.glossary,.teacher,.noprint{display:none !important}
+  .note{margin:0;border-width:1.5px;box-shadow:none;break-inside:avoid}
+  .note-wrap{padding:0}
+  .n-head{background:#fff;color:#000;border-bottom:1.5px solid #000}
+  .n-step,.n-rule,.n-word{break-inside:avoid}
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important;transition-duration:.001ms !important}
+  .face{transform:none;opacity:1}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">BUKA <em>KUBUS</em></div>
+  <div class="tag">ISI PADU ➜ LUAS PERMUKAAN</div>
+  <div class="qwrap">
+    <span class="qlbl">LEVEL</span>
+    <div class="qnav" id="qnav" role="group" aria-label="Pilih level"></div>
+    <div class="starchip" id="starchip">★ <span id="starNow">0</span><u>/ 12</u></div>
+  </div>
+  <div class="zoomctl" role="group" aria-label="Saiz paparan">
+    <button class="zbtn" id="zOut" type="button" aria-label="Kecilkan paparan" title="Kecilkan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14"/></svg>
+    </button>
+    <button class="zval" id="zVal" type="button" aria-label="Kembali ke saiz asal" title="Saiz asal">100%</button>
+    <button class="zbtn" id="zIn" type="button" aria-label="Besarkan paparan" title="Besarkan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </div>
+</header>
+
+<div id="zoomable">
+<nav class="pipeline" id="pipeline" aria-label="Langkah"></nav>
+
+<main class="board">
+  <!-- LEFT: visual stage -->
+  <section class="card" id="cardRajah" aria-label="Rajah">
+    <div class="card-head">
+      <span class="eyebrow">Rajah</span>
+      <span class="eyebrow" id="qlevel">★☆☆</span>
+    </div>
+    <div class="card-body">
+      <div class="stage">
+        <div class="layer" id="layerCube">
+          <div class="scene" id="scene">
+            <div class="dimtop" id="dimtop"><span>s</span><i></i></div>
+            <button class="r3d" id="reset3d" type="button" aria-label="Reset putaran" title="Reset putaran">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>
+            </button>
+            <div class="model" id="model">
+              <div class="pivot" id="pivot">
+                <div class="f3 front">
+                  <div class="f3 top"    id="f-top"></div>
+                  <div class="f3 bottom" id="f-bottom"><div class="f3 back" id="f-back"></div></div>
+                  <div class="f3 left"   id="f-left"></div>
+                  <div class="f3 right"  id="f-right"></div>
+                </div>
+              </div>
+            </div>
+            <div class="draghint" id="draghint">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20M12 2l-3 3M12 2l3 3M12 22l-3-3M12 22l3-3M2 12l3-3M2 12l3 3M22 12l-3-3M22 12l-3 3"/></svg>
+            </div>
+          </div>
+
+          <div class="foldbar">
+            <button class="foldbtn" id="toCube" type="button" aria-label="Tutup jadi kubus" title="Kubus">
+              <svg viewBox="0 0 24 24"><path d="M4 8 L8 4 L20 4 L16 8 Z" fill="#E8C378" stroke="#9A7020" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 8 L20 4 L20 16 L16 20 Z" fill="#C08F2E" stroke="#9A7020" stroke-width="1.6" stroke-linejoin="round"/><rect x="4" y="8" width="12" height="12" fill="#D9A441" stroke="#9A7020" stroke-width="1.6"/></svg>
+            </button>
+            <input type="range" id="fold" min="0" max="100" value="0" step="1" aria-label="Buka bentangan">
+            <button class="foldbtn" id="toNet" type="button" aria-label="Buka jadi bentangan" title="Bentangan">
+              <svg viewBox="0 0 24 24"><g fill="#D9A441" stroke="#9A7020" stroke-width="1"><rect x="9.7" y="1.6" width="4.6" height="4.6"/><rect x="4.3" y="7" width="4.6" height="4.6"/><rect x="9.7" y="7" width="4.6" height="4.6"/><rect x="15.1" y="7" width="4.6" height="4.6"/><rect x="9.7" y="12.4" width="4.6" height="4.6"/><rect x="9.7" y="17.8" width="4.6" height="4.6"/></g></svg>
+            </button>
+          </div>
+
+          <div id="soalSide">
+            <div class="sline" id="sline">s = <b>?</b></div>
+            <div class="vstamp"><small>V =</small><span id="vVal">64</span><small>m³</small></div>
+            <div class="lidflag" id="lidflag"></div>
+          </div>
+          <div id="binaSide" hidden>
+            <div class="coll" id="coll"></div>
+          </div>
+        </div>
+        <div class="layer" id="layerNet" hidden>
+          <div class="net" id="net"></div>
+          <div class="counter" id="counter" hidden>MUKA <b id="cnt">0</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RIGHT: step panel -->
+  <section class="card" id="cardPanel" aria-label="Langkah kerja">
+    <div class="card-head">
+      <span class="eyebrow" id="headLabel">Level <span id="qno">1</span> / 3</span>
+      <button class="btn ghost" id="showMe" style="padding:6px 10px;min-height:0;font-size:14px">▶ Tunjuk cara</button>
+    </div>
+    <div class="card-body" id="panel"></div>
+  </section>
+
+  <section class="card" id="scoreCard" style="grid-column:1/-1" aria-label="Keputusan" hidden></section>
+</main>
+
+<section class="glossary">
+  <div class="gtitle">Kamus visual</div>
+  <div class="gstrip" id="gstrip"></div>
+</section>
+
+
+<div class="note-wrap">
+<section class="note" id="notaMurid">
+  <div class="n-head">
+    <span class="n-title">NOTA MURID</span>
+    <button class="n-print noprint" id="btnPrint" type="button">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4v-6h16v6h-2M8 14h8v7H8z"/></svg>
+      CETAK
+    </button>
+  </div>
+
+  <div class="n-body">
+
+    <div class="n-steps">
+      <div class="n-step"><span class="n-no">1</span>
+        <svg viewBox="0 0 60 46"><path d="M12 16 L22 8 L48 8 L38 16 Z" fill="#E8C378" stroke="#9A7020" stroke-width="2"/><path d="M38 16 L48 8 L48 32 L38 40 Z" fill="#C08F2E" stroke="#9A7020" stroke-width="2"/><rect x="12" y="16" width="26" height="24" fill="#D9A441" stroke="#9A7020" stroke-width="2"/><g fill="#1D4E89"><circle cx="19" cy="24" r="2.2"/><circle cx="27" cy="24" r="2.2"/><circle cx="35" cy="24" r="2.2"/><circle cx="19" cy="33" r="2.2"/><circle cx="27" cy="33" r="2.2"/><circle cx="35" cy="33" r="2.2"/></g></svg>
+        <div class="n-lbl">LIHAT</div><div class="n-f">V m³</div>
+      </div>
+
+      <div class="n-step"><span class="n-no">2</span>
+        <svg viewBox="0 0 60 46"><rect x="15" y="10" width="30" height="28" fill="#F3E2B8" stroke="#9A7020" stroke-width="2"/><path d="M15 38 H45" stroke="#1D4E89" stroke-width="4.5"/><text x="30" y="8" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" fill="#1D4E89">s</text></svg>
+        <div class="n-lbl">CARI s</div><div class="n-f">s × s × s = V</div>
+      </div>
+
+      <div class="n-step"><span class="n-no">3</span>
+        <svg viewBox="0 0 60 46"><g fill="#D9A441" stroke="#9A7020" stroke-width="1.6"><rect x="25.25" y="1.75" width="9.5" height="9.5"/><rect x="14.25" y="12.75" width="9.5" height="9.5"/><rect x="25.25" y="12.75" width="9.5" height="9.5"/><rect x="36.25" y="12.75" width="9.5" height="9.5"/><rect x="25.25" y="23.75" width="9.5" height="9.5"/><rect x="25.25" y="34.75" width="9.5" height="9.5"/></g></svg>
+        <div class="n-lbl">BUKA</div><div class="n-f">kira muka</div>
+      </div>
+
+      <div class="n-step"><span class="n-no">4</span>
+        <svg viewBox="0 0 60 46"><g fill="#D9A441" stroke="#9A7020" stroke-width="2"><rect x="7" y="8" width="14" height="14"/><rect x="23" y="8" width="14" height="14"/><rect x="39" y="8" width="14" height="14"/><rect x="7" y="24" width="14" height="14"/><rect x="23" y="24" width="14" height="14"/><rect x="39" y="24" width="14" height="14"/></g></svg>
+        <div class="n-lbl">DARAB</div><div class="n-f">muka × s × s</div>
+      </div>
+    </div>
+
+    <div class="n-block">
+      <div class="n-cap">Contoh</div>
+      <div class="n-chain">
+        <span class="n-chip b">1728 m³</span>
+        <span class="n-ar">➜</span>
+        <span class="n-chip k">s = 12</span>
+        <span class="n-ar">➜</span>
+        <span class="mininet" data-mini="closed"></span>
+        <span class="n-chip k">6 muka</span>
+        <span class="n-ar">➜</span>
+        <span class="n-chip">12 × 12 = 144</span>
+        <span class="n-ar">➜</span>
+        <span class="n-chip g">6 × 144 = 864 m²</span>
+      </div>
+    </div>
+
+    <div class="n-block">
+      <div class="n-cap">Ingat</div>
+      <div class="n-rule closed">
+        <span class="mininet" data-mini="closed"></span>
+        <span class="rl">TERTUTUP</span>
+        <span class="rf">6 × s × s</span>
+      </div>
+      <div class="n-rule open">
+        <span class="mininet" data-mini="open"></span>
+        <span class="rl">TERBUKA</span>
+        <span class="rf">5 × s × s</span>
+      </div>
+    </div>
+
+    <div class="n-block">
+      <div class="n-cap">Awas &nbsp;·&nbsp; s = 12</div>
+      <div class="n-err no">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        <b>6 × 12 = 72</b><span>lupa s × s</span>
+      </div>
+      <div class="n-err no">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        <b>6 × 1728</b><span>itu V</span>
+      </div>
+      <div class="n-err yes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l5.5 5.5L20 6"/></svg>
+        <b>6 × 12 × 12 = 864</b><span>betul</span>
+      </div>
+    </div>
+
+    <div class="n-words">
+      <div class="n-word"><b>ISI PADU</b><i>V</i></div>
+      <div class="n-word"><b>SISI</b><i>s</i></div>
+      <div class="n-word"><b>BENTANGAN</b><i><svg width="21" height="28" viewBox="0 0 21 28"><g fill="#D9A441" stroke="#9A7020" stroke-width="1"><rect x="7.8" y="1.7" width="5.4" height="5.4"/><rect x="1.4" y="8.1" width="5.4" height="5.4"/><rect x="7.8" y="8.1" width="5.4" height="5.4"/><rect x="14.2" y="8.1" width="5.4" height="5.4"/><rect x="7.8" y="14.5" width="5.4" height="5.4"/><rect x="7.8" y="20.9" width="5.4" height="5.4"/></g></svg></i></div>
+      <div class="n-word"><b>MUKA</b><i>1 kotak</i></div>
+      <div class="n-word"><b>LUAS PERMUKAAN</b><i>L, m²</i></div>
+    </div>
+
+  </div>
+</section>
+</div>
+
+<div class="teacher">
+  <details>
+    <summary>Nota guru</summary>
+    <div class="tbody">
+      <p><strong>Kenapa reka bentuk ini.</strong> Murid pekak selalunya bukan gagal pada matematik, tetapi tersekat pada ayat soalan. Jadi soalan di sini dipaparkan sebagai lukisan teknikal (tangki + cop <code>V</code> + tanda penutup), bukan perenggan. Setiap langkah ialah satu tindakan visual: pilih <code>s</code>, bentangkan kubus, kira muka satu demi satu, darab.</p>
+      <ul>
+        <li><strong>Tiada bunyi langsung.</strong> Semua maklum balas adalah visual: warna, bentuk (✓ / ✕), getaran ringan.</li>
+        <li><strong>Warna + bentuk.</strong> Betul dan salah dibezakan oleh ikon dan garis, bukan warna sahaja, untuk murid buta warna.</li>
+        <li><strong>Bilangan muka dikira sendiri.</strong> Murid tap setiap muka. Nombor 6 (atau 5) datang daripada tindakan mereka, bukan daripada rumus yang dihafal.</li>
+        <li><strong>Soalan 3 ialah ujian sebenar.</strong> Tangki terbuka. Bentangan hanya ada 5 muka, dan lubang itu kelihatan pada skrin sebelum murid mengira.</li>
+        <li><strong>Untuk menambah video BIM:</strong> buka fail ini dalam editor teks, cari <code>BIM_VIDEO</code>, dan letakkan pautan video isyarat bagi setiap istilah.</li>
+      </ul>
+      <p><label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700">
+        <input type="checkbox" id="unlockAll" style="width:20px;height:20px"> Buka semua level (untuk guru)
+      </label></p>
+      <p><strong>Cadangan penggunaan.</strong> Tayang "Tunjuk cara" sekali di hadapan kelas tanpa bercakap, biar murid tonton geraknya. Kemudian murid buat sendiri. Selepas itu baru perkenalkan ayat penuh soalan SPM.</p>
+    </div>
+  </details>
+</div>
+</div>
+
+<script>
+/* ===== BIM_VIDEO: letak pautan video isyarat di sini (kosongkan jika tiada) =====
+   Contoh: isiPadu: "https://.../isi-padu.mp4"
+*/
+const BIM_VIDEO = { isiPadu:"", sisi:"", bentangan:"", luasPermukaan:"", tertutup:"" };
+
+/* ---------- data soalan ---------- */
+const QUESTIONS = [
+  { level:1, V:64,   s:4,  sOpt:[3,4,5,6],     faces:6, closed:true,
+    ans:96,   aOpt:[24,96,16,384],
+    why:{ 24:"Itu 6 × s. Kena 6 × s².", 16:"Itu 1 muka sahaja.", 384:"Itu 6 × isi padu." } },
+
+  { level:2, V:1728, s:12, sOpt:[10,12,14,18], faces:6, closed:true,
+    ans:864,  aOpt:[576,720,864,1152],
+    why:{ 576:"Itu 4 muka. Kira semula.", 720:"Itu 5 muka. Tangki ini tertutup.", 1152:"Itu 8 muka. Kubus ada 6." } },
+
+  { level:3, V:3375, s:15, sOpt:[12,15,20,25], faces:5, closed:false,
+    ans:1125, aOpt:[225,900,1125,1350],
+    why:{ 225:"Itu 1 muka sahaja.", 900:"Itu 4 muka. Kira semula.", 1350:"Itu 6 muka. Tangki ini TERBUKA, tiada penutup." } }
+];
+
+const NET_CELLS = [
+  {k:"top",    r:1, c:2},
+  {k:"left",   r:2, c:1},
+  {k:"front",  r:2, c:2},
+  {k:"right",  r:2, c:3},
+  {k:"bottom", r:3, c:2},
+  {k:"back",   r:4, c:2}
+];
+
+/* ---------- state ---------- */
+let qi = 0, step = 0, counted = 0, tries = 0, auto = false;
+let li = 0, mode = "soal", unlockAll = false, usedHelp = false;
+const stars = [];                 // 0-3 setiap level, undefined = belum buat
+const LEVELS = 4;                 // 3 soalan + 1 mod BINA
+const unlocked = i => unlockAll || i === 0 || stars[i-1] !== undefined;
+const totalStars = () => stars.reduce((a,v)=>a+(v||0), 0);
+const allDone = () => stars.filter(v=>v !== undefined).length === LEVELS;
+
+const $ = s => document.querySelector(s);
+const panel = $("#panel"), net = $("#net"), qnav = $("#qnav"), pipeline = $("#pipeline");
+
+const TICK = '<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l5.5 5.5L20 6"/></svg>';
+const CROSS = '<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+
+/* ---------- model kubus 3D ---------- */
+const M3 = { open:0, rx:-16, ry:26, raf:null, timer:null, built:false, tw:0 };
+
+function apply3d(){
+  const A = 90 * (1 - M3.open), r = Math.PI / 180;
+  // tallest extent of the model at this fold angle, in units of S
+  const hTop = 0.5 + Math.cos(A*r) + 0.5 * M3.open;
+  const hBot = Math.abs(0.5 + Math.cos(A*r) + Math.cos(2*A*r) - 0.5 * M3.open);
+  const k = 1.95 / Math.max(0.9, hTop, hBot);
+  M3.top.style.transform    = `rotateX(${A}deg)`;
+  M3.bottom.style.transform = `rotateX(${-A}deg)`;
+  M3.left.style.transform   = `rotateY(${-A}deg)`;
+  M3.right.style.transform  = `rotateY(${A}deg)`;
+  M3.back.style.transform   = `rotateX(${-A}deg)`;
+  M3.pivot.style.transform =
+    `translateY(calc(var(--S) * ${(-0.5 * M3.open).toFixed(4)})) ` +
+    `translateZ(calc(var(--S) * ${(0.5 * (1 - M3.open)).toFixed(4)}))`;
+  M3.model.style.transform = `scale(${k.toFixed(3)}) rotateX(${M3.rx.toFixed(2)}deg) rotateY(${M3.ry.toFixed(2)}deg)`;
+  M3.scene.style.setProperty("--kk", k.toFixed(4));
+  M3.slider.value = Math.round(M3.open * 100);
+
+}
+
+function stopSpin(){
+  if(M3.raf){ cancelAnimationFrame(M3.raf); M3.raf = null; }
+  if(M3.timer){ clearTimeout(M3.timer); M3.timer = null; }
+  const h = document.getElementById("draghint");
+  if(h) h.remove();
+}
+function startSpin(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const loop = ()=>{ M3.ry += 0.22; apply3d(); M3.raf = requestAnimationFrame(loop); };
+  M3.raf = requestAnimationFrame(loop);
+  M3.timer = setTimeout(()=>{ if(M3.raf){ cancelAnimationFrame(M3.raf); M3.raf = null; } }, 14000);
+}
+
+function tweenView(open, rx, ry, ms = 720, shortWay = true){
+  const tok = ++M3.tw;
+  return new Promise(done=>{
+    const f0 = M3.open, x0 = M3.rx, y0 = M3.ry, t0 = performance.now();
+    let dy = ry - y0;
+    if(shortWay){
+      dy %= 360;
+      if(dy >  180) dy -= 360;
+      if(dy < -180) dy += 360;
+    }
+    const walk = now =>{
+      if(tok !== M3.tw) return done();
+      const p = Math.min(1, (now - t0) / ms);
+      const e = p < .5 ? 2*p*p : 1 - Math.pow(-2*p + 2, 2)/2;
+      M3.open = f0 + (open - f0) * e;
+      M3.rx   = x0 + (rx - x0) * e;
+      M3.ry   = y0 + (dy) * e;
+      apply3d();
+      p < 1 ? requestAnimationFrame(walk) : done();
+    };
+    requestAnimationFrame(walk);
+  });
+}
+const VIEW_CUBE = [0, -16, 26];   // kubus, sudut 3/4
+const VIEW_NET  = [1, 0, 0];      // bentangan, rata depan
+
+function build3d(){
+  if(M3.built) return;
+  M3.scene  = $("#scene");  M3.model = $("#model"); M3.pivot = $("#pivot");
+  M3.top    = $("#f-top");  M3.bottom = $("#f-bottom");
+  M3.left   = $("#f-left"); M3.right  = $("#f-right"); M3.back = $("#f-back");
+  M3.slider = $("#fold");
+
+  let drag = false, lx = 0, ly = 0;
+  M3.scene.addEventListener("pointerdown", e=>{
+    if(e.target.closest(".r3d")) return;
+    drag = true; lx = e.clientX; ly = e.clientY;
+    M3.scene.setPointerCapture(e.pointerId);
+    M3.scene.classList.add("dragging");
+    stopSpin();
+  });
+  M3.scene.addEventListener("pointermove", e=>{
+    if(!drag) return;
+    M3.ry += (e.clientX - lx) * 0.45;
+    M3.rx  = Math.max(-85, Math.min(85, M3.rx - (e.clientY - ly) * 0.45));
+    lx = e.clientX; ly = e.clientY;
+    apply3d();
+  });
+  const stop = ()=>{ drag = false; M3.scene.classList.remove("dragging"); };
+  M3.scene.addEventListener("pointerup", stop);
+  M3.scene.addEventListener("pointercancel", stop);
+
+  M3.slider.addEventListener("input", e=>{ stopSpin(); M3.open = e.target.value/100; apply3d(); });
+  $("#toCube").addEventListener("click", ()=>{ stopSpin(); tweenView(...VIEW_CUBE); });
+  $("#toNet").addEventListener("click",  ()=>{ stopSpin(); tweenView(...VIEW_NET); });
+  $("#reset3d").addEventListener("click", ()=>{ stopSpin(); tweenView(M3.open, VIEW_CUBE[1], VIEW_CUBE[2], 420); });
+
+  M3.built = true;
+  apply3d();
+  startSpin();
+}
+
+function sync3d(q){
+  build3d();
+  M3.top.classList.toggle("hole", !q.closed);
+  const known = step > 0;
+  $("#dimtop").querySelector("span").textContent = known ? `${q.s} m` : "s";
+  $("#sline").innerHTML = `s = <b>?</b>`;
+  $("#sline").hidden = known;
+}
+
+/* ---------- render ---------- */
+const ICON_LOCK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>`;
+const ICON_BINA = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="2" width="6" height="6"/><rect x="3" y="9" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/><rect x="15" y="9" width="6" height="6"/><rect x="9" y="16" width="6" height="6"/></svg>`;
+
+function renderQNav(){
+  qnav.innerHTML = Array.from({length:LEVELS}, (_,i)=>{
+    const open = unlocked(i);
+    const here = mode !== "score" && i === li;
+    const got  = stars[i] || 0;
+    const face = !open ? ICON_LOCK : (i === 3 ? ICON_BINA : (i+1));
+    const dots = `<span class="qdots">${[0,1,2].map(d=>`<b class="${d<got?"lit":""}"></b>`).join("")}</span>`;
+    return `<button class="qbtn${here?" on":""}${open?"":" lock"}" type="button" data-q="${i}"`
+         + ` ${open?"":"disabled"} aria-label="Level ${i+1}" aria-current="${here}">${face}${dots}</button>`;
+  }).join("");
+  $("#starNow").textContent = totalStars();
+}
+qnav.addEventListener("click", e=>{
+  const b = e.target.closest(".qbtn");
+  if(b && !b.classList.contains("lock")) gotoLevel(+b.dataset.q);
+});
+function renderPipeline(){
+  const nodes = [
+    {t:"V  m³",  a:0, b:0},
+    {t:"∛",      a:0, b:0},
+    {t:"s",      a:0, b:0},
+    {t:"BENTANG",a:1, b:2},
+    {t:"n × s²", a:3, b:3},
+    {t:"L  m²",  a:4, b:4}
+  ];
+  pipeline.innerHTML = nodes.map((n,i)=>{
+    const cls = step>n.b ? "past" : (step>=n.a && step<=n.b) ? "live" : "";
+    return `<div class="node ${cls}"><b>${n.t}</b></div>` + (i<nodes.length-1?'<span class="arrow"></span>':'');
+  }).join("");
+}
+function renderStage(){
+  const q = QUESTIONS[qi];
+  $("#vVal").textContent = q.V.toLocaleString("en-US");
+  $("#qlevel").textContent = "●".repeat(q.level) + "○".repeat(3-q.level);
+  $("#headLabel").innerHTML = `Level <span id="qno">${li+1}</span> / 4`;
+  sync3d(q);
+  const lf = $("#lidflag");
+  lf.className = "lidflag" + (q.closed?"":" open");
+  lf.innerHTML = q.closed
+    ? `<svg width="20" height="16" viewBox="0 0 24 18" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M2 8h20M4 8l4-5h8l4 5M3 8v8h18V8"/></svg> TERTUTUP`
+    : `<svg width="20" height="16" viewBox="0 0 24 18" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3 7v9h18V7" /><path d="M2 5l7-3 4 3" stroke-dasharray="3 2"/></svg> TERBUKA`;
+  $("#layerCube").hidden = step >= 2;
+  $("#layerNet").hidden  = step <  2;
+}
+
+function buildNet(){
+  const q = QUESTIONS[qi];
+  net.classList.remove("open");
+  net.innerHTML = "";
+  NET_CELLS.forEach((cell,i)=>{
+    const isHole = (!q.closed && cell.k === "top");
+    const el = document.createElement(isHole ? "div" : "button");
+    el.className = "face" + (isHole ? " hole" : "");
+    el.style.gridArea = `${cell.r}/${cell.c}`;
+    el.style.transitionDelay = (i*80) + "ms";
+    el.style.setProperty("--dx", `calc(${2 - cell.c} * (var(--cs) + 3px))`);
+    el.style.setProperty("--dy", `calc(${2.5 - cell.r} * (var(--cs) + 3px))`);
+    if(!isHole){
+      el.type = "button";
+      el.setAttribute("aria-label","Muka kubus, tap untuk kira");
+      el.innerHTML = `<span class="num"></span><span class="sdim">${q.s}×${q.s}</span>`;
+      el.addEventListener("click", ()=>tapFace(el));
+    }
+    net.appendChild(el);
+  });
+  requestAnimationFrame(()=>requestAnimationFrame(()=>net.classList.add("open")));
+}
+
+function tapFace(el){
+  if(el.classList.contains("done")) return;
+  counted++;
+  el.classList.add("done");
+  el.querySelector(".num").textContent = counted;
+  $("#cnt").textContent = counted;
+  const q = QUESTIONS[qi];
+  if(counted === q.faces){ step = 3; render(); }
+  else renderPanel();
+}
+
+/* ---------- panel per langkah ---------- */
+function renderPanel(){
+  const q = QUESTIONS[qi];
+
+  if(step === 0){
+    panel.innerHTML = `
+      <div class="steptitle"><span class="stepno">1</span><span class="steptext">Cari sisi &nbsp;s</span></div>
+      <div class="eq">
+        <span class="eq-label">s × s × s = isi padu</span>
+        <span class="chip q">s</span><span class="op">×</span>
+        <span class="chip q">s</span><span class="op">×</span>
+        <span class="chip q">s</span><span class="op">=</span>
+        <span class="chip b">${q.V.toLocaleString("en-US")}</span>
+      </div>
+      <div class="tiles" id="tiles" style="margin-top:18px"></div>
+      <div class="hintbar" id="hint" hidden></div>`;
+    const t = $("#tiles");
+    q.sOpt.forEach(v=>{
+      const b = document.createElement("button");
+      b.className = "tile"; b.type = "button";
+      b.innerHTML = `${v}<small>${v}×${v}×${v} = ${(v**3).toLocaleString("en-US")}</small>`;
+      b.addEventListener("click", ()=>pickS(b, v));
+      t.appendChild(b);
+    });
+  }
+
+  if(step === 1){
+    panel.innerHTML = `
+      <div class="steptitle"><span class="stepno">2</span><span class="steptext">Bentangkan kubus</span></div>
+      <div class="eq">
+        <span class="eq-label">sisi ditemui</span>
+        <span class="chip g">s = ${q.s}</span>
+      </div>
+      <button class="btn wide" id="unfold" style="margin-top:18px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M9 3h6v6H9zM3 9h6v6H3zM15 9h6v6h-6zM9 15h6v6H9z"/></svg>
+        BUKA
+      </button>`;
+    $("#unfold").addEventListener("click", async ()=>{
+      stopSpin();
+      $("#unfold").disabled = true;
+      await tweenView(...VIEW_NET, 640);
+      step = 2; render();
+    });
+  }
+
+  if(step === 2){
+    const q2 = QUESTIONS[qi];
+    panel.innerHTML = `
+      <div class="steptitle"><span class="stepno">3</span><span class="steptext">Kira muka</span></div>
+      <div class="eq"><span class="eq-label">tap setiap muka kuning</span></div>
+      <div class="eq">
+        <span class="chip ${counted?'k':'q'}">${counted}</span>
+        <span class="op">/</span>
+        <span class="chip q">?</span>
+      </div>
+      ${!q2.closed ? `<div class="hintbar">✕ = tiada penutup, jangan kira</div>` : ``}`;
+  }
+
+  if(step === 3){
+    const sq = q.s * q.s;
+    panel.innerHTML = `
+      <div class="steptitle"><span class="stepno">4</span><span class="steptext">Darab</span></div>
+      <div class="eq">
+        <span class="eq-label">luas 1 muka</span>
+        <span class="chip k">${q.s}</span><span class="op">×</span>
+        <span class="chip k">${q.s}</span><span class="op">=</span>
+        <span class="chip g">${sq}</span>
+      </div>
+      <div class="eq" style="margin-top:16px">
+        <span class="eq-label">jumlah luas permukaan</span>
+        <span class="chip b">${q.faces}</span><span class="op">×</span>
+        <span class="chip g">${sq}</span><span class="op">=</span>
+        <span class="chip q">?</span>
+      </div>
+      <div class="tiles" id="tiles" style="margin-top:20px"></div>
+      <div class="hintbar" id="hint" hidden></div>`;
+    const t = $("#tiles");
+    q.aOpt.forEach(v=>{
+      const b = document.createElement("button");
+      b.className = "tile"; b.type = "button";
+      b.innerHTML = `${v.toLocaleString("en-US")}<small>m²</small>`;
+      b.addEventListener("click", ()=>pickAns(b, v));
+      t.appendChild(b);
+    });
+  }
+
+  if(step === 4){
+    const got = stars[li] || 1;
+    panel.innerHTML = `
+      <div class="reward">
+        <div class="rstars">
+          ${[0,1,2].map(i=>`<span class="rs${i<got?" on":""}" style="animation-delay:${i*190}ms">\u2605</span>`).join("")}
+        </div>
+        <div class="eq" style="justify-content:center">
+          <span class="chip b">${q.faces}</span><span class="op">\u00d7</span>
+          <span class="chip k">${q.s*q.s}</span><span class="op">=</span>
+          <span class="chip g">${q.ans.toLocaleString("en-US")} m\u00b2</span>
+        </div>
+        <div class="actions">
+          <button class="btn wide" id="next">${(li + 1 < LEVELS && !allDone()) ? "LEVEL SETERUSNYA \u279c" : "LIHAT KEPUTUSAN \u279c"}</button>
+        </div>
+      </div>`;
+    $("#next").addEventListener("click", nextQ);
+    if(M3.built) tweenView(M3.open, M3.rx, M3.ry + 720, 1500, false);
+  }
+}
+
+function pickS(btn, v){
+  const q = QUESTIONS[qi];
+  if(v === q.s){
+    [...$("#tiles").children].forEach(b=>b.disabled = true);
+    btn.classList.add("good");
+    setTimeout(()=>{ step = 1; render(); }, 620);
+  }else{
+    tries++;
+    btn.classList.add("bad","shake");
+    btn.disabled = true;
+    setTimeout(()=>btn.classList.remove("shake"), 350);
+    const h = $("#hint");
+    h.hidden = false;
+    h.innerHTML = `${v}×${v}×${v} = ${(v**3).toLocaleString("en-US")} &nbsp;≠&nbsp; ${q.V.toLocaleString("en-US")}`;
+  }
+}
+
+function pickAns(btn, v){
+  const q = QUESTIONS[qi];
+  if(v === q.ans){
+    [...$("#tiles").children].forEach(b=>b.disabled = true);
+    btn.classList.add("good");
+    stars[li] = usedHelp ? 1 : (tries === 0 ? 3 : tries === 1 ? 2 : 1);
+    setTimeout(()=>{ step = 4; render(); }, 560);
+  }else{
+    tries++;
+    btn.classList.add("bad","shake");
+    btn.disabled = true;
+    setTimeout(()=>btn.classList.remove("shake"), 350);
+    const h = $("#hint"); h.hidden = false;
+    h.innerHTML = q.why[v] || `${q.faces} × ${q.s*q.s} ≠ ${v.toLocaleString("en-US")}`;
+    [...net.querySelectorAll(".face")].forEach(f=>{
+      f.classList.add("nudge"); setTimeout(()=>f.classList.remove("nudge"), 520);
+    });
+  }
+}
+
+function render(){
+  renderQNav();
+  if(mode === "bina"){ renderBina(); return; }
+  pipeline.hidden = false;
+  $("#showMe").hidden = false;
+  $("#soalSide").hidden = false; $("#binaSide").hidden = true;
+  renderPipeline(); renderStage(); renderPanel();
+  if(step === 2 && !net.classList.contains("open")){
+    buildNet();
+    $("#counter").hidden = false;
+    $("#cnt").textContent = counted;
+  }
+}
+
+function gotoLevel(i){
+  li = i;
+  mode = (i === 3) ? "bina" : "soal";
+  qi = Math.min(i, QUESTIONS.length - 1);
+  step = 0; counted = 0; tries = 0; usedHelp = false;
+  net.classList.remove("open"); net.innerHTML = ""; $("#counter").hidden = true;
+  $("#scoreCard").hidden = true;
+  $("#cardRajah").hidden = false;
+  $("#cardPanel").hidden = false;
+  BINA.cells.clear(); BINA.busy = false;
+  if(M3.built){ M3.tw++; [M3.open, M3.rx, M3.ry] = VIEW_CUBE; apply3d(); }
+  render();
+}
+function nextQ(){
+  if(li + 1 < LEVELS && !allDone()) gotoLevel(li + 1);
+  else showScore();
+}
+
+
+/* ---------- mod BINA: murid susun 6 petak, uji sama ada ia jadi kubus ---------- */
+const GRID = 5, TARGET = 3;
+const BINA = { cells:new Set(), found:new Set(), shapes:[], busy:false };
+
+/* gulingkan dadu merentasi petak. kalau 6 petak jatuh pada 6 muka
+   berlainan, bentangan itu sah. kalau dua petak jatuh pada muka
+   yang sama, itulah puncanya, dan kita pulangkan dua petak itu. */
+function checkNet(cells){
+  if(cells.length !== 6) return { ok:false, why:"count" };
+  const K = (r,c) => r + "," + c;
+  const set = new Set(cells.map(([r,c]) => K(r,c)));
+  const roll = {
+    E: s => ({U:s.W, W:s.D, D:s.E, E:s.U, N:s.N, S:s.S}),
+    W: s => ({U:s.E, E:s.D, D:s.W, W:s.U, N:s.N, S:s.S}),
+    N: s => ({U:s.S, S:s.D, D:s.N, N:s.U, E:s.E, W:s.W}),
+    S: s => ({U:s.N, N:s.D, D:s.S, S:s.U, E:s.E, W:s.W})
+  };
+  const seen = new Map(), owner = new Map();
+  const [r0, c0] = cells[0], s0 = {U:0, D:1, N:2, S:3, E:4, W:5};
+  seen.set(K(r0,c0), s0); owner.set(s0.D, [r0,c0]);
+  const queue = [[r0,c0]];
+  while(queue.length){
+    const [r,c] = queue.shift(), st = seen.get(K(r,c));
+    for(const [nr,nc,dir] of [[r-1,c,"N"],[r+1,c,"S"],[r,c+1,"E"],[r,c-1,"W"]]){
+      const k = K(nr,nc);
+      if(!set.has(k) || seen.has(k)) continue;
+      const ns = roll[dir](st);
+      if(owner.has(ns.D)) return { ok:false, why:"clash", clash:[owner.get(ns.D), [nr,nc]] };
+      owner.set(ns.D, [nr,nc]);
+      seen.set(k, ns);
+      queue.push([nr,nc]);
+    }
+  }
+  if(seen.size !== 6) return { ok:false, why:"split" };
+  return { ok:true };
+}
+
+/* kunci bentuk yang sama walau diputar atau dicerminkan, supaya
+   bentangan yang serupa tak dikira dua kali */
+function canonKey(cells){
+  const norm = pts => {
+    const mr = Math.min(...pts.map(p=>p[0])), mc = Math.min(...pts.map(p=>p[1]));
+    return pts.map(([r,c]) => [r-mr, c-mc]).map(p=>p.join(",")).sort().join(" ");
+  };
+  let pts = cells.map(p => p.slice()), best = null;
+  for(let f = 0; f < 2; f++){
+    for(let t = 0; t < 4; t++){
+      const k = norm(pts);
+      if(best === null || k < best) best = k;
+      pts = pts.map(([r,c]) => [c, -r]);
+    }
+    pts = pts.map(([r,c]) => [r, -c]);
+  }
+  return best;
+}
+
+const binaCells = () => [...BINA.cells].map(k => k.split(",").map(Number));
+
+function renderColl(){
+  const c = $("#coll");
+  const slots = Math.max(TARGET, BINA.shapes.length);
+  c.innerHTML = Array.from({length:slots}, (_,i)=>{
+    const sh = BINA.shapes[i];
+    if(!sh) return `<div class="collslot">?</div>`;
+    const mr = Math.min(...sh.map(p=>p[0])), mc = Math.min(...sh.map(p=>p[1]));
+    const on = new Set(sh.map(([r,c]) => (r-mr) + "," + (c-mc)));
+    let g = "";
+    for(let r = 0; r < 4; r++) for(let col = 0; col < 4; col++)
+      if(on.has(r + "," + col)) g += `<i style="grid-area:${r+1}/${col+1}"></i>`;
+    return `<div class="collitem">${g}</div>`;
+  }).join("");
+}
+
+function renderBina(){
+  pipeline.hidden = true;
+  $("#headLabel").textContent = "Level 4 \u00b7 Bina";
+  $("#showMe").hidden = true;
+  $("#qlevel").textContent = `\u2605 ${BINA.found.size} / ${TARGET}`;
+  $("#layerCube").hidden = false;
+  $("#layerNet").hidden = true;
+  $("#counter").hidden = true;
+  net.classList.remove("open"); net.innerHTML = "";
+  build3d();
+  $("#dimtop").querySelector("span").textContent = "s";
+  $("#cardRajah").hidden = false; $("#cardPanel").hidden = false; $("#scoreCard").hidden = true;
+  $("#soalSide").hidden = true; $("#binaSide").hidden = false;
+  renderColl();
+
+  const n = BINA.cells.size;
+  panel.innerHTML = `
+    <div class="steptitle"><span class="stepno">\u25a6</span><span class="steptext">Bina bentangan</span></div>
+    <div class="eq"><span class="eq-label">tap 6 petak, kemudian lipat</span></div>
+    ${BINA.found.size === 0 ? `<div class="hintbar" style="margin:0 0 12px">
+        \u25a6 6 petak mesti bersentuhan tepi</div>` : ``}
+    <div class="bgrid" id="bgrid">
+      ${Array.from({length:GRID*GRID}, (_,i)=>{
+        const r = Math.floor(i/GRID), c = i % GRID;
+        return `<button class="bcell${BINA.cells.has(r+","+c)?" on":""}" type="button"
+                 data-r="${r}" data-c="${c}" aria-label="Petak ${r+1} ${c+1}"></button>`;
+      }).join("")}
+    </div>
+    <div class="bbar">
+      <span class="bcount${n===6?" full":""}"><b>${n}</b> / 6</span>
+    </div>
+    <div class="actions">
+      <button class="btn wide" id="bfold" ${n===6?"":"disabled"}>LIPAT</button>
+      <button class="btn ghost" id="bclear" style="width:100%;justify-content:center">KOSONGKAN</button>
+    </div>`;
+
+  $("#bgrid").addEventListener("click", e=>{
+    const b = e.target.closest(".bcell");
+    if(!b || BINA.busy) return;
+    const k = b.dataset.r + "," + b.dataset.c;
+    if(BINA.cells.has(k)) BINA.cells.delete(k);
+    else if(BINA.cells.size < 6) BINA.cells.add(k);
+    else { b.classList.add("shake"); setTimeout(()=>b.classList.remove("shake"), 340); return; }
+    renderBina();
+  });
+  $("#bclear").addEventListener("click", ()=>{ if(!BINA.busy){ BINA.cells.clear(); renderBina(); } });
+  $("#bfold").addEventListener("click", foldTest);
+}
+
+async function foldTest(){
+  if(BINA.busy) return;
+  BINA.busy = true;
+  const cells = binaCells();
+  const res = checkNet(cells);
+  const at = (r,c) => document.querySelector(`.bcell[data-r="${r}"][data-c="${c}"]`);
+
+  if(!res.ok){
+    if(res.why === "clash"){
+      res.clash.forEach(([r,c])=>{ const e = at(r,c); if(e){ e.classList.add("bad","shake"); } });
+    }else{
+      document.querySelectorAll(".bcell.on").forEach(e=>e.classList.add("bad","shake"));
+    }
+    setTimeout(()=>{
+      document.querySelectorAll(".bcell").forEach(e=>e.classList.remove("bad","shake"));
+      BINA.busy = false;
+    }, 900);
+    return;
+  }
+
+  document.querySelectorAll(".bcell.on").forEach((e,i)=>
+    setTimeout(()=>e.classList.add("good"), i*70));
+
+  const key = canonKey(cells);
+  const fresh = !BINA.found.has(key);
+  if(fresh){ BINA.found.add(key); BINA.shapes.push(cells); }
+  stars[3] = Math.min(3, BINA.found.size);
+
+  stopSpin();
+  await tweenView(0, VIEW_CUBE[1], M3.ry + 720, 1500, false);
+  BINA.cells.clear();
+  BINA.busy = false;
+  if(BINA.found.size >= TARGET && stars[3] === 3 && fresh){ step = 0; render(); binaDone(); }
+  else render();
+}
+
+function binaDone(){
+  panel.innerHTML = `
+    <div class="reward">
+      <div class="rstars">
+        ${[0,1,2].map(i=>`<span class="rs on" style="animation-delay:${i*190}ms">\u2605</span>`).join("")}
+      </div>
+      <div class="eq" style="justify-content:center">
+        <span class="chip g">${BINA.found.size} bentangan</span>
+      </div>
+      <div class="actions">
+        <button class="btn wide" id="next">LIHAT KEPUTUSAN \u279c</button>
+        <button class="btn ghost" id="bmore" style="width:100%;justify-content:center">CARI LAGI</button>
+      </div>
+    </div>`;
+  $("#next").addEventListener("click", showScore);
+  $("#bmore").addEventListener("click", ()=>{ BINA.cells.clear(); render(); });
+}
+
+/* ---------- keputusan ---------- */
+function showScore(){
+  mode = "score";
+  stopSpin();
+  renderQNav();
+  pipeline.hidden = true;
+  $("#cardRajah").hidden = true;
+  $("#cardPanel").hidden = true;
+  const sc = $("#scoreCard");
+  sc.hidden = false;
+  const row = (n, txt, got) => {
+    const s3 = got === undefined ? "" : [0,1,2].map(i=>`<span style="color:${i<got?"var(--kraft)":"#D5DAD4"}">\u2605</span>`).join("");
+    return `<div class="srow">
+        <span class="n">${n}</span>
+        <span class="txt">${txt}</span>
+        <span class="val" style="font-size:19px">${got === undefined ? "\u2013" : s3}</span>
+      </div>`;
+  };
+  sc.innerHTML = `
+    <div class="card-head">
+      <span class="eyebrow">Keputusan</span>
+      <span class="eyebrow" style="color:var(--kraft-dark)">\u2605 ${totalStars()} / ${LEVELS*3}</span>
+    </div>
+    <div class="card-body">
+      <div class="score">
+        ${QUESTIONS.map((q,i)=>row(i+1,
+            `${q.V.toLocaleString("en-US")} m\u00b3 \u279c ${q.ans.toLocaleString("en-US")} m\u00b2`, stars[i])).join("")}
+        ${row("\u25a6", `BINA \u00b7 ${BINA.found.size} bentangan dijumpai`, stars[3])}
+      </div>
+      <div class="formula-card">
+        <div class="frow">
+          <div class="mini">${miniNet(true)}</div>
+          <div><div class="fl">TERTUTUP</div><div class="fx">L = 6 \u00d7 s\u00b2</div></div>
+        </div>
+        <div class="frow">
+          <div class="mini">${miniNet(false)}</div>
+          <div><div class="fl">TERBUKA</div><div class="fx">L = 5 \u00d7 s\u00b2</div></div>
+        </div>
+      </div>
+      <div class="actions"><button class="btn wide" onclick="location.reload()">ULANG SEMULA</button></div>
+    </div>`;
+}
+function miniNet(closed){
+  return NET_CELLS.map(c=>{
+    const off = (!closed && c.k === "top");
+    return `<i class="${off?'off':''}" style="grid-area:${c.r}/${c.c}"></i>`;
+  }).join("");
+}
+
+/* ---------- tunjuk cara (auto demo) ---------- */
+$("#showMe").addEventListener("click", async ()=>{
+  if(auto || mode !== "soal") return; auto = true; usedHelp = true;
+  const q = QUESTIONS[qi];
+  const wait = ms => new Promise(r=>setTimeout(r, ms));
+  if(step === 0){
+    const tiles = [...$("#tiles").children];
+    const idx = q.sOpt.indexOf(q.s);
+    tiles[idx].classList.add("good"); tiles.forEach(b=>b.disabled = true);
+    await wait(900); step = 1; render(); await wait(700);
+  }
+  if(step === 1){ stopSpin(); await tweenView(...VIEW_NET, 640); step = 2; render(); await wait(1400); }
+  if(step === 2){
+    const faces = [...net.querySelectorAll(".face:not(.hole)")];
+    for(const f of faces){ tapFace(f); await wait(430); }
+    await wait(500);
+  }
+  if(step === 3){
+    const tiles = [...$("#tiles").children];
+    const idx = q.aOpt.indexOf(q.ans);
+    tiles.forEach(b=>b.disabled = true);
+    tiles[idx].classList.add("good");
+    await wait(1000);
+    stars[li] = 1; step = 4; render();
+  }
+  auto = false;
+});
+
+
+/* ---------- nota murid ---------- */
+document.querySelectorAll("[data-mini]").forEach(el=>{
+  el.innerHTML = miniNet(el.dataset.mini === "closed");
+});
+$("#btnPrint").addEventListener("click", ()=>window.print());
+
+/* ---------- kawalan saiz paparan ---------- */
+const ZOOM = [0.8, 0.9, 1, 1.15, 1.3, 1.5, 1.75, 2];
+let zi = 2;
+function applyZoom(){
+  document.documentElement.style.setProperty("--z", ZOOM[zi]);
+  $("#zVal").textContent = Math.round(ZOOM[zi]*100) + "%";
+  $("#zOut").disabled = (zi === 0);
+  $("#zIn").disabled  = (zi === ZOOM.length-1);
+}
+$("#zOut").addEventListener("click", ()=>{ if(zi>0){ zi--; applyZoom(); } });
+$("#zIn").addEventListener("click",  ()=>{ if(zi<ZOOM.length-1){ zi++; applyZoom(); } });
+$("#zVal").addEventListener("click", ()=>{ zi = 2; applyZoom(); });
+applyZoom();
+
+/* ---------- kamus visual ---------- */
+const GLOSS = [
+  { w:"ISI PADU", sym:"V = s³", key:"isiPadu", svg:`
+    <svg viewBox="0 0 60 50"><path d="M12 18 L22 10 L48 10 L38 18 Z" fill="#E8C378" stroke="#9A7020" stroke-width="2"/>
+    <path d="M38 18 L48 10 L48 34 L38 42 Z" fill="#C08F2E" stroke="#9A7020" stroke-width="2"/>
+    <rect x="12" y="18" width="26" height="24" fill="#D9A441" stroke="#9A7020" stroke-width="2"/>
+    <g fill="#1D4E89"><circle cx="19" cy="26" r="2.2"/><circle cx="27" cy="26" r="2.2"/><circle cx="35" cy="26" r="2.2"/><circle cx="19" cy="35" r="2.2"/><circle cx="27" cy="35" r="2.2"/><circle cx="35" cy="35" r="2.2"/></g></svg>` },
+  { w:"SISI", sym:"s", key:"sisi", svg:`
+    <svg viewBox="0 0 60 50"><rect x="14" y="14" width="30" height="28" fill="#F3E2B8" stroke="#9A7020" stroke-width="2"/>
+    <path d="M14 42 H44" stroke="#1D4E89" stroke-width="4"/><text x="29" y="11" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1D4E89" font-weight="700">s</text></svg>` },
+  { w:"BENTANGAN", sym:"", key:"bentangan", svg:`
+    <svg viewBox="0 0 60 50"><g fill="#D9A441" stroke="#9A7020" stroke-width="1.6"><rect x="24.75" y="1.75" width="10.5" height="10.5"/><rect x="12.75" y="13.75" width="10.5" height="10.5"/><rect x="24.75" y="13.75" width="10.5" height="10.5"/><rect x="36.75" y="13.75" width="10.5" height="10.5"/><rect x="24.75" y="25.75" width="10.5" height="10.5"/><rect x="24.75" y="37.75" width="10.5" height="10.5"/></g></svg>` },
+  { w:"LUAS PERMUKAAN", sym:"L = n × s²", key:"luasPermukaan", svg:`
+    <svg viewBox="0 0 60 50"><g fill="#D9A441" stroke="#9A7020" stroke-width="2"><rect x="5.5" y="9" width="15" height="15"/><rect x="22.5" y="9" width="15" height="15"/><rect x="39.5" y="9" width="15" height="15"/><rect x="5.5" y="26" width="15" height="15"/><rect x="22.5" y="26" width="15" height="15"/><rect x="39.5" y="26" width="15" height="15"/></g></svg>` },
+  { w:"TERTUTUP / TERBUKA", sym:"6 / 5", key:"tertutup", svg:`
+    <svg viewBox="0 0 60 50" fill="none" stroke-width="2.2">
+    <g stroke="#14775A"><path d="M4 20h22M6 20l4-5h12l4 5M5 20v14h20V20"/></g>
+    <g stroke="#B8371F"><path d="M35 22v12h20V22"/><path d="M34 18l7-5 5 4" stroke-dasharray="3 2"/></g></svg>` }
+];
+$("#gstrip").innerHTML = GLOSS.map(g=>{
+  const v = BIM_VIDEO[g.key];
+  return `<div class="gcard">${g.svg}
+    <div class="gword">${g.w}</div>
+    ${g.sym?`<div class="gsym">${g.sym}</div>`:``}
+    ${v?`<a class="gsym" href="${v}" target="_blank" rel="noopener">▶ BIM</a>`:``}
+  </div>`;
+}).join("");
+
+$("#unlockAll").addEventListener("change", e=>{ unlockAll = e.target.checked; renderQNav(); });
+
+render();
+</script>
+</body>
+</html>
