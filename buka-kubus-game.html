@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>BUKA KUBUS • Misi Tangki Air</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --amber:#F2A93B; --amber-d:#B9761A; --amber-l:#FFD98A;
+  --green:#2FD07A; --green-d:#127A47;
+  --red:#FF5A5A; --red-d:#A32020;
+  --yellow:#FFD84D; --cyan:#4CC9F0; --pink:#FF7BA9; --violet:#9B8CFF;
+  --ink:#06111C; --panel:rgba(255,255,255,.07); --line:rgba(255,255,255,.22);
+  --head:"Fredoka",Arial,Helvetica,sans-serif;
+  --body:Arial,Helvetica,sans-serif;
+  --W:960px; --H:560px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{height:100%}
+body{
+  background:#02080E;font-family:var(--body);color:#fff;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+  -webkit-text-size-adjust:100%;
+}
+button{font-family:inherit;color:inherit;border:0;background:none;cursor:pointer}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+
+/* ---------- pentas ---------- */
+#fit{position:fixed;inset:0;overflow:hidden}
+#stage{
+  width:var(--W);height:var(--H);position:absolute;left:50%;top:50%;overflow:hidden;border-radius:20px;
+  background:radial-gradient(ellipse at 32% 34%,#123A5C 0%,#08192A 55%,#040D16 100%);
+  box-shadow:0 0 0 3px rgba(76,201,240,.25),0 24px 70px rgba(0,0,0,.75);
+  transform-origin:center center;
+}
+.dot{position:absolute;background:#fff;border-radius:50%;animation:tw 2.6s infinite alternate}
+@keyframes tw{from{opacity:.15}to{opacity:.9}}
+
+#stage.ok{animation:fok .8s ease}
+@keyframes fok{
+  0%{box-shadow:0 0 0 3px rgba(76,201,240,.25),0 24px 70px rgba(0,0,0,.75)}
+  35%{box-shadow:0 0 0 12px rgba(47,208,122,.95),0 0 110px rgba(47,208,122,.6)}
+  100%{box-shadow:0 0 0 3px rgba(76,201,240,.25),0 24px 70px rgba(0,0,0,.75)}
+}
+#stage.bad{animation:fbad .5s ease}
+@keyframes fbad{0%,100%{transform:translateX(0)}20%{transform:translateX(-14px)}40%{transform:translateX(14px)}60%{transform:translateX(-9px)}80%{transform:translateX(9px)}}
+
+.burst{
+  position:absolute;left:50%;top:30%;z-index:400;pointer-events:none;
+  font-size:96px;opacity:0;transform:translate(-50%,-50%) scale(.3);
+  animation:bst 1s ease forwards;
+}
+@keyframes bst{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(-25deg)}
+  30%{opacity:1;transform:translate(-50%,-50%) scale(1.3) rotate(8deg)}
+  75%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1.15)}
+}
+
+/* ---------- bar atas ---------- */
+#top{position:absolute;left:0;right:0;top:0;height:46px;display:flex;align-items:center;gap:12px;padding:0 16px;z-index:200}
+#prog{display:flex;gap:3px;margin-left:auto;align-items:center}
+.pbtn{
+  width:33px;height:33px;border-radius:9px;font-family:var(--head);font-size:15px;
+  background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.18);color:#9FB2C0;
+  display:grid;place-items:center;transition:background-color .15s,border-color .15s,color .15s,transform .12s;
+}
+.pbtn:hover{background:rgba(255,255,255,.26);color:#fff;border-color:var(--cyan);transform:translateY(-3px)}
+.pbtn:active{transform:translateY(1px)}
+.pbtn.past{background:rgba(47,208,122,.2);border-color:var(--green);color:#BEEBD5}
+.pbtn.on{background:var(--yellow);border-color:#fff;color:#3A2000;box-shadow:0 0 0 3px rgba(255,216,77,.35)}
+.pbtn.home{font-size:17px;margin-right:6px}
+.tbtn{
+  font-family:var(--head);font-size:15px;padding:7px 14px;border-radius:30px;
+  background:rgba(255,255,255,.1);border:2px solid var(--line);
+}
+.tbtn:hover{background:rgba(255,255,255,.2);border-color:var(--cyan)}
+#visualBadge{
+  font-family:var(--head);font-size:14px;letter-spacing:.04em;padding:6px 13px;border-radius:30px;
+  background:rgba(155,140,255,.18);border:2px solid var(--violet);color:#DDD6FF;
+}
+#zoomBar{display:flex;align-items:center;gap:4px}
+#zoomBar .tbtn{width:36px;height:36px;padding:0;display:grid;place-items:center;font-size:20px}
+#zlab{font-family:var(--head);font-size:14px;min-width:48px;text-align:center;color:var(--cyan)}
+
+/* ---------- babak ---------- */
+.scene{position:absolute;inset:46px 0 0 0;display:none}
+.scene.live{display:block;animation:fade .4s ease}
+@keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.badge{
+  position:absolute;left:16px;top:6px;font-family:var(--head);font-size:17px;
+  padding:7px 18px;border-radius:30px;background:linear-gradient(90deg,var(--amber),var(--yellow));
+  color:#3A2000;box-shadow:0 4px 0 var(--amber-d);
+}
+.sub{
+  position:absolute;left:16px;right:16px;bottom:12px;min-height:56px;
+  display:flex;align-items:center;gap:12px;padding:12px 18px;border-radius:16px;
+  background:rgba(0,0,0,.55);border:2px solid var(--line);
+  font-size:19px;line-height:1.35;
+}
+.sub b{color:var(--yellow)}
+.sub .em{font-size:30px;flex:0 0 auto}
+
+.act{
+  position:absolute;font-family:var(--head);font-size:20px;padding:14px 26px;border-radius:16px;
+  background:linear-gradient(180deg,var(--green),var(--green-d));color:#fff;
+  box-shadow:0 5px 0 #0A5230;transition:transform .1s,box-shadow .1s;
+}
+.act:hover{transform:translateY(-2px);box-shadow:0 7px 0 #0A5230}
+.act:active{transform:translateY(3px);box-shadow:0 2px 0 #0A5230}
+.act:disabled{opacity:.4;cursor:default;transform:none;box-shadow:0 5px 0 #0A5230}
+.nxt{
+  position:absolute;right:16px;bottom:78px;font-family:var(--head);font-size:20px;
+  padding:13px 24px;border-radius:16px;background:linear-gradient(180deg,var(--cyan),#1274A0);
+  color:#04222F;box-shadow:0 5px 0 #0A4A66;animation:pulse 1.3s ease-in-out 4;
+}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+.qbox{
+  position:absolute;left:50%;transform:translateX(-50%);text-align:center;
+  font-size:21px;font-weight:700;padding:12px 22px;border-radius:14px;
+  background:rgba(255,255,255,.08);border:2px solid var(--line);white-space:nowrap;
+}
+.qbox b{color:var(--yellow)}
+.qbox .l2{
+  display:block;margin-top:7px;padding-top:7px;
+  border-top:1.5px dashed rgba(255,255,255,.2);
+  font-size:19px;color:var(--cyan);
+}
+.qbox .l2 em{font-style:normal;font-size:14px;font-weight:400;color:#8FA8BC;margin-right:10px}
+.qbox .l2 b{color:var(--cyan)}
+.row{position:absolute;left:50%;transform:translateX(-50%);display:flex;gap:12px}
+.row.sm .ans{font-size:19px;min-width:0;padding:13px 14px}
+.crow{
+  padding:11px 16px;border-radius:12px;background:rgba(255,255,255,.08);
+  border:2px solid var(--line);font-size:18px;opacity:0;transform:translateY(12px);
+}
+.crow.in{opacity:1;transform:none;transition:all .5s cubic-bezier(.2,1.2,.4,1)}
+.crow b{color:var(--yellow)}
+.ans{
+  font-family:var(--head);font-size:26px;min-width:104px;padding:14px 16px;border-radius:14px;
+  background:rgba(255,255,255,.1);border:3px solid var(--line);
+  transition:transform .12s,background-color .15s,border-color .15s;
+}
+.ans small{display:block;font-family:var(--body);font-size:13px;font-weight:400;opacity:.75;margin-top:3px}
+.ans:hover:not(:disabled){transform:translateY(-4px);border-color:var(--cyan)}
+.ans.good{background:var(--green);border-color:#fff;color:#04250F}
+.ans.bad{background:var(--red);border-color:#fff;opacity:.6}
+.ans:disabled{cursor:default}
+.ans.shk{animation:shk .35s}
+@keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-9px)}75%{transform:translateX(9px)}}
+
+/* ---------- watak KUBI ---------- */
+.kubi{position:absolute;pointer-events:none;animation:bob 2.6s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-13px) rotate(1.5deg)}}
+.speech{
+  position:absolute;font-family:var(--head);font-size:16px;padding:10px 15px;border-radius:14px;
+  background:#fff;color:#123;box-shadow:0 5px 0 rgba(0,0,0,.35);max-width:190px;line-height:1.3;
+}
+.speech::after{content:"";position:absolute;left:26px;bottom:-13px;border:7px solid transparent;border-top-color:#fff}
+
+/* ---------- model kubus 3D ---------- */
+.scene3d{--S:56px;position:absolute;perspective:900px;perspective-origin:50% 46%}
+.model{position:absolute;left:50%;top:54%;width:0;height:0;transform-style:preserve-3d}
+.pivot{position:absolute;left:calc(var(--S)/-2);top:calc(var(--S)/-2);width:var(--S);height:var(--S);transform-style:preserve-3d}
+.f3{
+  position:absolute;width:var(--S);height:var(--S);box-sizing:border-box;
+  border:2px solid var(--amber-d);transform-style:preserve-3d;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);
+}
+.f3.front{inset:0;background:#F2A93B}
+.f3.top{left:0;top:calc(var(--S)*-1);transform-origin:50% 100%;background:#FFD98A}
+.f3.bottom{left:0;top:var(--S);transform-origin:50% 0%;background:#C4801F}
+.f3.left{left:calc(var(--S)*-1);top:0;transform-origin:100% 50%;background:#D9922B}
+.f3.right{left:var(--S);top:0;transform-origin:0% 50%;background:#E29F33}
+.f3.back{left:0;top:var(--S);transform-origin:50% 0%;background:#DA9526}
+.f3.hole{background:transparent !important;border-style:dashed;border-color:var(--red);box-shadow:none}
+.f3.tapme{cursor:pointer}
+.f3 .num{
+  position:absolute;inset:0;display:grid;place-items:center;
+  font-family:var(--head);font-size:26px;color:#3A2000;opacity:0;transform:scale(.4);
+}
+.f3.hit{background:var(--green) !important;border-color:#fff}
+.f3.hit .num{opacity:1;transform:scale(1);transition:all .3s cubic-bezier(.2,1.6,.4,1)}
+.f3.marked .num{opacity:1;transform:scale(1);font-size:20px;transition:all .35s cubic-bezier(.2,1.6,.4,1)}
+.dimtop{
+  position:absolute;left:50%;transform:translateX(-50%);width:calc(var(--S)*var(--kk,1));height:30px;pointer-events:none;
+}
+.dimtop i{position:absolute;left:0;right:0;bottom:4px;height:3px;background:var(--yellow)}
+.dimtop i::before,.dimtop i::after{content:"";position:absolute;width:3px;top:-6px;bottom:-6px;background:var(--yellow)}
+.dimtop i::before{left:0} .dimtop i::after{right:0}
+.dimtop span{
+  position:absolute;left:50%;bottom:12px;transform:translateX(-50%);
+  font-family:var(--head);font-size:17px;color:var(--yellow);white-space:nowrap;
+}
+
+/* ---------- slider lipat ---------- */
+.foldui{position:absolute;display:flex;align-items:center;gap:12px}
+.fbtn{
+  width:52px;height:52px;border-radius:14px;display:grid;place-items:center;
+  background:rgba(255,255,255,.1);border:3px solid var(--line);
+}
+.fbtn:hover{border-color:var(--amber)}
+.fbtn svg{width:30px;height:30px}
+.fslide{-webkit-appearance:none;appearance:none;width:220px;height:44px;background:transparent}
+.fslide::-webkit-slider-runnable-track{height:14px;border-radius:8px;background:linear-gradient(90deg,var(--amber-d),var(--amber-l));border:2px solid #fff3}
+.fslide::-webkit-slider-thumb{-webkit-appearance:none;width:40px;height:40px;border-radius:50%;margin-top:-15px;background:#fff;border:4px solid var(--amber);box-shadow:0 3px 10px #000a}
+.fslide::-moz-range-track{height:14px;border-radius:8px;background:linear-gradient(90deg,var(--amber-d),var(--amber-l));border:2px solid #fff3}
+.fslide::-moz-range-thumb{width:40px;height:40px;border-radius:50%;background:#fff;border:4px solid var(--amber);box-shadow:0 3px 10px #000a}
+
+/* ---------- kaunter besar ---------- */
+.bigcount{
+  position:absolute;font-family:var(--head);display:flex;align-items:center;gap:12px;
+  font-size:19px;color:#BFD3E2;
+}
+.bigcount b{
+  font-size:44px;color:#3A2000;background:var(--yellow);border-radius:14px;
+  padding:2px 20px;box-shadow:0 5px 0 #B99000;min-width:80px;text-align:center;
+}
+.bigcount.done b{background:var(--green);color:#fff;box-shadow:0 5px 0 var(--green-d)}
+
+/* ---------- grid BINA ---------- */
+.bgrid{position:absolute;display:grid;grid-template-columns:repeat(5,58px);grid-template-rows:repeat(5,58px);gap:5px}
+.bcell{border:3px dashed rgba(255,255,255,.28);border-radius:8px;background:rgba(255,255,255,.05);transition:all .14s}
+.bcell:hover{border-color:var(--cyan);background:rgba(76,201,240,.12)}
+.bcell.on{background:var(--amber);border:3px solid var(--amber-d);box-shadow:inset 0 0 0 2px #fff5}
+.bcell.win{background:var(--green);border-color:#fff}
+.bcell.err{background:var(--red);border-color:#fff;animation:shk .35s}
+.coll{position:absolute;display:flex;gap:9px}
+.slot{
+  width:56px;height:56px;border-radius:10px;border:3px dashed rgba(255,255,255,.25);
+  display:grid;place-items:center;font-family:var(--head);font-size:24px;color:rgba(255,255,255,.3);
+}
+.slot.got{border-style:solid;border-color:var(--amber);background:rgba(242,169,59,.14);animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+.slot .mini{display:grid;grid-template-columns:repeat(4,9px);grid-template-rows:repeat(4,9px);gap:1px}
+.slot .mini i{background:var(--amber);border-radius:2px}
+@keyframes pop{0%{transform:scale(0) rotate(-30deg)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+
+/* ---------- kad petua + tamat ---------- */
+.gold{
+  display:flex;align-items:center;gap:12px;padding:11px 16px;border-radius:14px;
+  background:linear-gradient(90deg,rgba(255,216,77,.2),rgba(242,169,59,.08));
+  border:2px solid var(--amber);font-size:18px;
+}
+.gold i{
+  font-style:normal;font-family:var(--head);width:34px;height:34px;flex:0 0 auto;border-radius:50%;
+  background:var(--yellow);color:#3A2000;display:grid;place-items:center;font-size:19px;
+}
+.trophy{
+  position:absolute;font-family:var(--head);text-align:center;font-size:30px;line-height:1.25;
+  padding:18px 30px;border-radius:20px;background:linear-gradient(180deg,var(--amber),var(--amber-d));
+  color:#2A1600;box-shadow:0 8px 0 #7A4A08;
+}
+.conf{position:absolute;width:12px;height:16px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(620px) rotate(720deg);opacity:0}}
+
+/* ---------- tajuk ---------- */
+.tmain{
+  position:absolute;left:50%;top:74px;transform:translateX(-50%);text-align:center;
+  font-family:var(--head);font-size:64px;line-height:1;color:#fff;
+  text-shadow:0 6px 0 var(--amber-d),0 0 40px rgba(242,169,59,.5);white-space:nowrap;
+}
+.tsub{position:absolute;left:50%;top:154px;transform:translateX(-50%);font-family:var(--head);font-size:26px;color:var(--yellow);white-space:nowrap}
+.tnote{position:absolute;left:50%;top:200px;transform:translateX(-50%);font-size:18px;color:#BFD3E2;white-space:nowrap}
+.tbig{
+  position:absolute;left:50%;bottom:64px;transform:translateX(-50%);
+  font-family:var(--head);font-size:32px;padding:18px 52px;border-radius:20px;
+  background:linear-gradient(180deg,var(--green),var(--green-d));box-shadow:0 8px 0 #0A5230;
+}
+.tbig:hover{transform:translateX(-50%) translateY(-3px)}
+.spark{position:absolute;font-size:34px;animation:bob 3s ease-in-out infinite}
+
+/* ---------- pusing telefon ---------- */
+#rot{position:fixed;inset:0;background:#02080E;display:none;place-items:center;text-align:center;z-index:9999;padding:30px}
+#rot.show{display:grid}
+#rot div{font-family:var(--head);font-size:24px;line-height:1.5}
+#rot svg{width:110px;height:110px;margin:0 auto 20px;display:block;animation:rot 2.4s ease-in-out infinite}
+@keyframes rot{0%,40%{transform:rotate(0)}60%,100%{transform:rotate(90deg)}}
+</style>
+</head>
+<body>
+
+<div id="rot">
+  <div>
+    <svg viewBox="0 0 24 24" fill="none" stroke="#F2A93B" stroke-width="1.8" stroke-linejoin="round">
+      <rect x="7" y="2" width="10" height="20" rx="2"/><circle cx="12" cy="18.5" r="1" fill="#F2A93B"/>
+    </svg>
+    Pusingkan telefon<br>ke sisi 📱↻
+  </div>
+</div>
+
+<div id="fit"><div id="stage">
+
+  <div id="top">
+    <button class="tbtn" id="back" hidden>◀ Kembali</button>
+    <span id="visualBadge">👀&nbsp; 100% VISUAL</span>
+    <div id="zoomBar">
+      <button class="tbtn" onclick="zoom(-1)" aria-label="Kecilkan">−</button>
+      <span id="zlab">100%</span>
+      <button class="tbtn" onclick="zoom(1)" aria-label="Besarkan">+</button>
+    </div>
+    <div id="prog"></div>
+  </div>
+
+  <!-- ============ TAJUK ============ -->
+  <div class="scene live" id="s0">
+    <span class="spark" style="left:96px;top:44px">⭐</span>
+    <span class="spark" style="right:120px;top:70px;animation-delay:.7s">✨</span>
+    <span class="spark" style="left:150px;bottom:120px;animation-delay:1.2s">📦</span>
+    <span class="spark" style="right:170px;bottom:150px;animation-delay:.4s">💧</span>
+    <div class="tmain">BUKA KUBUS</div>
+    <div class="tsub">Misi Tangki Air 💧📦</div>
+    <div class="tnote">Isi padu ➜ Luas permukaan • 11 babak • tiada bunyi diperlukan</div>
+    <button class="tbig" onclick="go(1)">MULA! 🚀</button>
+    <div class="kubi" id="kubiTitle" style="right:64px;bottom:130px"></div>
+  </div>
+
+  <!-- ============ BABAK 1 : APA ITU BENTANGAN ============ -->
+  <div class="scene" id="s1">
+    <span class="badge">Babak 1 • Apa itu BENTANGAN?</span>
+    <div class="kubi" style="left:24px;bottom:150px;--k:150px" data-kubi></div>
+    <div class="speech" style="left:16px;bottom:290px">Tangki ini kubus. Jom kita buka! 📦</div>
+    <div class="scene3d" id="sc1" style="left:300px;top:16px;width:400px;height:330px"></div>
+    <div class="foldui" id="fold1" style="left:300px;top:352px" hidden></div>
+    <button class="act" id="a1" style="left:340px;top:352px" onclick="s1open()">Buka kubus! 📦▶</button>
+    <div class="sub"><span class="em">🔎</span><div><b>BENTANGAN</b> = bentuk 3D yang <b>DIBUKA</b> jadi rata. Tekan butang hijau, kemudian <b>seret slider</b> untuk buka &amp; tutup sendiri.</div></div>
+    <button class="nxt" id="n1" onclick="go(2)" hidden>Seterusnya ▶</button>
+  </div>
+
+  <!-- ============ BABAK 2 : KIRA MUKA ============ -->
+  <div class="scene" id="s2">
+    <span class="badge">Babak 2 • Berapa muka?</span>
+    <div class="kubi" style="left:24px;bottom:150px;--k:140px" data-kubi></div>
+    <div class="speech" style="left:14px;bottom:282px">Tap satu-satu ya! 👆</div>
+    <div class="scene3d" id="sc2" style="left:250px;top:6px;width:420px;height:350px"></div>
+    <div class="bigcount" id="cnt2" style="right:60px;top:150px">MUKA <b>0</b></div>
+    <div class="sub"><span class="em">👆</span><div>Tap <b>setiap petak</b> pada bentangan. Kira sendiri berapa banyak muka ada pada satu kubus.</div></div>
+    <button class="nxt" id="n2" onclick="go(3)" hidden>Seterusnya ▶</button>
+  </div>
+
+  <!-- ============ BABAK 3 : ISI PADU -> SISI ============ -->
+  <div class="scene" id="s3">
+    <span class="badge">Babak 3 • Isi padu ➜ cari sisi s</span>
+    <div class="scene3d" id="sc3" style="left:40px;top:34px;width:340px;height:290px"></div>
+    <div class="qbox" style="left:calc(50% + 160px);top:52px">
+      s <b>×</b> s <b>×</b> s = <b>64</b> m³
+      <span class="l2"><em>atau</em>s³ = <b>64</b></span>
+    </div>
+    <div class="row" id="row3" style="left:calc(50% + 160px);top:158px;flex-wrap:wrap;max-width:420px;justify-content:center"></div>
+    <div class="sub"><span class="em">🧊</span><div>Tangki ini muat <b>64 m³</b> air. Semua sisi kubus <b>sama panjang</b>. Nombor mana yang didarab tiga kali jadi 64?</div></div>
+    <button class="nxt" id="n3" onclick="go(4)" hidden>Seterusnya ▶</button>
+  </div>
+
+  <!-- ============ BABAK 4 : LUAS 1 MUKA ============ -->
+  <div class="scene" id="s4">
+    <span class="badge">Babak 4 • Luas SATU muka</span>
+    <div class="kubi" style="right:44px;bottom:150px;--k:140px" data-kubi></div>
+    <svg id="svg4" style="position:absolute;left:70px;top:10px" width="420" height="352" viewBox="0 0 420 352"></svg>
+    <div class="bigcount" id="cnt4" style="left:520px;top:120px">PETAK <b>0</b></div>
+    <div class="qbox" id="q4" style="left:calc(50% + 130px);top:200px" hidden>4 <b>×</b> 4 = <b>16</b> m²</div>
+    <button class="act" id="a4" style="left:540px;top:250px" onclick="s4fill()">Isi petak! ▦▶</button>
+    <div class="sub"><span class="em">▦</span><div>Satu muka ialah <b>segi empat sama</b> 4 m × 4 m. Tekan butang, kira petak kecil di dalamnya.</div></div>
+    <button class="nxt" id="n4" onclick="go(5)" hidden>Seterusnya ▶</button>
+  </div>
+
+  <!-- ============ BABAK 5 : DARAB 6 ============ -->
+  <div class="scene" id="s5">
+    <span class="badge">Babak 5 • 6 muka × 16 = ?</span>
+    <svg id="svg5" style="position:absolute;left:44px;top:44px" width="360" height="332" viewBox="0 0 360 332"></svg>
+    <div class="bigcount" id="cnt5" style="left:490px;top:110px">JUMLAH <b>0</b></div>
+    <div class="qbox" id="q5" style="left:calc(50% + 140px);top:190px" hidden>6 <b>×</b> 16 = <b>96</b> m²</div>
+    <button class="act" id="a5" style="left:512px;top:246px" onclick="s5sum()">Kira semua! ➕▶</button>
+    <div class="kubi" style="right:56px;bottom:150px;--k:130px" data-kubi></div>
+    <div class="sub"><span class="em">➕</span><div>Setiap muka luasnya <b>16 m²</b>. Ada <b>6</b> muka. Tambah semua, itulah <b>jumlah luas permukaan</b>.</div></div>
+    <button class="nxt" id="n5" onclick="go(6)" hidden>Seterusnya ▶</button>
+  </div>
+
+  <!-- ============ BABAK 6 : SOALAN SPM ============ -->
+  <div class="scene" id="s6">
+    <span class="badge">Babak 6 • Soalan SPM sebenar 🎯</span>
+    <div class="scene3d" id="sc6" style="left:30px;top:30px;width:330px;height:300px"></div>
+    <div class="qbox" id="q6" style="left:calc(50% + 155px);top:42px">s <b>×</b> s <b>×</b> s = <b>1728</b> m³<span class="l2"><em>atau</em>s³ = <b>1728</b></span></div>
+    <div class="row" id="row6" style="left:calc(50% + 155px);top:148px;flex-wrap:wrap;max-width:430px;justify-content:center"></div>
+    <div class="sub" id="sub6"><span class="em">🎯</span><div>Tangki <b>TERTUTUP</b>, isi padu <b>1728 m³</b>. Ini soalan SPM 2024. Cari <b>s</b> dahulu.</div></div>
+    <button class="nxt" id="n6" onclick="go(7)" hidden>Seterusnya ▶</button>
+  </div>
+
+  <!-- ============ BABAK 7 : PERANGKAP TERBUKA ============ -->
+  <div class="scene" id="s7">
+    <span class="badge">Babak 7 • Perangkap! Tangki TERBUKA ⚠️</span>
+    <div class="scene3d" id="sc7" style="left:30px;top:26px;width:330px;height:300px"></div>
+    <div class="qbox" id="q7" style="left:calc(50% + 155px);top:56px">Tangki tiada penutup. Berapa muka?</div>
+    <div class="row" id="row7" style="left:calc(50% + 155px);top:122px"></div>
+    <div class="sub" id="sub7"><span class="em">⚠️</span><div>Tangki ini <b>TERBUKA</b>, tiada penutup. Pusingkan kubus dan tengok <b>lubang merah</b> di atas.</div></div>
+    <button class="nxt" id="n7" onclick="go(8)" hidden>Seterusnya ▶</button>
+  </div>
+
+
+  <!-- ============ BABAK 8 : SONGSANG, LUAS -> ISI PADU ============ -->
+  <div class="scene" id="s7b">
+    <span class="badge">Babak 8 • Songsang! Luas ➜ Isi padu 🔄</span>
+    <div class="scene3d" id="sc7b" style="left:18px;top:18px;width:290px;height:250px"></div>
+    <div id="conv" style="position:absolute;left:16px;top:272px;width:450px;display:flex;flex-direction:column;gap:9px">
+      <div class="crow" id="cr1">📦 1 m³ = 100 × 100 × 100 = <b>1 000 000</b> cm³</div>
+      <div class="crow" id="cr2">512 ÷ 1 000 000 = <b>0.000512</b> m³</div>
+      <div class="crow" id="cr3">Titik lompat <b>4</b> tempat ➜ <b>5.12 × 10⁻⁴</b></div>
+    </div>
+    <div class="qbox" id="q7b" style="left:calc(50% + 148px);top:32px">Jumlah luas = <b>384</b> cm²</div>
+    <div class="row" id="row7b" style="left:calc(50% + 148px);top:132px;flex-wrap:wrap;max-width:420px;justify-content:center"></div>
+    <div class="sub" id="sub7b"><span class="em">🔄</span><div>Kali ini <b>terbalik</b>! Kita tahu jumlah luas, kita cari <b>isi padu</b>. Mula dengan luas <b>satu</b> muka.</div></div>
+    <button class="nxt" id="n7b" onclick="go(9)" hidden>Seterusnya ▶</button>
+  </div>
+
+  <!-- ============ BABAK 9 : BINA ============ -->
+  <div class="scene" id="s8">
+    <span class="badge">Babak 9 • Bina bentangan sendiri 🧩</span>
+    <div class="bgrid" id="bgrid" style="left:56px;top:22px"></div>
+    <div class="bigcount" id="cnt8" style="left:430px;top:34px">PETAK <b>0</b></div>
+    <button class="act" id="a8" style="left:430px;top:110px" onclick="s8fold()" disabled>LIPAT! 📦▶</button>
+    <button class="tbtn" id="a8c" style="position:absolute;left:430px;top:180px;font-size:17px;padding:11px 20px" onclick="s8clear()">↺ Kosongkan</button>
+    <div class="coll" id="coll8" style="left:430px;top:240px"></div>
+    <div class="scene3d" id="sc8" style="right:10px;top:20px;width:250px;height:240px"></div>
+    <div class="sub"><span class="em">🧩</span><div>Tap <b>6 petak</b> yang bersentuhan tepi, kemudian tekan LIPAT. Cari <b>3 bentangan berbeza</b> yang boleh jadi kubus!</div></div>
+    <button class="nxt" id="n8" onclick="go(10)" hidden>Seterusnya ▶</button>
+  </div>
+
+  <!-- ============ BABAK 10 : KUIZ ============ -->
+  <div class="scene" id="s9">
+    <span class="badge">Babak 10 • Kuiz Kubus 🧠</span>
+    <div class="kubi" style="left:26px;bottom:150px;--k:140px" data-kubi></div>
+    <div id="quizWrap" style="position:absolute;left:230px;right:24px;top:14px"></div>
+    <div class="sub" id="sub9"><span class="em">🧠</span><div>Empat soalan. Salah pun tak apa, cuba lagi. 💪</div></div>
+    <button class="nxt" id="n9" onclick="go(11)" hidden>Seterusnya ▶</button>
+  </div>
+
+  <!-- ============ BABAK 11 : PETUA + TAMAT ============ -->
+  <div class="scene" id="s10">
+    <span class="badge">Babak 11 • 4 Petua Emas 🏆</span>
+    <div id="confetti" style="position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:5"></div>
+    <div style="position:absolute;left:26px;top:56px;width:520px;display:flex;flex-direction:column;gap:9px;z-index:10">
+      <div class="gold"><i>1</i>🧊 Isi padu = s × s × s ➜ cari <b>s</b> dahulu</div>
+      <div class="gold"><i>2</i>📦 Buka jadi bentangan ➜ <b>kira muka</b></div>
+      <div class="gold"><i>3</i>▦ Luas satu muka = <b>s × s</b></div>
+      <div class="gold"><i>4</i>⚠️ Tertutup = <b>6</b> muka &nbsp;•&nbsp; Terbuka = <b>5</b> muka</div>
+      <div class="gold"><i>5</i>🔄 Songsang: luas ÷ 6 ➜ s ➜ s³ &nbsp;•&nbsp; 1 m³ = <b>1 000 000</b> cm³</div>
+    </div>
+    <div class="trophy" id="trophy" style="right:34px;top:96px">🏆<br>HEBAT!<br><span style="font-size:17px;font-family:var(--body)">Anda sudah boleh<br>jawab soalan SPM</span></div>
+    <div class="kubi" style="right:74px;bottom:110px;--k:130px" data-kubi></div>
+    <div class="sub"><span class="em">🎉</span><div>Ingat 4 petua ini. Soalan tangki kubus akan jadi <b>mudah</b>! Tekan Kembali untuk main semula mana-mana babak.</div></div>
+  </div>
+
+</div></div>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+/* ================= pentas: muat ikut skrin ================= */
+let userZoom = 1;
+function fitStage(){
+  const W = 960, H = 560, pad = 16;
+  const base = Math.min((innerWidth - pad) / W, (innerHeight - pad) / H);
+  const k = Math.max(.25, base * userZoom);
+  $("#stage").style.transform = `translate(-50%,-50%) scale(${k.toFixed(4)})`;
+  $("#zlab").textContent = Math.round(userZoom * 100) + "%";
+  $("#rot").classList.toggle("show", innerWidth < 560 && innerWidth < innerHeight);
+}
+function zoom(d){ userZoom = Math.min(1.8, Math.max(.5, userZoom + d * .15)); fitStage(); }
+addEventListener("resize", fitStage);
+addEventListener("orientationchange", ()=>setTimeout(fitStage, 250));
+
+/* bintang latar */
+(function(){
+  const st = $("#stage");
+  for(let i = 0; i < 60; i++){
+    const d = document.createElement("div");
+    d.className = "dot";
+    const s = Math.random() * 2.4 + 1;
+    d.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*960}px;top:${Math.random()*560}px;animation-delay:${Math.random()*2.6}s`;
+    st.prepend(d);
+  }
+})();
+
+/* ================= watak KUBI ================= */
+function kubiSVG(h){
+  return `<svg width="${h}" height="${h}" viewBox="0 0 120 120" aria-label="Kubi">
+    <g>
+      <path d="M22 44 L44 26 L98 26 L76 44 Z" fill="#FFD98A" stroke="#B9761A" stroke-width="3.5" stroke-linejoin="round"/>
+      <path d="M76 44 L98 26 L98 80 L76 98 Z" fill="#C4801F" stroke="#B9761A" stroke-width="3.5" stroke-linejoin="round"/>
+      <rect x="22" y="44" width="54" height="54" rx="4" fill="#F2A93B" stroke="#B9761A" stroke-width="3.5"/>
+      <ellipse cx="40" cy="66" rx="9" ry="10" fill="#fff"/>
+      <ellipse cx="60" cy="66" rx="9" ry="10" fill="#fff"/>
+      <circle cx="42" cy="68" r="4.6" fill="#123"/>
+      <circle cx="62" cy="68" r="4.6" fill="#123"/>
+      <circle cx="43.6" cy="66" r="1.7" fill="#fff"/>
+      <circle cx="63.6" cy="66" r="1.7" fill="#fff"/>
+      <path d="M40 82 Q50 91 60 82" fill="none" stroke="#7A4A08" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="30" cy="79" r="5" fill="#FF7BA9" opacity=".55"/>
+      <circle cx="70" cy="79" r="5" fill="#FF7BA9" opacity=".55"/>
+    </g></svg>`;
+}
+$("#kubiTitle").innerHTML = kubiSVG(200);
+$$("[data-kubi]").forEach(e => e.innerHTML = kubiSVG(parseInt(getComputedStyle(e).getPropertyValue("--k")) || 140));
+
+/* ================= maklum balas visual ================= */
+function flashOK(emoji = "✅"){
+  const st = $("#stage");
+  st.classList.remove("ok"); void st.offsetWidth; st.classList.add("ok");
+  const b = document.createElement("div");
+  b.className = "burst"; b.textContent = emoji;
+  st.appendChild(b); setTimeout(()=>b.remove(), 1000);
+}
+function flashBad(){
+  const st = $("#stage");
+  st.classList.remove("bad"); void st.offsetWidth; st.classList.add("bad");
+}
+
+/* ================= navigasi babak ================= */
+const ORDER = ["0","1","2","3","4","5","6","7","7b","8","9","10"];
+const LAST = ORDER.length - 1;
+let cur = 0, seen = new Set([0]);
+$("#prog").innerHTML =
+  `<button class="pbtn home" type="button" data-g="0" title="Tajuk" aria-label="Tajuk">\u2302</button>` +
+  Array.from({length:LAST}, (_,i)=>
+    `<button class="pbtn" type="button" data-g="${i+1}" title="Babak ${i+1}" aria-label="Babak ${i+1}">${i+1}</button>`
+  ).join("");
+$("#prog").addEventListener("click", e=>{
+  const b = e.target.closest(".pbtn");
+  if(b) go(+b.dataset.g);
+});
+function paintProg(){
+  $$("#prog .pbtn").forEach(e=>{
+    const n = +e.dataset.g;
+    e.className = "pbtn" + (n === 0 ? " home" : "") +
+      (n === cur ? " on" : (seen.has(n) ? " past" : ""));
+    e.setAttribute("aria-current", n === cur);
+  });
+  $("#back").hidden = cur === 0;
+}
+function go(n){
+  $("#s" + ORDER[cur]).classList.remove("live");
+  cur = n; seen.add(n);
+  const el = $("#s" + ORDER[cur]);
+  el.classList.add("live");
+  paintProg();
+  CUBES.forEach(c => c.spin(false));      // jangan biar 5 gelung animasi berjalan serentak
+  (INIT[n] || (()=>{}))();
+  (RESUME[n] || (()=>{}))();
+}
+const RESUME = {};
+const idle = C => ()=>{ if(C && C.open < .15) C.spin(true); };
+$("#back").onclick = ()=> go(Math.max(0, cur - 1));
+
+/* ================= enjin kubus 3D ================= */
+const CUBES = [];
+function makeCube(host, opt = {}){
+  const S = opt.S || 56;
+  host.style.setProperty("--S", S + "px");
+  host.innerHTML = `
+    <div class="dimtop" hidden><span>s</span><i></i></div>
+    <div class="model">
+      <div class="pivot">
+        <div class="f3 front"><span class="num"></span>
+          <div class="f3 top"><span class="num"></span></div>
+          <div class="f3 bottom"><span class="num"></span>
+            <div class="f3 back"><span class="num"></span></div>
+          </div>
+          <div class="f3 left"><span class="num"></span></div>
+          <div class="f3 right"><span class="num"></span></div>
+        </div>
+      </div>
+    </div>`;
+  const C = {
+    host, S, open: opt.open ?? 0, rx: opt.rx ?? -16, ry: opt.ry ?? 26, tw: 0, raf: null,
+    model: host.querySelector(".model"), pivot: host.querySelector(".pivot"),
+    dim: host.querySelector(".dimtop"),
+    f: {
+      front: host.querySelector(".front"), top: host.querySelector(".top"),
+      bottom: host.querySelector(".bottom"), back: host.querySelector(".back"),
+      left: host.querySelector(".left"), right: host.querySelector(".right")
+    }
+  };
+  C.apply = ()=>{
+    const A = 90 * (1 - C.open), r = Math.PI / 180;
+    const hT = .5 + Math.cos(A*r) + .5*C.open;
+    const hB = Math.abs(.5 + Math.cos(A*r) + Math.cos(2*A*r) - .5*C.open);
+    const k = 1.9 / Math.max(.9, hT, hB);
+    C.f.top.style.transform    = `rotateX(${A}deg)`;
+    C.f.bottom.style.transform = `rotateX(${-A}deg)`;
+    C.f.left.style.transform   = `rotateY(${-A}deg)`;
+    C.f.right.style.transform  = `rotateY(${A}deg)`;
+    C.f.back.style.transform   = `rotateX(${-A}deg)`;
+    C.pivot.style.transform =
+      `translateY(calc(var(--S) * ${(-.5*C.open).toFixed(4)})) translateZ(calc(var(--S) * ${(.5*(1-C.open)).toFixed(4)}))`;
+    C.model.style.transform = `scale(${k.toFixed(3)}) rotateX(${C.rx.toFixed(2)}deg) rotateY(${C.ry.toFixed(2)}deg)`;
+    host.style.setProperty("--kk", k.toFixed(3));
+    if(C.dim) C.dim.style.top = (host.clientHeight * .10) + "px";
+  };
+  C.tween = (open, rx, ry, ms = 700, shortWay = true)=>{
+    const tok = ++C.tw;
+    return new Promise(done=>{
+      const f0 = C.open, x0 = C.rx, y0 = C.ry, t0 = performance.now();
+      let dy = ry - y0;
+      if(shortWay){ dy %= 360; if(dy > 180) dy -= 360; if(dy < -180) dy += 360; }
+      const walk = now =>{
+        if(tok !== C.tw) return done();
+        const p = Math.min(1, (now - t0) / ms);
+        const e = p < .5 ? 2*p*p : 1 - Math.pow(-2*p + 2, 2)/2;
+        C.open = f0 + (open - f0)*e; C.rx = x0 + (rx - x0)*e; C.ry = y0 + dy*e;
+        C.apply();
+        p < 1 ? requestAnimationFrame(walk) : done();
+      };
+      requestAnimationFrame(walk);
+    });
+  };
+  C.spin = (on = true)=>{
+    if(C.raf){ cancelAnimationFrame(C.raf); C.raf = null; }
+    if(!on || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const loop = ()=>{ C.ry += .25; C.apply(); C.raf = requestAnimationFrame(loop); };
+    C.raf = requestAnimationFrame(loop);
+  };
+  C.hole = v => C.f.top.classList.toggle("hole", !!v);
+  C.label = t =>{ C.dim.hidden = !t; if(t) C.dim.querySelector("span").textContent = t; };
+
+  /* seret untuk pusing. tangkapan penuding hanya bermula selepas jari
+     bergerak 6px, kalau tidak tap pada muka kubus akan tercuri. */
+  let drag = false, moved = false, sx = 0, sy = 0, lx = 0, ly = 0;
+  host.style.touchAction = "none"; host.style.cursor = "grab";
+  host.addEventListener("pointerdown", e=>{
+    drag = true; moved = false;
+    sx = lx = e.clientX; sy = ly = e.clientY;
+    C.spin(false);
+  });
+  host.addEventListener("pointermove", e=>{
+    if(!drag) return;
+    if(!moved){
+      if(Math.hypot(e.clientX - sx, e.clientY - sy) < 6) return;
+      moved = true;
+      try{ host.setPointerCapture(e.pointerId); }catch(_){}
+    }
+    C.ry += (e.clientX - lx) * .5;
+    C.rx = Math.max(-85, Math.min(85, C.rx - (e.clientY - ly) * .5));
+    lx = e.clientX; ly = e.clientY; C.apply();
+  });
+  const stop = ()=>{ drag = false; moved = false; };
+  host.addEventListener("pointerup", stop);
+  host.addEventListener("pointercancel", stop);
+
+  C.apply();
+  CUBES.push(C);
+  return C;
+}
+
+/* ================= butang jawapan ================= */
+function answers(host, opts, correct, onWin, big){
+  host.innerHTML = "";
+  opts.forEach(o=>{
+    const ob = typeof o === "object";
+    const v = ob ? o.v : o;
+    const key = ob && "k" in o ? o.k : v;
+    const sub = ob ? o.s : "";
+    const b = document.createElement("button");
+    b.className = "ans"; b.type = "button";
+    b.innerHTML = `${big ? v.toLocaleString("en-US") : v}${sub ? `<small>${sub}</small>` : ""}`;
+    b.onclick = ()=>{
+      if(b.disabled) return;
+      if(key === correct){
+        [...host.children].forEach(x => x.disabled = true);
+        b.classList.add("good"); flashOK("✅"); onWin();
+      }else{
+        b.classList.add("bad","shk"); b.disabled = true; flashBad();
+        setTimeout(()=>b.classList.remove("shk"), 360);
+      }
+    };
+    host.appendChild(b);
+  });
+}
+const foldUI = (host, C)=>{
+  host.hidden = false;
+  host.innerHTML = `
+    <button class="fbtn" aria-label="Kubus"><svg viewBox="0 0 24 24"><path d="M4 8 L8 4 L20 4 L16 8 Z" fill="#FFD98A" stroke="#B9761A" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 8 L20 4 L20 16 L16 20 Z" fill="#C4801F" stroke="#B9761A" stroke-width="1.6" stroke-linejoin="round"/><rect x="4" y="8" width="12" height="12" fill="#F2A93B" stroke="#B9761A" stroke-width="1.6"/></svg></button>
+    <input class="fslide" type="range" min="0" max="100" value="${Math.round(C.open*100)}" aria-label="Buka bentangan">
+    <button class="fbtn" aria-label="Bentangan"><svg viewBox="0 0 24 24"><g fill="#F2A93B" stroke="#B9761A" stroke-width="1.1"><rect x="9.3" y="1.6" width="4.6" height="4.6"/><rect x="4.3" y="7" width="4.6" height="4.6"/><rect x="9.3" y="7" width="4.6" height="4.6"/><rect x="14.3" y="7" width="4.6" height="4.6"/><rect x="9.3" y="12.4" width="4.6" height="4.6"/><rect x="9.3" y="17.8" width="4.6" height="4.6"/></g></svg></button>`;
+  const sl = host.querySelector(".fslide");
+  sl.oninput = e =>{ C.spin(false); C.open = e.target.value/100; C.apply(); };
+  host.children[0].onclick = ()=>{ C.spin(false); C.tween(0, -16, 26).then(()=> sl.value = 0); };
+  host.children[2].onclick = ()=>{ C.spin(false); C.tween(1, 0, 0).then(()=> sl.value = 100); };
+  return sl;
+};
+
+/* ================= BABAK 1 ================= */
+let C1;
+const INIT = {};
+INIT[1] = ()=>{
+  if(C1) return;
+  C1 = makeCube($("#sc1"), {S:58});
+  C1.label("s"); C1.spin(true); RESUME[1] = idle(C1);
+};
+async function s1open(){
+  $("#a1").disabled = true;
+  C1.spin(false);
+  await C1.tween(1, 0, 0, 1100);
+  flashOK("🎉");
+  $("#a1").hidden = true;
+  foldUI($("#fold1"), C1);
+  $("#n1").hidden = false;
+  $("#s1 .sub div").innerHTML = "Nampak? <b>1 kubus = 6 petak</b> bila dibuka. Seret slider untuk buka &amp; tutup, dan <b>seret kubus</b> untuk pusing.";
+}
+
+/* ================= BABAK 2 ================= */
+let C2, hit2 = 0;
+INIT[2] = ()=>{
+  if(!C2){
+    C2 = makeCube($("#sc2"), {S:58, open:1, rx:0, ry:0});
+    Object.values(C2.f).forEach(f=>{
+      f.classList.add("tapme");
+      f.addEventListener("click", ev=>{
+        ev.stopPropagation();
+        if(f.classList.contains("hit")) return;
+        hit2++;
+        f.classList.add("hit");
+        f.querySelector(".num").textContent = hit2;
+        $("#cnt2 b").textContent = hit2;
+        if(hit2 === 6){
+          $("#cnt2").classList.add("done");
+          flashOK("6️⃣");
+          $("#n2").hidden = false;
+          $("#s2 .sub div").innerHTML = "Satu kubus ada <b>6 muka</b>. Semua sama besar. Ingat nombor <b>6</b> ini!";
+        }
+      });
+    });
+  }
+  C2.open = 1; C2.rx = 0; C2.ry = 0; C2.apply();
+};
+
+/* ================= BABAK 3 ================= */
+let C3;
+INIT[3] = ()=>{
+  if(!C3){
+    C3 = makeCube($("#sc3"), {S:60});
+    C3.label("s = ?"); C3.spin(true); RESUME[3] = idle(C3);
+    answers($("#row3"),
+      [{v:3,s:"3×3×3 = 27"},{v:4,s:"4×4×4 = 64"},{v:5,s:"5×5×5 = 125"},{v:6,s:"6×6×6 = 216"}],
+      4, ()=>{
+        C3.label("4 m");
+        C3.spin(false); C3.tween(0, -16, C3.ry + 720, 1400, false);
+        $("#n3").hidden = false;
+        $("#s3 .sub div").innerHTML = "Betul! <b>4 × 4 × 4 = 64</b>. Jadi setiap sisi tangki ialah <b>4 m</b>.";
+      });
+  }
+};
+
+/* ================= BABAK 4 : isi petak ================= */
+INIT[4] = ()=>{
+  const sv = $("#svg4");
+  if(sv.childElementCount) return;
+  let g = `<rect x="60" y="46" width="240" height="240" rx="6" fill="rgba(242,169,59,.14)" stroke="#F2A93B" stroke-width="4"/>`;
+  for(let r = 0; r < 4; r++) for(let c = 0; c < 4; c++)
+    g += `<rect class="pk" data-i="${r*4+c}" x="${60+c*60}" y="${46+r*60}" width="60" height="60"
+            fill="#F2A93B" stroke="#B9761A" stroke-width="2" opacity="0"/>`;
+  g += `<g stroke="#FFD84D" stroke-width="3.5">
+      <path d="M60 312 H300"/><path d="M60 306 V318 M300 306 V318"/>
+      <path d="M40 46 V286"/><path d="M34 46 H46 M34 286 H46"/></g>
+    <text x="180" y="336" text-anchor="middle" font-family="Fredoka,Arial" font-size="20" fill="#FFD84D">4 m</text>
+    <text x="20" y="172" text-anchor="middle" font-family="Fredoka,Arial" font-size="20" fill="#FFD84D" transform="rotate(-90 20 172)">4 m</text>`;
+  sv.innerHTML = g;
+};
+async function s4fill(){
+  $("#a4").disabled = true;
+  const pk = $$("#svg4 .pk");
+  for(let i = 0; i < pk.length; i++){
+    pk[i].setAttribute("opacity","1");
+    $("#cnt4 b").textContent = i + 1;
+    await wait(95);
+  }
+  $("#cnt4").classList.add("done");
+  $("#a4").hidden = true;
+  $("#q4").hidden = false;
+  flashOK("▦");
+  $("#n4").hidden = false;
+  $("#s4 .sub div").innerHTML = "Luas <b>satu muka</b> = 4 × 4 = <b>16 m²</b>. Itu 16 petak kecil, setiap satu 1 m × 1 m.";
+}
+
+/* ================= BABAK 5 : darab 6 ================= */
+const NETPOS = [[1,0],[0,1],[1,1],[2,1],[1,2],[1,3]];
+INIT[5] = ()=>{
+  const sv = $("#svg5");
+  if(sv.childElementCount) return;
+  const S = 74, X = 48, Y = 12;
+  sv.innerHTML = NETPOS.map(([c,r],i)=>`
+    <g class="mk" data-i="${i}" opacity=".3">
+      <rect x="${X+c*S}" y="${Y+r*S}" width="${S-4}" height="${S-4}" rx="5"
+            fill="#F2A93B" stroke="#B9761A" stroke-width="3"/>
+      <text x="${X+c*S+(S-4)/2}" y="${Y+r*S+(S-4)/2+8}" text-anchor="middle"
+            font-family="Fredoka,Arial" font-size="24" fill="#3A2000">16</text>
+    </g>`).join("");
+};
+async function s5sum(){
+  $("#a5").disabled = true;
+  const mk = $$("#svg5 .mk");
+  for(let i = 0; i < mk.length; i++){
+    mk[i].setAttribute("opacity","1");
+    mk[i].querySelector("rect").setAttribute("fill", "#2FD07A");
+    $("#cnt5 b").textContent = (i + 1) * 16;
+    await wait(300);
+  }
+  $("#cnt5").classList.add("done");
+  $("#a5").hidden = true;
+  $("#q5").hidden = false;
+  flashOK("🎉");
+  $("#n5").hidden = false;
+  $("#s5 .sub div").innerHTML = "Jumlah luas permukaan = <b>6 × 16 = 96 m²</b>. Itulah jawapannya!";
+}
+
+/* ================= BABAK 6 : soalan SPM ================= */
+let C6;
+INIT[6] = ()=>{
+  if(C6) return;
+  C6 = makeCube($("#sc6"), {S:56});
+  C6.label("s = ?"); C6.spin(true); RESUME[6] = idle(C6);
+  answers($("#row6"),
+    [{v:10,s:"10³ = 1000"},{v:12,s:"12³ = 1728"},{v:14,s:"14³ = 2744"},{v:18,s:"18³ = 5832"}],
+    12, async ()=>{
+      C6.label("12 m"); C6.spin(false);
+      $("#q6").innerHTML = `Luas 1 muka = 12 <b>×</b> 12 = <b>144</b> m²<span class="l2"><em>atau</em>12² = <b>144</b></span>`;
+      $("#sub6").querySelector("div").innerHTML = "Bagus! s = <b>12 m</b>. Tangki <b>TERTUTUP</b>, jadi ada <b>6</b> muka. Sekarang darab.";
+      await C6.tween(1, 0, 0, 900);
+      await wait(250);
+      $("#row6").style.top = "148px";
+      answers($("#row6"), [576, 720, 864, 1152], 864, ()=>{
+        $("#q6").innerHTML = `6 <b>×</b> 144 = <b>864</b> m²  🎯`;
+        $("#n6").hidden = false;
+        $("#sub6").querySelector("div").innerHTML = "Tepat! Jawapan SPM 2024 ialah <b>864 m²</b>. 🏅";
+        C6.tween(0, -16, C6.ry + 720, 1400, false);
+      }, true);
+    });
+};
+
+/* ================= BABAK 7 : perangkap terbuka ================= */
+let C7;
+INIT[7] = ()=>{
+  if(C7) return;
+  C7 = makeCube($("#sc7"), {S:56, rx:-38, ry:20});
+  C7.hole(true); C7.label("15 m"); C7.spin(true); RESUME[7] = idle(C7);
+  answers($("#row7"), [4, 5, 6], 5, async ()=>{
+    $("#q7").innerHTML = `Betul! <b>5</b> muka sahaja. Luas 1 muka = <b>225</b> m²`;
+    $("#sub7").querySelector("div").innerHTML = "Isi padu 3375 m³, jadi s = <b>15 m</b>. Tiada penutup, jadi <b>5 × 225</b>.";
+    await C7.tween(1, 0, 0, 950);
+    await wait(250);
+    answers($("#row7"), [225, 900, 1125, 1350], 1125, ()=>{
+      $("#q7").innerHTML = `5 <b>×</b> 225 = <b>1125</b> m² ⚠️➜🏅`;
+      $("#n7").hidden = false;
+      $("#sub7").querySelector("div").innerHTML = "Hebat! Murid lain selalu tersilap pilih <b>1350</b> sebab lupa tangki ini terbuka.";
+      C7.tween(0, -30, C7.ry + 720, 1400, false);
+    }, true);
+  });
+};
+
+/* ================= BABAK 8 : songsang, luas ➜ isi padu (SPM 2016) ================= */
+let C7b;
+INIT[8] = ()=>{
+  if(C7b) return;
+  C7b = makeCube($("#sc7b"), {S:50, open:1, rx:0, ry:0});
+
+  /* langkah 1: jumlah luas dibahagi bilangan muka */
+  answers($("#row7b"),
+    [{v:64,s:"384 ÷ 6"},{v:76.8,s:"384 ÷ 5"},{v:96,s:"384 ÷ 4"},{v:2304,s:"384 × 6"}],
+    64, async ()=>{
+      $("#sub7b").querySelector("div").innerHTML = "Betul, <b>384 ÷ 6 = 64</b>. Setiap muka luasnya 64 cm².";
+      const fs = Object.values(C7b.f);
+      for(let i = 0; i < fs.length; i++){
+        fs[i].querySelector(".num").textContent = "64";
+        fs[i].classList.add("marked");
+        await wait(140);
+      }
+      $("#q7b").innerHTML = `s <b>×</b> s = <b>64</b> cm²<span class="l2"><em>atau</em>s² = <b>64</b></span>`;
+      await wait(500);
+
+      /* langkah 2: punca kuasa dua, bukan punca kuasa tiga */
+      answers($("#row7b"),
+        [{v:4,s:"4×4×4 = 64"},{v:8,s:"8×8 = 64"},{v:16,s:"64 ÷ 4"},{v:32,s:"64 ÷ 2"}],
+        8, async ()=>{
+          C7b.label("8 cm");
+          $("#sub7b").querySelector("div").innerHTML = "s = <b>8 cm</b>. Isi padu = 8 × 8 × 8 = <b>512 cm³</b>. Tapi soalan mahu <b>m³</b>!";
+          await C7b.tween(0, -16, 26, 1100);
+          $("#q7b").innerHTML = `V = 8 × 8 × 8 = <b>512</b> cm³<span class="l2"><em>atau</em>8³ = <b>512</b></span>`;
+          await wait(400);
+          $("#cr1").classList.add("in"); await wait(900);
+          $("#cr2").classList.add("in"); await wait(900);
+          $("#q7b").innerHTML = `0.000512 m³ ➜ bentuk piawai?`;
+          $("#sub7b").querySelector("div").innerHTML = "1 m ada 100 cm, jadi 1 m³ ada <b>1 000 000</b> cm³. Tukar 0.000512 kepada <b>bentuk piawai</b>.";
+
+          /* langkah 3: bentuk piawai, pilihan sebenar SPM 2016 */
+          const row = $("#row7b");
+          row.classList.add("sm");
+          row.style.maxWidth = "400px";
+          answers(row, [
+            {v:"5.12 × 10⁻⁸", k:"a"},
+            {v:"5.12 × 10⁻⁴", k:"b"},
+            {v:"6.4 × 10⁻⁷",  k:"c"},
+            {v:"6.4 × 10⁻⁵",  k:"d"}
+          ], "b", async ()=>{
+            $("#cr3").classList.add("in");
+            $("#q7b").innerHTML = `V = <b>5.12 × 10⁻⁴</b> m³ 🏅`;
+            $("#sub7b").querySelector("div").innerHTML = "Tepat! Jawapan SPM 2016 ialah <b>5.12 × 10⁻⁴ m³</b>. Pilihan <b>B</b>.";
+            C7b.tween(0, -16, C7b.ry + 720, 1400, false);
+            $("#n7b").hidden = false;
+          });
+        });
+    });
+};
+
+/* ================= BABAK 9 : bina bentangan ================= */
+const B = { cells:new Set(), found:new Set(), shapes:[], busy:false };
+let C8;
+
+function checkNet(cells){
+  if(cells.length !== 6) return { ok:false };
+  const K = (r,c)=> r + "," + c;
+  const set = new Set(cells.map(([r,c])=> K(r,c)));
+  const roll = {
+    E: s=>({U:s.W,W:s.D,D:s.E,E:s.U,N:s.N,S:s.S}),
+    W: s=>({U:s.E,E:s.D,D:s.W,W:s.U,N:s.N,S:s.S}),
+    N: s=>({U:s.S,S:s.D,D:s.N,N:s.U,E:s.E,W:s.W}),
+    S: s=>({U:s.N,N:s.D,D:s.S,S:s.U,E:s.E,W:s.W})
+  };
+  const seenM = new Map(), owner = new Map();
+  const [r0,c0] = cells[0], s0 = {U:0,D:1,N:2,S:3,E:4,W:5};
+  seenM.set(K(r0,c0), s0); owner.set(s0.D, [r0,c0]);
+  const q = [[r0,c0]];
+  while(q.length){
+    const [r,c] = q.shift(), st = seenM.get(K(r,c));
+    for(const [nr,nc,d] of [[r-1,c,"N"],[r+1,c,"S"],[r,c+1,"E"],[r,c-1,"W"]]){
+      const k = K(nr,nc);
+      if(!set.has(k) || seenM.has(k)) continue;
+      const ns = roll[d](st);
+      if(owner.has(ns.D)) return { ok:false, clash:[owner.get(ns.D), [nr,nc]] };
+      owner.set(ns.D, [nr,nc]); seenM.set(k, ns); q.push([nr,nc]);
+    }
+  }
+  return seenM.size === 6 ? { ok:true } : { ok:false };
+}
+function canonKey(cells){
+  const norm = p =>{
+    const mr = Math.min(...p.map(x=>x[0])), mc = Math.min(...p.map(x=>x[1]));
+    return p.map(([r,c])=>[r-mr,c-mc]).map(x=>x.join(",")).sort().join(" ");
+  };
+  let pts = cells.map(p=>p.slice()), best = null;
+  for(let f = 0; f < 2; f++){
+    for(let t = 0; t < 4; t++){
+      const k = norm(pts);
+      if(best === null || k < best) best = k;
+      pts = pts.map(([r,c])=>[c,-r]);
+    }
+    pts = pts.map(([r,c])=>[r,-c]);
+  }
+  return best;
+}
+function paintBina(){
+  const n = B.cells.size;
+  $("#cnt8 b").textContent = n;
+  $("#cnt8").classList.toggle("done", n === 6);
+  $("#a8").disabled = n !== 6;
+  $$("#bgrid .bcell").forEach(e=>
+    e.classList.toggle("on", B.cells.has(e.dataset.r + "," + e.dataset.c)));
+  $("#coll8").innerHTML = Array.from({length:Math.max(3, B.shapes.length)}, (_,i)=>{
+    const sh = B.shapes[i];
+    if(!sh) return `<div class="slot">?</div>`;
+    const mr = Math.min(...sh.map(p=>p[0])), mc = Math.min(...sh.map(p=>p[1]));
+    const on = new Set(sh.map(([r,c])=>(r-mr)+","+(c-mc)));
+    let g = "";
+    for(let r = 0; r < 4; r++) for(let c = 0; c < 4; c++)
+      if(on.has(r+","+c)) g += `<i style="grid-area:${r+1}/${c+1}"></i>`;
+    return `<div class="slot got"><div class="mini">${g}</div></div>`;
+  }).join("");
+}
+INIT[9] = ()=>{
+  if(!C8){
+    C8 = makeCube($("#sc8"), {S:44});
+    C8.spin(true); RESUME[9] = ()=> C8.spin(true);
+    $("#bgrid").innerHTML = Array.from({length:25}, (_,i)=>
+      `<button class="bcell" type="button" data-r="${Math.floor(i/5)}" data-c="${i%5}"
+        aria-label="Petak ${Math.floor(i/5)+1} ${i%5+1}"></button>`).join("");
+    $("#bgrid").onclick = e=>{
+      const b = e.target.closest(".bcell");
+      if(!b || B.busy) return;
+      const k = b.dataset.r + "," + b.dataset.c;
+      if(B.cells.has(k)) B.cells.delete(k);
+      else if(B.cells.size < 6) B.cells.add(k);
+      else { flashBad(); return; }
+      paintBina();
+    };
+  }
+  paintBina();
+};
+function s8clear(){ if(!B.busy){ B.cells.clear(); paintBina(); } }
+async function s8fold(){
+  if(B.busy) return;
+  B.busy = true;
+  const cells = [...B.cells].map(k=>k.split(",").map(Number));
+  const res = checkNet(cells);
+  const at = (r,c)=> document.querySelector(`.bcell[data-r="${r}"][data-c="${c}"]`);
+  if(!res.ok){
+    flashBad();
+    (res.clash || cells).forEach(p=>{ const e = at(p[0], p[1]); if(e) e.classList.add("err"); });
+    $("#s8 .sub div").innerHTML = res.clash
+      ? "Belum jadi. <b>Dua petak merah</b> itu jatuh pada <b>muka yang sama</b> bila dilipat. Alihkan satu."
+      : "Belum jadi. Pastikan <b>6 petak bersentuhan tepi</b>, bukan bucu.";
+    await wait(1000);
+    $$("#bgrid .bcell").forEach(e=>e.classList.remove("err"));
+    B.busy = false;
+    return;
+  }
+  $$("#bgrid .bcell.on").forEach((e,i)=> setTimeout(()=>e.classList.add("win"), i*70));
+  const key = canonKey(cells);
+  const baru = !B.found.has(key);
+  if(baru){ B.found.add(key); B.shapes.push(cells); }
+  flashOK(baru ? "🎉" : "👍");
+  C8.spin(false);
+  await C8.tween(0, -16, C8.ry + 720, 1400, false);
+  B.cells.clear();
+  $$("#bgrid .bcell").forEach(e=>e.classList.remove("win"));
+  paintBina();
+  C8.spin(true);
+  B.busy = false;
+  $("#s8 .sub div").innerHTML = B.found.size >= 3
+    ? `Hebat! <b>${B.found.size} bentangan</b> dijumpai. Ada <b>11</b> semuanya, cuba cari lagi!`
+    : `Jadi kubus! Sudah jumpa <b>${B.found.size} / 3</b>. Cuba bentuk lain pula.`;
+  if(B.found.size >= 3) $("#n8").hidden = false;
+}
+
+/* ================= BABAK 10 : kuiz ================= */
+const QUIZ = [
+  { q:"Tangki kubus <b>TERTUTUP</b>. Berapa muka?", o:[4,5,6,8], a:6, t:"Kubus ada 6 muka." },
+  { q:"Isi padu kubus <b>27 m³</b>. Sisi s = ?", o:[3,6,9,27], a:3, t:"3 × 3 × 3 = 27." },
+  { q:"Tangki <b>TERBUKA</b>, s = 10 m. Jumlah luas?", o:[100,500,600,1000], a:500, t:"5 muka × 100 = 500 m²." },
+  { q:"Jumlah luas kubus <b>150 cm²</b>. Luas satu muka?", o:[15,25,30,900], a:25, t:"150 ÷ 6 = 25 cm²." }
+];
+let qi9 = 0;
+INIT[10] = ()=>{ qi9 = 0; drawQuiz(); };
+function drawQuiz(){
+  const w = $("#quizWrap");
+  if(qi9 >= QUIZ.length){
+    w.innerHTML = `<div style="text-align:center;padding-top:60px;font-family:var(--head);font-size:40px;color:var(--yellow)">${QUIZ.length} / ${QUIZ.length} BETUL! 🏅</div>`;
+    $("#n9").hidden = false;
+    $("#sub9").querySelector("div").innerHTML = "Semua betul! Anda sudah faham konsepnya. 🎉";
+    return;
+  }
+  const Q = QUIZ[qi9];
+  w.innerHTML = `
+    <div style="font-family:var(--head);font-size:15px;color:var(--cyan);margin-bottom:8px">SOALAN ${qi9+1} / ${QUIZ.length}</div>
+    <div class="qbox" style="position:static;transform:none;white-space:normal;display:block;margin-bottom:20px">${Q.q}</div>
+    <div class="row" id="qrow" style="position:static;transform:none;flex-wrap:wrap"></div>`;
+  answers($("#qrow"), Q.o, Q.a, async ()=>{
+    $("#sub9").querySelector("div").innerHTML = Q.t;
+    await wait(900);
+    qi9++; drawQuiz();
+  }, true);
+}
+
+/* ================= BABAK 11 : tamat ================= */
+INIT[11] = ()=>{
+  const wrap = $("#confetti");
+  wrap.innerHTML = "";
+  const cols = ["#F2A93B","#FFD84D","#2FD07A","#4CC9F0","#FF7BA9","#9B8CFF"];
+  for(let i = 0; i < 70; i++){
+    const d = document.createElement("div");
+    d.className = "conf";
+    d.style.cssText = `left:${Math.random()*960}px;top:${-30 - Math.random()*200}px;` +
+      `background:${cols[i%cols.length]};animation-duration:${2.6+Math.random()*2.4}s;animation-delay:${Math.random()*2}s`;
+    wrap.appendChild(d);
+  }
+};
+
+/* ================= mula ================= */
+fitStage(); paintProg();
+</script>
+</body>
+</html>
