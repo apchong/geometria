@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Borang Soal Selidik Murid GeoMETriA</title>
+  <meta name="description" content="Borang Soal Selidik Murid GeoMETriA - Penilaian Pengalaman Pembelajaran">
+  <style>
+    :root {
+      --blue:#165b98; --blue2:#1f78be; --ink:#17324d; --muted:#5b6b7b;
+      --bg:#f4f8fc; --card:#ffffff; --line:#c9d9e8; --green:#2f8d5d;
+      --shadow:0 12px 34px rgba(24,73,116,.10);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:Arial,Helvetica,sans-serif; color:var(--ink);
+      background:linear-gradient(180deg,#eef6fd 0%,#f9fbfd 100%);
+    }
+    .wrap{max-width:980px;margin:auto;padding:18px}
+    header{
+      background:var(--card); border:2px solid var(--blue2); border-radius:18px;
+      padding:26px 22px; text-align:center; box-shadow:var(--shadow); margin-bottom:18px;
+    }
+    header h1{margin:0;color:#123f73;font-size:clamp(28px,5vw,44px);line-height:1.08}
+    header p{margin:8px 0 0;color:var(--blue2);font-weight:700;font-size:clamp(18px,3vw,28px)}
+    .info-box,.scale-box,.survey-section,.submit-box{
+      background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;
+      box-shadow:var(--shadow);margin-bottom:16px
+    }
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    label.field{font-weight:700;color:#24415e}
+    input[type="text"], input[type="date"]{
+      width:100%;margin-top:6px;padding:12px 13px;border:1px solid #aebfd0;border-radius:10px;
+      font-size:16px;background:#fbfdff
+    }
+    .instruction{margin-top:12px;padding:12px 14px;background:#eef7ff;border-left:5px solid var(--blue2);border-radius:10px}
+    .scale-title{font-weight:800;margin-bottom:10px}
+    .scale{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+    .scale-item{text-align:center;padding:10px 6px;border-radius:12px;border:1px solid #d8e2ec;background:#fbfdff}
+    .scale-item .n{font-size:24px;font-weight:800;color:var(--blue2)}
+    .scale-item .e{font-size:30px;display:block;margin:3px 0}
+    .scale-item small{display:block;font-weight:700;line-height:1.2}
+    .survey-section h2{margin:0 -18px 14px;padding:12px 18px;background:#edf6ff;color:#1c629d;border-radius:16px 16px 0 0;font-size:21px}
+    .question{padding:15px 0;border-top:1px solid #edf1f5}
+    .question:first-of-type{border-top:0}
+    .qtext{font-weight:700;line-height:1.45;margin-bottom:11px}
+    .choices{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+    .choice input{position:absolute;opacity:0;pointer-events:none}
+    .choice-card{
+      min-height:96px;border:2px solid #d8e1ea;border-radius:12px;padding:8px 6px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+      cursor:pointer;transition:.18s;background:#fff
+    }
+    .choice-card:hover{transform:translateY(-1px);border-color:#8ab8de;background:#f7fbff}
+    .choice input:checked + .choice-card{border-color:var(--blue2);background:#eaf5ff;box-shadow:0 0 0 3px rgba(31,120,190,.12)}
+    .score{font-weight:800;color:var(--blue2);font-size:18px}
+    .emoji{font-size:26px;line-height:1.1;margin:3px 0}
+    .choice-text{font-size:12px;font-weight:700;line-height:1.15}
+    .submit-box{text-align:center}
+    .submit-btn{
+      appearance:none;border:0;border-radius:14px;padding:15px 28px;background:var(--green);
+      color:white;font-weight:800;font-size:18px;cursor:pointer;min-width:220px;
+      box-shadow:0 8px 20px rgba(47,141,93,.22)
+    }
+    .submit-btn:hover{filter:brightness(.96)}
+    .note{margin-top:10px;font-size:13px;color:var(--muted)}
+    .setup-warning{background:#fff6d8;border:1px solid #e4c25c;color:#614d00;padding:12px 14px;border-radius:12px;margin-bottom:16px;font-size:14px}
+    footer{text-align:center;color:#6a7b8b;padding:10px 0 28px;font-size:13px}
+    @media (max-width:720px){
+      .grid{grid-template-columns:1fr}
+      .scale,.choices{grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:5px}
+      .choice-card{min-height:84px;padding:6px 3px}
+      .choice-text{font-size:10px}
+      .emoji{font-size:22px}
+      .wrap{padding:10px}
+    }
+    @media (max-width:470px){
+      .choices{grid-template-columns:repeat(5,1fr)}
+      .choice-card{min-height:78px}
+      .choice-text{display:none}
+      .scale-item small{font-size:10px}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>BORANG SOAL SELIDIK MURID<br>GeoMETriA</h1>
+    <p>Penilaian Pengalaman Pembelajaran</p>
+  </header>
+
+  <div class="setup-warning">
+    <strong>Nota untuk penyelidik:</strong> Sebelum digunakan, tukar
+    <code>YOUR_EMAIL@example.com</code> pada baris <code>&lt;form action=...&gt;</code>
+    kepada e-mel anda. Perkhidmatan FormSubmit akan menghantar respons terus ke e-mel tersebut.
+  </div>
+
+  <form action="https://formsubmit.co/apchong83@gmail.com" method="POST" id="surveyForm">
+    <input type="hidden" name="_subject" value="Respons Baharu Borang GeoMETriA">
+    <input type="hidden" name="_template" value="table">
+    <input type="hidden" name="_captcha" value="false">
+
+    <div class="info-box">
+      <div class="grid">
+        <label class="field">Kod Murid
+          <input type="text" name="Kod_Murid" required autocomplete="off">
+        </label>
+        <label class="field">Sekolah
+          <input type="text" name="Sekolah" required autocomplete="off">
+        </label>
+        <label class="field">Kelas
+          <input type="text" name="Kelas" autocomplete="off">
+        </label>
+        <label class="field">Topik
+          <input type="text" name="Topik" autocomplete="off">
+        </label>
+        <label class="field">Tarikh
+          <input type="date" name="Tarikh" required>
+        </label>
+      </div>
+      <div class="instruction"><strong>Arahan:</strong> Tandakan satu jawapan bagi setiap pernyataan. Tiada jawapan betul atau salah. Pilih berdasarkan pengalaman sebenar anda.</div>
+    </div>
+
+    <div class="scale-box">
+      <div class="scale-title">Skala Jawapan</div>
+      <div class="scale">
+        <div class="scale-item"><span class="n">1</span><span class="e">😠</span><small>Sangat tidak setuju</small></div>
+        <div class="scale-item"><span class="n">2</span><span class="e">🙁</span><small>Tidak setuju</small></div>
+        <div class="scale-item"><span class="n">3</span><span class="e">😐</span><small>Tidak pasti</small></div>
+        <div class="scale-item"><span class="n">4</span><span class="e">🙂</span><small>Setuju</small></div>
+        <div class="scale-item"><span class="n">5</span><span class="e">😄</span><small>Sangat setuju</small></div>
+      </div>
+    </div>
+
+    
+    <section class="survey-section">
+      <h2>B1. Kemudahan Penggunaan</h2>
+      
+        <div class="question">
+          <div class="qtext">1. Cara menggunakan GeoMETriA mudah saya fahami.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 1">
+            
+              <label class="choice">
+                <input type="radio" name="Q1" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q1" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q1" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q1" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q1" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">2. Saya mudah bergerak dari satu kawasan ke kawasan lain dalam GeoMETriA.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 2">
+            
+              <label class="choice">
+                <input type="radio" name="Q2" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q2" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q2" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q2" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q2" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">3. Butang dan kawalan dalam GeoMETriA mudah saya gunakan.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 3">
+            
+              <label class="choice">
+                <input type="radio" name="Q3" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q3" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q3" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q3" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q3" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+    </section>
+    <section class="survey-section">
+      <h2>B2. Kejelasan dan Kebolehcapaian Bahan</h2>
+      
+        <div class="question">
+          <div class="qtext">4. Tujuan setiap aktiviti dalam GeoMETriA jelas kepada saya.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 4">
+            
+              <label class="choice">
+                <input type="radio" name="Q4" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q4" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q4" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q4" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q4" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">5. Arahan bagi setiap aktiviti mudah saya fahami.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 5">
+            
+              <label class="choice">
+                <input type="radio" name="Q5" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q5" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q5" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q5" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q5" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">6. Teks dan sari kata dalam GeoMETriA mudah saya baca.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 6">
+            
+              <label class="choice">
+                <input type="radio" name="Q6" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q6" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q6" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q6" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q6" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">7. Video Bahasa Isyarat Malaysia (BIM) dalam GeoMETriA mudah saya fahami.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 7">
+            
+              <label class="choice">
+                <input type="radio" name="Q7" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q7" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q7" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q7" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q7" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">8. Bahan visual dalam GeoMETriA membantu saya memahami konsep geometri.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 8">
+            
+              <label class="choice">
+                <input type="radio" name="Q8" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q8" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q8" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q8" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q8" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">9. Kelajuan video pembelajaran dalam GeoMETriA sesuai untuk saya.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 9">
+            
+              <label class="choice">
+                <input type="radio" name="Q9" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q9" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q9" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q9" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q9" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+    </section>
+    <section class="survey-section">
+      <h2>B3. Keseronokan dan Penglibatan</h2>
+      
+        <div class="question">
+          <div class="qtext">10. Aktiviti dalam GeoMETriA menarik perhatian saya.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 10">
+            
+              <label class="choice">
+                <input type="radio" name="Q10" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q10" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q10" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q10" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q10" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">11. Saya seronok belajar menggunakan GeoMETriA.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 11">
+            
+              <label class="choice">
+                <input type="radio" name="Q11" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q11" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q11" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q11" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q11" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">12. Saya dapat menumpukan perhatian semasa belajar dalam GeoMETriA.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 12">
+            
+              <label class="choice">
+                <input type="radio" name="Q12" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q12" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q12" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q12" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q12" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">13. Saya aktif mencuba dan menyiapkan aktiviti dalam GeoMETriA.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 13">
+            
+              <label class="choice">
+                <input type="radio" name="Q13" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q13" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q13" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q13" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q13" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+    </section>
+    <section class="survey-section">
+      <h2>B4. Kawalan Pembelajaran</h2>
+      
+        <div class="question">
+          <div class="qtext">14. Saya boleh belajar mengikut kadar saya sendiri.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 14">
+            
+              <label class="choice">
+                <input type="radio" name="Q14" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q14" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q14" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q14" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q14" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">15. Saya boleh melihat atau mengulang bahan pembelajaran apabila saya belum faham.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 15">
+            
+              <label class="choice">
+                <input type="radio" name="Q15" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q15" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q15" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q15" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q15" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">16. Saya boleh meneruskan pembelajaran tanpa selalu menunggu bantuan guru.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 16">
+            
+              <label class="choice">
+                <input type="radio" name="Q16" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q16" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q16" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q16" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q16" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+    </section>
+    <section class="survey-section">
+      <h2>B5. Keyakinan Belajar</h2>
+      
+        <div class="question">
+          <div class="qtext">17. Saya yakin dapat menyelesaikan aktiviti Matematik dalam GeoMETriA.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 17">
+            
+              <label class="choice">
+                <input type="radio" name="Q17" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q17" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q17" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q17" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q17" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">18. Saya yakin dapat terus mencuba walaupun aktiviti itu sukar.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 18">
+            
+              <label class="choice">
+                <input type="radio" name="Q18" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q18" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q18" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q18" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q18" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">19. Saya yakin dapat menggunakan GeoMETriA untuk mempelajari topik geometri yang lain.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 19">
+            
+              <label class="choice">
+                <input type="radio" name="Q19" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q19" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q19" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q19" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q19" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+    </section>
+    <section class="survey-section">
+      <h2>B6. Kehadiran dan Interaksi Sosial</h2>
+      
+        <div class="question">
+          <div class="qtext">20. Saya berasa seperti benar-benar berada dalam persekitaran GeoMETriA.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 20">
+            
+              <label class="choice">
+                <input type="radio" name="Q20" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q20" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q20" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q20" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q20" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">21. Saya mudah berinteraksi dengan guru atau rakan dalam GeoMETriA.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 21">
+            
+              <label class="choice">
+                <input type="radio" name="Q21" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q21" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q21" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q21" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q21" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">22. Belajar bersama guru atau rakan dalam GeoMETriA membantu pembelajaran saya.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 22">
+            
+              <label class="choice">
+                <input type="radio" name="Q22" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q22" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q22" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q22" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q22" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+    </section>
+    <section class="survey-section">
+      <h2>B7. Hasil Pembelajaran yang Dirasai</h2>
+      
+        <div class="question">
+          <div class="qtext">23. GeoMETriA membantu saya memahami konsep geometri dengan lebih baik.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 23">
+            
+              <label class="choice">
+                <input type="radio" name="Q23" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q23" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q23" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q23" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q23" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">24. GeoMETriA membantu saya melihat hubungan antara objek 3D dengan bentangannya.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 24">
+            
+              <label class="choice">
+                <input type="radio" name="Q24" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q24" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q24" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q24" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q24" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">25. GeoMETriA membantu saya mengingat rumus geometri.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 25">
+            
+              <label class="choice">
+                <input type="radio" name="Q25" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q25" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q25" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q25" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q25" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">26. GeoMETriA membantu saya menggunakan pengetahuan untuk menjawab soalan Matematik.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 26">
+            
+              <label class="choice">
+                <input type="radio" name="Q26" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q26" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q26" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q26" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q26" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+    </section>
+    <section class="survey-section">
+      <h2>B8. Kegunaan, Motivasi dan Niat Penggunaan</h2>
+      
+        <div class="question">
+          <div class="qtext">27. GeoMETriA ialah alat pembelajaran Matematik yang berguna.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 27">
+            
+              <label class="choice">
+                <input type="radio" name="Q27" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q27" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q27" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q27" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q27" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">28. GeoMETriA meningkatkan semangat saya untuk belajar geometri.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 28">
+            
+              <label class="choice">
+                <input type="radio" name="Q28" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q28" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q28" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q28" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q28" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">29. Saya mahu menggunakan GeoMETriA lagi untuk belajar Matematik.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 29">
+            
+              <label class="choice">
+                <input type="radio" name="Q29" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q29" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q29" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q29" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q29" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+        <div class="question">
+          <div class="qtext">30. Saya akan mencadangkan GeoMETriA kepada murid lain.</div>
+          <div class="choices" role="radiogroup" aria-label="Soalan 30">
+            
+              <label class="choice">
+                <input type="radio" name="Q30" value="1" required>
+                <span class="choice-card">
+                  <span class="score">1</span>
+                  <span class="emoji">😠</span>
+                  <span class="choice-text">Sangat tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q30" value="2" required>
+                <span class="choice-card">
+                  <span class="score">2</span>
+                  <span class="emoji">🙁</span>
+                  <span class="choice-text">Tidak setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q30" value="3" required>
+                <span class="choice-card">
+                  <span class="score">3</span>
+                  <span class="emoji">😐</span>
+                  <span class="choice-text">Tidak pasti</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q30" value="4" required>
+                <span class="choice-card">
+                  <span class="score">4</span>
+                  <span class="emoji">🙂</span>
+                  <span class="choice-text">Setuju</span>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="Q30" value="5" required>
+                <span class="choice-card">
+                  <span class="score">5</span>
+                  <span class="emoji">😄</span>
+                  <span class="choice-text">Sangat setuju</span>
+                </span>
+              </label>
+          </div>
+        </div>
+    </section>
+
+    <div class="submit-box">
+      <button type="submit" class="submit-btn">✅ HANTAR JAWAPAN</button>
+      <div class="note">Terima kasih kerana berkongsi pengalaman sebenar anda.</div>
+    </div>
+  </form>
+
+  <footer>GeoMETriA • Borang Soal Selidik Murid</footer>
+</div>
+
+<script>
+  const dateField = document.querySelector('input[name="Tarikh"]');
+  if (dateField && !dateField.value) {
+    const d = new Date();
+    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0,10);
+    dateField.value = local;
+  }
+</script>
+</body>
+</html>
