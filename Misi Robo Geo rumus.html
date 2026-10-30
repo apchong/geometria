@@ -1,0 +1,1490 @@
+<!doctype html><html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
+<title>Misi Robo Geo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,700&family=Lilita+One&display=swap">
+<style>
+/* Layout: one app column (max 1040px) on drafting-grid paper. Map = robot bay + mission list side by side, stacking under 780px. Level = figure board + question panel. */
+:root{
+  --paper:#EAF1F6; --grid:#D3E0EA; --panel:#FFFFFF; --panel-2:#F5F9FC;
+  --ink:#1B2A41; --ink-soft:#4B5D75; --line:#AFC2D2;
+  --key-border:#1B2A41; --key-edge:#1B2A41;
+  --pencil:#FFC83D; --pencil-ink:#1B2A41;
+  --ok:#137A50; --ok-bg:#DCF4E7; --bad:#C2363A; --bad-bg:#FCE4E4; --hint-bg:#FFF3C9; --hint-line:#E0BE4F;
+  --vj:#D2372B; --vt:#1C5FC4; --vs:#0F8048;
+  --f1:#FF9566; --f2:#80C3F2; --f3:#97DA8A; --f4:#FFD45C; --f5:#F6A6C8; --f6:#B9A8F2;
+  --coin:#E7B33E; --sand:#E8C27A; --water:#9ED3F5; --snow:#FFFFFF;
+  --stroke:#1B2A41; --shade:rgba(27,42,65,.16); --shine:rgba(255,255,255,.4); --scrim:rgba(12,22,38,.55);
+  --font-display:"Lilita One","Arial Rounded MT Bold","Trebuchet MS",sans-serif;
+  --font-body:"Atkinson Hyperlegible","Segoe UI",Verdana,system-ui,sans-serif;
+  --font-math:"Cambria Math","STIX Two Math","Times New Roman",Georgia,serif;
+  --r-key:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1A29; --grid:#172A40; --panel:#15253A; --panel-2:#1A2D45;
+    --ink:#E7EFF7; --ink-soft:#A8BACE; --line:#38536F;
+    --key-border:#5A7898; --key-edge:#050C16;
+    --pencil:#FFC83D; --pencil-ink:#1B2A41;
+    --ok:#5ED6A0; --ok-bg:#103828; --bad:#FF8585; --bad-bg:#3C1A22; --hint-bg:#322A10; --hint-line:#8F7525;
+    --vj:#FF7B6E; --vt:#7DB2FF; --vs:#5BD995;
+    --f1:#E8835A; --f2:#68AEDD; --f3:#7EC472; --f4:#E8BE4C; --f5:#DE8FB1; --f6:#9F8FDB;
+    --coin:#D9A632; --sand:#D3AE68; --water:#5FA9D8; --snow:#F1F5F9;
+    --stroke:#0A1320; --shade:rgba(0,0,0,.24); --shine:rgba(255,255,255,.22); --scrim:rgba(0,0,0,.6);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1A29; --grid:#172A40; --panel:#15253A; --panel-2:#1A2D45;
+  --ink:#E7EFF7; --ink-soft:#A8BACE; --line:#38536F;
+  --key-border:#5A7898; --key-edge:#050C16;
+  --pencil:#FFC83D; --pencil-ink:#1B2A41;
+  --ok:#5ED6A0; --ok-bg:#103828; --bad:#FF8585; --bad-bg:#3C1A22; --hint-bg:#322A10; --hint-line:#8F7525;
+  --vj:#FF7B6E; --vt:#7DB2FF; --vs:#5BD995;
+  --f1:#E8835A; --f2:#68AEDD; --f3:#7EC472; --f4:#E8BE4C; --f5:#DE8FB1; --f6:#9F8FDB;
+  --coin:#D9A632; --sand:#D3AE68; --water:#5FA9D8; --snow:#F1F5F9;
+  --stroke:#0A1320; --shade:rgba(0,0,0,.24); --shine:rgba(255,255,255,.22); --scrim:rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;
+  color:var(--ink); font-family:var(--font-body); font-size:18px; line-height:1.5; min-height:100vh;
+}
+.app{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px 48px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+h1,h2,h3,h4{text-wrap:balance}
+.title{font-family:var(--font-display);font-weight:400;font-size:clamp(44px,8vw,72px);line-height:.95;margin:0 0 14px;letter-spacing:.005em;color:var(--ink)}
+.title-sm{font-family:var(--font-display);font-weight:400;font-size:28px;margin:0}
+
+/* top bar */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:6px 14px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:24px;color:var(--ink)}
+.brand svg{width:42px;height:42px}
+.starcount{display:inline-flex;align-items:center;gap:6px;font-weight:700;background:var(--panel);border:2px solid var(--key-border);border-radius:999px;padding:4px 14px 4px 8px;font-variant-numeric:tabular-nums}
+.starcount svg{width:24px;height:24px}
+
+/* keys: chunky workshop buttons */
+.key{font:inherit;color:var(--ink);background:var(--panel);border:2.5px solid var(--key-border);border-radius:var(--r-key);box-shadow:0 4px 0 var(--key-edge);padding:12px 16px;min-height:56px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .08s,box-shadow .08s,background-color .15s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.key:hover:not(:disabled){background:var(--panel-2)}
+.key:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 var(--key-edge)}
+.key:focus-visible{outline:3px solid var(--vt);outline-offset:3px}
+.key:disabled{cursor:default}
+.key>svg{width:22px;height:22px;flex:none}
+.key.go{background:var(--pencil);color:var(--pencil-ink);border-color:var(--pencil-ink);box-shadow:0 4px 0 var(--pencil-ink);font-family:var(--font-display);font-size:22px;letter-spacing:.02em;padding:12px 26px}
+.key.go:hover:not(:disabled){background:var(--pencil);filter:brightness(1.05)}
+.key.sm{min-height:46px;padding:8px 14px;font-size:17px;font-weight:700}
+.key.danger{background:var(--bad-bg);border-color:var(--bad);box-shadow:0 4px 0 var(--bad)}
+
+/* start */
+.start{display:grid;gap:24px;align-items:center;padding-block:8px 24px}
+@media (min-width:780px){.start{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}}
+.start-art svg{width:100%;max-width:380px;height:auto;display:block;margin-inline:auto}
+.story{font-size:21px;max-width:34ch;margin:0 0 18px}
+.howto{list-style:none;padding:0;margin:0 0 22px;display:flex;flex-wrap:wrap;gap:10px}
+.howto li{display:flex;align-items:center;gap:8px;background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:6px 14px 6px 8px;font-weight:700;font-size:17px}
+.howto svg{width:28px;height:28px}
+.start-form label{display:block;font-weight:700;margin-bottom:6px}
+.start-form .row{display:flex;flex-wrap:wrap;gap:12px}
+.start-form input{flex:1 1 200px;min-width:0;font:inherit;font-size:20px;padding:12px 14px;border:2.5px solid var(--key-border);border-radius:var(--r-key);background:var(--panel);color:var(--ink);min-height:56px}
+.start-form input:focus-visible{outline:3px solid var(--vt);outline-offset:2px}
+.src{color:var(--ink-soft);font-size:15px;margin:18px 0 0}
+
+/* map */
+.map{display:grid;gap:20px}
+@media (min-width:780px){.map{grid-template-columns:300px minmax(0,1fr);align-items:start}}
+.bay{background:var(--panel);border:2px solid var(--key-border);border-radius:20px;padding:16px;display:grid;gap:10px;justify-items:center}
+.bay h2{font-family:var(--font-display);font-weight:400;font-size:24px;margin:0}
+.bay .robot{width:100%;max-width:230px;height:auto}
+.bay-n{margin:0;font-size:17px;color:var(--ink-soft)}
+.bay-n b{color:var(--ink);font-size:22px}
+.col-h{font-family:var(--font-display);font-weight:400;font-size:26px;margin:0 0 12px}
+.missions{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.mis{width:100%;display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;align-items:center;gap:14px;text-align:left;padding:10px 16px 10px 12px;justify-content:stretch}
+.mis-n{font-family:var(--font-display);font-size:22px;width:44px;height:44px;border-radius:12px;background:var(--pencil);color:var(--pencil-ink);display:grid;place-items:center;border:2px solid var(--pencil-ink)}
+.mis-n svg{width:20px;height:20px}
+.mis-ic{width:58px;height:50px;display:block}
+.mis-ic svg{width:100%;height:100%}
+.mis-tx{min-width:0}
+.mis-tx b{display:block;font-family:var(--font-display);font-weight:400;font-size:22px;line-height:1.15}
+.mis-tx small{display:block;color:var(--ink-soft);font-size:15px}
+.mis-st{display:flex;gap:2px}
+.mis-st svg{width:22px;height:22px}
+.mis:disabled{opacity:.6}
+.mis:disabled .mis-n{background:var(--line);color:var(--ink)}
+@media (max-width:480px){.mis{grid-template-columns:auto minmax(0,1fr) auto;gap:10px}.mis-ic{display:none}.mis-st svg{width:18px;height:18px}}
+.guru{margin-top:18px;background:var(--panel);border:2px dashed var(--line);border-radius:14px;padding:10px 14px}
+.guru summary{cursor:pointer;font-weight:700;color:var(--ink-soft)}
+.guru-in{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding-top:10px}
+.chk{display:inline-flex;align-items:center;gap:8px;font-weight:700}
+.chk input{width:22px;height:22px}
+.guru-note{flex-basis:100%;margin:0;font-size:15px;color:var(--ink-soft)}
+
+/* level */
+.lv-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;margin-bottom:12px}
+.back.warn{background:var(--bad-bg);border-color:var(--bad)}
+.lv-title{display:grid;min-width:0}
+.lv-title small{color:var(--ink-soft);font-size:15px;font-weight:700}
+.lv-title b{font-family:var(--font-display);font-weight:400;font-size:24px;line-height:1.1}
+.lv-side{display:flex;align-items:center;gap:8px}
+.mascot svg{width:54px;height:54px;display:block}
+.combo{display:inline-flex;align-items:center;gap:4px;background:var(--f1);color:var(--pencil-ink);border:2px solid var(--stroke);border-radius:999px;padding:2px 10px 2px 6px;font-weight:700;font-size:17px}
+.combo svg{width:20px;height:20px}
+.combo.bump{animation:pop .35s}
+.lv-prog{grid-column:1/-1;height:14px;background:var(--panel);border:2px solid var(--key-border);border-radius:999px;overflow:hidden}
+.lv-prog span{display:block;height:100%;width:0;background:var(--ok);transition:width .45s}
+.stage{background:var(--panel);border:2px solid var(--key-border);border-radius:20px;padding:18px}
+.stage.enter{animation:rise .3s}
+@media (max-width:520px){.stage{padding:12px}}
+
+/* question layout */
+.q{display:grid;gap:18px}
+@media (min-width:780px){.q{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:start}.q-fig{position:sticky;top:12px}}
+.q-fig{margin:0;border:2px solid var(--line);border-radius:16px;padding:12px;display:grid;gap:8px;background-color:var(--panel-2);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:14px 14px}
+.fig-in{display:grid;place-items:center;min-height:180px}
+.fig-in>svg{width:100%;max-width:390px;height:auto}
+.fig-in.revealed{animation:rise .4s}
+.q-fig figcaption{font-size:16px;color:var(--ink-soft);text-align:center;font-weight:700}
+.q-main{min-width:0}
+.tag{justify-self:start;font-weight:700;font-size:15px;border-radius:999px;padding:3px 12px;border:2px solid var(--stroke);color:var(--pencil-ink)}
+.tag-lp{background:var(--f2)} .tag-ip{background:var(--f1)}
+.lead{font-size:20px;margin:0 0 14px;text-wrap:pretty}
+.q-steps{display:grid;gap:4px}
+.step{display:grid;gap:12px;padding-block:14px;border-top:2px dashed var(--line);animation:rise .3s}
+.step:first-child{border-top:0;padding-top:0}
+.step-q{font-family:var(--font-body);font-size:21px;font-weight:700;margin:0}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.opt{position:relative;flex-direction:column;font-size:20px;font-weight:700;text-align:center;min-height:64px;line-height:1.25}
+.opt-ic{width:84px;height:66px;display:block}
+.opt-ic svg{width:100%;height:100%}
+.opts.fx .opt{font-size:25px}
+.opts.fx.sm .opt{font-size:18px}
+.opts.n4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.opts.n4 .opt{font-family:var(--font-display);font-size:30px;font-weight:400}
+.opts.yn .opt{font-size:24px;min-height:80px}
+.opt.is-ok{background:var(--ok-bg);border-color:var(--ok);box-shadow:0 4px 0 var(--ok);animation:pop .35s}
+.opt.is-bad{background:var(--bad-bg);border-color:var(--bad);box-shadow:0 4px 0 var(--bad);animation:shake .4s}
+.opt.is-pick{background:var(--hint-bg);border-color:var(--hint-line)}
+.opt.is-ok::after,.opt.is-bad::after{position:absolute;top:-12px;right:-10px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:18px;font-weight:700;color:var(--panel);font-family:var(--font-body)}
+.opt.is-ok::after{content:"\2713";background:var(--ok)}
+.opt.is-bad::after{content:"\2717";background:var(--bad)}
+.opt:disabled:not(.is-ok):not(.is-bad):not(.is-pick){opacity:.5}
+.hint{display:flex;gap:10px;align-items:flex-start;background:var(--hint-bg);border:2px solid var(--hint-line);border-radius:14px;padding:10px 14px;font-size:18px;animation:rise .25s}
+.hint svg{flex:none;width:30px;height:30px}
+.working{border:2px solid var(--ok);background:var(--ok-bg);border-radius:16px;padding:14px 16px;display:grid;gap:10px;animation:rise .3s;margin-top:8px}
+.working h4{margin:0;font-family:var(--font-display);font-weight:400;font-size:21px;color:var(--ok)}
+.wk{display:grid;gap:4px;font-size:19px;font-variant-numeric:tabular-nums}
+.working .key{justify-self:start}
+.act{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+
+/* maths type */
+var{font-family:var(--font-math);font-style:italic;font-weight:700}
+.vj{color:var(--vj)} .vt{color:var(--vt)} .vs{color:var(--vs)}
+.pi{font-family:var(--font-math)}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;font-size:.78em;line-height:1.05;text-align:center;margin:0 .1em;font-family:var(--font-body);font-weight:700}
+.fr>span:first-child{border-bottom:1.5px solid currentColor;padding:0 .12em}
+
+/* svg drawing classes */
+.fl{stroke:none}
+.ol{fill:none;stroke:var(--stroke);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.ol.thin{stroke-width:1.5;opacity:.55}
+.dk{fill:var(--shade)} .lt{fill:var(--shine)}
+.hd{fill:none;stroke:var(--stroke);stroke-width:2;stroke-dasharray:6 5;opacity:.7}
+.pc{stroke:var(--stroke);stroke-width:2.5;stroke-linejoin:round}
+.net.tappable .pc{cursor:pointer}
+.pc.mark{opacity:.55}
+.tick{font:700 22px var(--font-body);fill:var(--ok);paint-order:stroke;stroke:var(--panel);stroke-width:4px;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.dim{color:var(--ink)} .d-j{color:var(--vj)} .d-t{color:var(--vt)} .d-s{color:var(--vs)}
+.dim line{stroke:currentColor;stroke-width:2.5;stroke-linecap:round}
+.dim .dot{fill:currentColor}
+.dim text{fill:currentColor;font:700 16px var(--font-body);paint-order:stroke;stroke:var(--panel-2);stroke-width:5px;stroke-linejoin:round}
+.it{font-family:var(--font-math);font-style:italic}
+.ctext{font:700 14px var(--font-math);fill:var(--pencil-ink);text-anchor:middle;dominant-baseline:central}
+.bigeq{font:400 44px var(--font-display);fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.guide{stroke:var(--vt);stroke-width:2;stroke-dasharray:4 5;opacity:.8}
+.pf{fill:var(--f2);stroke:var(--stroke);stroke-width:2;stroke-linejoin:round}
+.pl{fill:none;stroke:var(--stroke);stroke-width:2.2;stroke-linecap:round}
+.pd{fill:var(--vj)}
+.st-on{fill:var(--f4);stroke:var(--stroke);stroke-width:1.5;stroke-linejoin:round}
+.st-off{fill:none;stroke:var(--line);stroke-width:1.8;stroke-linejoin:round}
+
+/* figures */
+.emo{font-size:clamp(96px,22vw,140px);line-height:1.1}
+.props{list-style:none;margin:0;padding:0;display:grid;gap:10px;width:100%}
+.props li{display:flex;align-items:center;gap:12px;background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:10px 14px;font-weight:700;font-size:19px}
+.props svg{width:38px;height:38px;flex:none}
+.reveal{display:flex;align-items:center;justify-content:center;gap:6px;width:100%}
+.reveal>svg{width:44%;height:auto}
+.reveal .arw{width:40px;flex:none}
+.duo{display:grid;gap:8px;width:100%;justify-items:center}
+.duo>svg{width:100%;max-width:340px;height:auto}
+.duo .cap{font-size:16px;font-weight:700;color:var(--ink-soft);text-align:center;margin:0}
+
+/* counters */
+.ctr{display:grid;gap:10px;margin-bottom:12px}
+.ctr-eq{font-weight:700;font-size:20px}
+.ctr-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:8px 10px;border-radius:14px;border:2px solid transparent}
+.ctr-row.is-bad{border-color:var(--bad);background:var(--bad-bg);animation:shake .4s}
+.ctr-row.is-ok{border-color:var(--ok);background:var(--ok-bg)}
+.stp{display:inline-flex;align-items:center;gap:6px}
+.stp .key{min-height:48px;width:48px;padding:0;font-size:26px;font-weight:700}
+.stp output{min-width:40px;text-align:center;font-family:var(--font-display);font-size:32px;font-variant-numeric:tabular-nums}
+.times{font-weight:700;font-size:22px}
+.sw{width:34px;height:30px;flex:none}
+.ctr-name{font-weight:700;font-size:18px}
+.ctr-plus{font-weight:700;font-size:24px;padding-left:22px;line-height:1}
+
+/* builder */
+.bld-eq{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:21px;font-weight:700;margin-bottom:14px}
+.slot{min-width:120px;min-height:64px;border:3px dashed var(--line);border-radius:14px;background:var(--panel-2);font:inherit;font-size:26px;display:inline-flex;align-items:center;justify-content:center;padding:4px 12px;cursor:pointer;color:var(--ink)}
+.slot.full{border-style:solid;border-color:var(--key-border);background:var(--panel)}
+.slot.is-bad{border-color:var(--bad);background:var(--bad-bg);animation:shake .4s}
+.slot.is-ok{border-color:var(--ok);background:var(--ok-bg)}
+.slot:focus-visible{outline:3px solid var(--vt);outline-offset:2px}
+.tray{display:flex;flex-wrap:wrap;gap:12px;padding:14px;border-radius:16px;background:var(--panel-2);border:2px solid var(--line);margin-bottom:14px}
+.tile{font-size:24px;min-width:96px}
+.tile.used{visibility:hidden}
+
+/* memory */
+.mem-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:12px}
+@media (max-width:600px){.mem-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.mc{aspect-ratio:4/5;max-width:100%;perspective:800px;border:0;background:none;padding:0;cursor:pointer;font:inherit;color:inherit;border-radius:14px}
+.mc-in{position:relative;display:block;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+.mc.up .mc-in{transform:rotateY(180deg)}
+.mc-back,.mc-front{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;border:2.5px solid var(--key-border);display:grid;place-items:center;align-content:center;padding:6px;box-shadow:0 4px 0 var(--key-edge)}
+.mc-back{background-color:var(--f2);background-image:linear-gradient(var(--shine) 1px,transparent 1px),linear-gradient(90deg,var(--shine) 1px,transparent 1px);background-size:12px 12px;font-family:var(--font-display);font-size:44px;color:var(--pencil-ink)}
+.mc-front{background:var(--panel);transform:rotateY(180deg);gap:2px;font-weight:700;text-align:center;font-size:16px;line-height:1.2}
+.mc-front.fx{font-size:20px}
+.mc-front.fx.sm{font-size:14px}
+.mc-ic{width:70%;max-width:76px;aspect-ratio:1/1}
+.mc-ic svg{width:100%;height:100%}
+.mc.match .mc-front{border-color:var(--ok);background:var(--ok-bg);box-shadow:0 4px 0 var(--ok)}
+.mc.nope .mc-front{border-color:var(--bad);background:var(--bad-bg)}
+.mc:focus-visible{outline:3px solid var(--vt);outline-offset:3px}
+.mem-stat{margin:0;font-weight:700;color:var(--ink-soft)}
+
+/* lab scenes */
+.coin{animation:drop .32s ease-out}
+.pour .lvl{transform-box:fill-box;transform-origin:50% 100%;transform:scaleY(0);transition:transform .7s ease-out}
+.pour .stream{opacity:0;transition:opacity .25s}
+.pour .csand{transition:opacity .35s}
+.pour.pouring .stream{opacity:1}
+.pour.pouring .csand{opacity:.15}
+.tally{display:flex;justify-content:center;gap:10px}
+.tally span{width:30px;height:34px;clip-path:polygon(0 0,100% 0,50% 100%);background:var(--line)}
+.tally span.on{background:var(--sand);animation:pop .35s}
+.pour-msg{font-size:19px;margin:0}
+
+/* boss */
+.boss{display:flex;align-items:center;gap:14px;background:var(--panel);border:2px solid var(--key-border);border-radius:18px;padding:10px 14px;margin-bottom:14px}
+.boss-face svg{width:76px;height:76px;display:block}
+.boss-face.hit{animation:hit .45s}
+.boss-face.laugh{animation:laugh .6s}
+.boss-face.ko{animation:ko 1.2s forwards}
+.boss-info{flex:1;min-width:0;display:grid;gap:6px}
+.boss-info b{font-family:var(--font-display);font-weight:400;font-size:21px}
+.hp{height:18px;border-radius:999px;border:2px solid var(--stroke);background:var(--panel-2);overflow:hidden}
+.hp span{display:block;height:100%;width:100%;background:var(--bad);transition:width .45s}
+.boss-n{font-weight:700;font-size:15px;color:var(--ink-soft)}
+
+/* done + final */
+.done,.final{display:grid;gap:24px;align-items:center;padding-block:8px 24px}
+@media (min-width:780px){.done{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)}}
+.done-art .robot,.cert-art .robot{width:100%;max-width:300px;height:auto;display:block;margin-inline:auto}
+.done-k{font-weight:700;color:var(--ink-soft);margin:0 0 4px;font-size:18px}
+.stars-big{display:flex;gap:8px;margin-bottom:12px}
+.stars-big span{display:inline-block;animation:starIn .5s both;animation-delay:calc(var(--i) * .25s)}
+.stars-big svg{width:60px;height:60px}
+.done-p{font-size:21px;margin:0 0 6px}
+.done-m{margin:0 0 20px;color:var(--ink-soft)}
+.done-act{display:flex;flex-wrap:wrap;gap:12px}
+.cert{background:var(--panel);border:3px solid var(--key-border);border-radius:24px;padding:22px;display:grid;gap:18px;align-items:center;outline:2px dashed var(--line);outline-offset:-12px}
+@media (min-width:780px){.cert{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}}
+.cert-name{font-family:var(--font-display);font-size:clamp(34px,6vw,52px);margin:4px 0 8px;color:var(--vt);line-height:1.05}
+.cert-date{color:var(--ink-soft);margin:8px 0 0}
+.cert-tx p{font-size:19px}
+
+/* robot */
+.rb-part:not(.on) .fl,.rb-part:not(.on) .lt,.rb-part:not(.on) .dk{fill:transparent}
+.rb-part:not(.on) .ol{stroke:var(--line);stroke-dasharray:5 4}
+.rb-part:not(.on) .rb-det{display:none}
+.rb-part.new{animation:snap .8s cubic-bezier(.2,1.4,.4,1) both;transform-box:fill-box;transform-origin:center}
+.scatter .rb-part{animation:float 3.2s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+.scatter [data-p="kepala"]{animation-delay:-.7s} .scatter [data-p="topi"]{animation-delay:-1.6s} .scatter [data-p="lengan"]{animation-delay:-2.2s} .scatter [data-p="kaki"]{animation-delay:-1.1s} .scatter [data-p="kasut"]{animation-delay:-2.8s}
+.robot.dance{animation:dance .9s ease-in-out infinite alternate;transform-origin:50% 100%}
+.eye{fill:var(--stroke)}
+.face .ey,.face .mo{display:none}
+.face .ey{fill:none;stroke:var(--stroke);stroke-width:2.6;stroke-linecap:round}
+.face .ey.n{fill:var(--stroke);stroke:none}
+.face .mo{fill:none;stroke:var(--stroke);stroke-width:2.6;stroke-linecap:round}
+[data-m="n"] .face .n,[data-m="h"] .face .h,[data-m="o"] .face .o{display:inline}
+[data-m="h"] .face{animation:pop .4s}
+[data-m="o"] .face{animation:shake .4s}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:60;background:var(--scrim);display:grid;place-items:center;padding:calc(env(safe-area-inset-top,0px) + 16px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 16px) max(16px,env(safe-area-inset-left,0px))}
+.modal-card{background:var(--panel);border:2.5px solid var(--key-border);border-radius:20px;width:min(780px,100%);max-height:100%;overflow:auto;padding:18px;display:grid;gap:14px}
+.modal-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.legend{display:flex;flex-wrap:wrap;gap:8px}
+.legend span{background:var(--panel-2);border:2px solid var(--line);border-radius:999px;padding:4px 12px;font-weight:700}
+.tbl-wrap{overflow-x:auto}
+table.kr{width:100%;border-collapse:collapse;min-width:540px;font-size:18px}
+.kr th{text-align:left;font-size:15px;color:var(--ink-soft);padding:8px;border-bottom:2px solid var(--line)}
+.kr td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.kr .nm{display:flex;align-items:center;gap:10px;font-weight:700}
+.kr .nm svg{width:46px;height:40px;flex:none}
+.kr .f{font-size:21px}
+.tip{display:flex;gap:10px;align-items:center;margin:0;background:var(--hint-bg);border:2px solid var(--hint-line);border-radius:14px;padding:10px 14px}
+.tip svg{width:30px;height:30px;flex:none}
+
+/* feedback */
+.cheer{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 16px);transform:translateX(-50%);z-index:50;font-family:var(--font-display);font-size:34px;color:var(--pencil-ink);background:var(--pencil);border:3px solid var(--pencil-ink);border-radius:16px;padding:6px 22px;box-shadow:0 5px 0 var(--pencil-ink);pointer-events:none;opacity:0;white-space:nowrap}
+.cheer.show{animation:cheer 1.15s forwards}
+.bit{position:fixed;width:12px;height:12px;margin:-6px 0 0 -6px;z-index:49;pointer-events:none;border:1.5px solid var(--stroke);animation:bit .85s ease-out forwards}
+.bit.tri{clip-path:polygon(50% 0,100% 100%,0 100%);border:0}
+.bit.cir{border-radius:50%}
+.bit.c1{background:var(--f1)} .bit.c2{background:var(--f2)} .bit.c3{background:var(--f3)} .bit.c4{background:var(--f4)} .bit.c5{background:var(--f5)} .bit.c6{background:var(--f6)}
+
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
+@keyframes rise{from{transform:translateY(8px);opacity:.3}to{transform:none;opacity:1}}
+@keyframes cheer{0%{opacity:0;transform:translate(-50%,-16px) scale(.7)}15%{opacity:1;transform:translate(-50%,0) scale(1.08)}25%{transform:translate(-50%,0) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-8px)}}
+@keyframes bit{to{transform:translate(var(--dx),var(--dy)) rotate(var(--rot));opacity:0}}
+@keyframes drop{from{transform:translateY(-40px);opacity:0}to{transform:none;opacity:1}}
+@keyframes float{from{transform:translateY(-4px) rotate(-2deg)}to{transform:translateY(5px) rotate(2deg)}}
+@keyframes dance{from{transform:rotate(-4deg)}to{transform:rotate(4deg) translateY(-6px)}}
+@keyframes starIn{0%{transform:scale(0) rotate(-40deg);opacity:0}70%{transform:scale(1.2) rotate(8deg);opacity:1}100%{transform:none;opacity:1}}
+@keyframes snap{0%{transform:translateY(-50px) scale(1.4);opacity:0}100%{transform:none;opacity:1}}
+@keyframes hit{0%,100%{transform:none}25%{transform:translateX(-8px) rotate(-8deg)}60%{transform:translateX(6px) rotate(5deg)}}
+@keyframes laugh{0%,100%{transform:none}30%{transform:translateY(-8px) scale(1.06)}60%{transform:translateY(0)}80%{transform:translateY(-4px)}}
+@keyframes ko{0%{transform:none;opacity:1}40%{transform:rotate(25deg) scale(1.1)}100%{transform:rotate(90deg) translateY(30px) scale(.4);opacity:0}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;animation-delay:0s!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+</style>
+</head><body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M30,9 V3" class="ol"/><circle cx="30" cy="3" r="2.5" style="fill:var(--f1)"/><circle cx="30" cy="33" r="24" class="fl" style="fill:var(--f4)"/><circle cx="22" cy="24" r="6" class="lt"/><circle cx="30" cy="33" r="24" class="ol"/><circle cx="22" cy="31" r="3.6" style="fill:var(--stroke)"/><circle cx="38" cy="31" r="3.6" style="fill:var(--stroke)"/><path d="M21,41 q9,9 18,0" class="ol"/></svg><span>Robo Geo</span></div>
+    <div class="starcount" aria-label="Jumlah bintang"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" class="st-on"/></svg><span id="starTotal">0</span><span class="sr"> bintang</span></div>
+  </header>
+  <main id="main"></main>
+</div>
+<div class="cheer" aria-hidden="true"></div>
+<div id="sr" class="sr" aria-live="polite"></div>
+<script>
+(function(){
+'use strict';
+const HAS_DOM = typeof document !== 'undefined';
+const PI = 22/7;
+const KEY = 'misi-robo-geo-v1';
+
+/* ---------- utils ---------- */
+const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){ const k=Math.floor(Math.random()*(i+1)); [a[i],a[k]]=[a[k],a[i]]; } return a; };
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const r2 = x => Math.round((x + Number.EPSILON) * 100) / 100;
+function fmt(x, dp){
+  dp = dp == null ? 2 : dp;
+  const neg = x < 0;
+  let s = Math.abs(x).toFixed(dp);
+  if (s.indexOf('.') >= 0) s = s.replace(/0+$/,'').replace(/\.$/,'');
+  const p = s.split('.');
+  const i = p[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+  return (neg?'−':'') + i + (p[1] ? '.'+p[1] : '');
+}
+const esc = s => String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- maths type ---------- */
+const J='<var class="vj">j</var>', T='<var class="vt">t</var>', S_='<var class="vs">s</var>';
+const PI_='<span class="pi">π</span>';
+const fr = (a,b) => `<span class="fr"><span>${a}</span><span>${b}</span></span>`;
+const P227 = fr(22,7);
+const FX = {
+  lpSil:`2${PI_}${J}² + 2${PI_}${J}${T}`,
+  lpSil1:`${PI_}${J}² + 2${PI_}${J}${T}`,
+  lpKon:`${PI_}${J}² + ${PI_}${J}${S_}`,
+  lpKonT:`${PI_}${J}² + ${PI_}${J}${T}`,
+  lpSf:`4${PI_}${J}²`,
+  ipSil:`${PI_}${J}²${T}`,
+  ipKon:`${fr(1,3)}${PI_}${J}²${T}`,
+  ipSf:`${fr(4,3)}${PI_}${J}³`,
+  ipHemi:`${fr(2,3)}${PI_}${J}³`,
+  lengkungSil:`2${PI_}${J}${T}`,
+  bul:`${PI_}${J}²`,
+  bul2:`2${PI_}${J}²`,
+  pjt:`${PI_}${J}${T}`,
+  pjs:`${PI_}${J}${S_}`
+};
+
+/* ---------- shape catalogue ---------- */
+const SHAPES = {
+  kubus:{name:'Kubus', fact:'6 muka segi empat sama yang sama saiz'},
+  kuboid:{name:'Kuboid', fact:'6 muka segi empat tepat'},
+  prisma:{name:'Prisma', fact:'2 tapak poligon yang sama dan selari, keratan rentas seragam'},
+  piramid:{name:'Piramid', fact:'1 tapak poligon, muka segi tiga bertemu di puncak'},
+  silinder:{name:'Silinder', fact:'2 tapak bulatan dan 1 permukaan melengkung'},
+  kon:{name:'Kon', fact:'1 tapak bulatan, 1 puncak dan 1 permukaan melengkung'},
+  sfera:{name:'Sfera', fact:'semua titik sama jarak dari pusat'},
+  hemisfera:{name:'Hemisfera', fact:'separuh sfera'},
+  piramid3:{name:'Piramid segi tiga', fact:'tapak segi tiga dan 3 muka segi tiga'},
+  heks:{name:'Prisma heksagon', fact:'2 tapak heksagon (6 sisi)'}
+};
+
+/* ---------- svg helpers ---------- */
+const labv = (v, val) => `<tspan class="it">${v}</tspan> = ${val}`;
+const f1 = n => (+n).toFixed(1);
+function dim(x1,y1,x2,y2,v,text,tx,ty,anchor,rot){
+  const dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy)||1, px=-dy/L*6, py=dx/L*6;
+  const tr = rot ? ` transform="rotate(${rot} ${tx} ${ty})"` : '';
+  return `<g class="dim d-${v}"><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/><line x1="${f1(x1-px)}" y1="${f1(y1-py)}" x2="${f1(x1+px)}" y2="${f1(y1+py)}"/><line x1="${f1(x2-px)}" y1="${f1(y2-py)}" x2="${f1(x2+px)}" y2="${f1(y2+py)}"/>` + (text ? `<text x="${tx}" y="${ty}" text-anchor="${anchor||'middle'}"${tr}>${text}</text>` : '') + `</g>`;
+}
+function ray(x1,y1,x2,y2,v,text,tx,ty,anchor){
+  return `<g class="dim d-${v}"><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/><circle cx="${x1}" cy="${y1}" r="3.5" class="dot"/>` + (text ? `<text x="${tx}" y="${ty}" text-anchor="${anchor||'middle'}">${text}</text>` : '') + `</g>`;
+}
+const tlab = (v, text, x, y, anchor) => `<g class="dim d-${v}"><text x="${x}" y="${y}" text-anchor="${anchor||'middle'}">${text}</text></g>`;
+function solid(faces, fill){
+  let a='', b='', c='';
+  faces.forEach(fc => {
+    a += `<polygon points="${fc.p}" class="fl" style="fill:var(--${fc.f||fill})"/>`;
+    if (fc.ov) b += `<polygon points="${fc.p}" class="${fc.ov}"/>`;
+    c += `<polygon points="${fc.p}" class="ol"/>`;
+  });
+  return a + b + c;
+}
+const hd = (x1,y1,x2,y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="hd"/>`;
+const hdP = d => `<path d="${d}" class="hd"/>`;
+const curved = (d, fill, ov) => `<path d="${d}" class="fl" style="fill:var(--${fill})"/>` + (ov||'') + `<path d="${d}" class="ol"/>`;
+
+/* ---------- 3D shapes (viewBox 0 0 300 220) ---------- */
+const DRAW = {
+  silinder(o){ const L=o.L||{}, f=o.fill||'f2';
+    let s = curved('M68,40 L68,172 A62,16 0 0 0 192,172 L192,40 Z', f, '<path d="M155,40 L155,186.6 A62,16 0 0 0 192,172 L192,40 Z" class="dk"/>');
+    s += curved('M68,40 A62,16 0 0 1 192,40 A62,16 0 0 1 68,40 Z', f, '<path d="M68,40 A62,16 0 0 1 192,40 A62,16 0 0 1 68,40 Z" class="lt"/>');
+    s += hdP('M68,172 A62,16 0 0 1 192,172');
+    if (L.j) s += ray(130,40,192,40,'j',labv('j',L.j),161,17);
+    if (L.d) s += dim(68,40,192,40,'j',labv('d',L.d),130,17);
+    if (L.t) s += dim(216,40,216,172,'t',labv('t',L.t),224,111,'start');
+    return s; },
+  kon(o){ const L=o.L||{}, f=o.fill||'f1';
+    const body='M66,168 L130,22 L194,168 A64,17 0 0 1 66,168 Z';
+    let s = curved(body, f, '<path d="M130,22 L194,168 A64,17 0 0 1 152,184 Z" class="dk"/>');
+    s += hdP('M66,168 A64,17 0 0 1 194,168');
+    if (L.t || o.axis) s += hd(130,22,130,168) + '<path d="M130,158 h10 v10" class="hd"/>';
+    if (L.j) s += ray(130,168,194,168,'j',labv('j',L.j),162,207);
+    if (L.d) s += dim(66,168,194,168,'j',labv('d',L.d),130,207);
+    if (L.t) s += dim(220,22,220,168,'t',labv('t',L.t),228,100,'start');
+    if (L.s) s += dim(53.2,162.4,117.2,16.4,'s',labv('s',L.s),70,84,'middle',-66.3);
+    return s; },
+  sfera(o){ const L=o.L||{}, f=o.fill||'f5';
+    let s = `<circle cx="130" cy="112" r="82" class="fl" style="fill:var(--${f})"/><path d="M130,30 A82,82 0 0 1 130,194 A60,82 0 0 0 130,30 Z" class="dk"/><circle cx="104" cy="80" r="20" class="lt"/><circle cx="130" cy="112" r="82" class="ol"/>`;
+    s += '<path d="M48,112 A82,20 0 0 0 212,112" class="ol"/>' + hdP('M48,112 A82,20 0 0 1 212,112');
+    if (L.j) s += ray(130,112,212,112,'j',labv('j',L.j),171,103);
+    if (L.d) s += dim(48,112,212,112,'j',labv('d',L.d),130,103);
+    if (!L.j && !L.d) s += '<circle cx="130" cy="112" r="3.5" style="fill:var(--stroke)"/>';
+    return s; },
+  hemisfera(o){ const L=o.L||{}, f=o.fill||'f6';
+    const body='M45,150 A85,85 0 0 1 215,150 A85,20 0 0 1 45,150 Z';
+    let s = curved(body, f, '<circle cx="100" cy="105" r="18" class="lt"/>');
+    s += hdP('M45,150 A85,20 0 0 1 215,150');
+    if (L.j) s += ray(130,150,215,150,'j',labv('j',L.j),172,141);
+    return s; },
+  kubus(o){ const L=o.L||{}, f=o.fill||'f3';
+    let s = solid([{p:'40,80 140,80 140,180 40,180'},{p:'40,80 85,40 185,40 140,80',ov:'lt'},{p:'140,80 185,40 185,140 140,180',ov:'dk'}], f);
+    s += hd(40,180,85,140) + hd(85,140,85,40) + hd(85,140,185,140);
+    if (L.a) s += dim(40,197,140,197,'n',L.a,90,216);
+    return s; },
+  kuboid(o){ const L=o.L||{}, f=o.fill||'f5';
+    let s = solid([{p:'55,100 185,100 185,175 55,175'},{p:'55,100 100,62 230,62 185,100',ov:'lt'},{p:'185,100 230,62 230,137 185,175',ov:'dk'}], f);
+    s += hd(55,175,100,137) + hd(100,137,100,62) + hd(100,137,230,137);
+    if (L.p) s += dim(55,192,185,192,'n',labv('p',L.p),120,213);
+    if (L.l) s += dim(193,183,238,145,'n',labv('l',L.l),236,183,'start');
+    if (L.t) s += dim(36,100,36,175,'t',labv('t',L.t),24,137.5,'middle',-90);
+    return s; },
+  piramid(o){ const L=o.L||{}, f=o.fill||'f4';
+    let s = solid([{p:'40,175 170,175 215,140 85,140',ov:'dk'},{p:'128,30 40,175 170,175'},{p:'128,30 170,175 215,140',ov:'dk'}], f);
+    s += hd(128,30,85,140) + hd(85,140,40,175) + hd(85,140,215,140);
+    if (L.t) s += '<g class="dim d-t"><line x1="128" y1="30" x2="127.5" y2="157.5" stroke-dasharray="7 5"/></g><path d="M127.5,147.5 h10 v10" class="hd"/>' + tlab('t', labv('t',L.t), 137, 112, 'start');
+    if (L.a) s += dim(40,193,170,193,'n',L.a,105,214);
+    if (L.s) s += '<g class="dim d-s"><line x1="128" y1="30" x2="105" y2="175"/></g>' + tlab('s', labv('s',L.s), 82, 104, 'end');
+    return s; },
+  prisma(o){ const L=o.L||{}, f=o.fill||'f5';
+    let s = solid([{p:'30,180 80,130 200,70 150,120',ov:'lt'},{p:'80,130 130,180 250,120 200,70',ov:'dk'},{p:'30,180 130,180 80,130', f: o.xs ? 'f4' : f}], f);
+    s += hd(150,120,250,120);
+    if (L.b) s += dim(30,197,130,197,'n',L.b,80,216);
+    if (L.h) s += hd(80,130,80,180) + tlab('n', L.h, 86, 170, 'start');
+    if (L.t) s += dim(135.4,190.7,255.4,130.7,'t',labv('t',L.t),206,180,'start');
+    return s; },
+  piramid3(o){ const f=o.fill||'f4';
+    return solid([{p:'110,28 40,175 160,175'},{p:'110,28 160,175 215,140',ov:'dk'}], f) + hd(40,175,215,140); },
+  heks(o){ const f=o.fill||'f2';
+    return solid([{p:'190,45 160,62.3 100,62.3 70,45 100,27.7 160,27.7',ov:'lt'},{p:'70,45 100,62.3 100,192.3 70,175'},{p:'100,62.3 160,62.3 160,192.3 100,192.3'},{p:'160,62.3 190,45 190,175 160,192.3',ov:'dk'}], f)
+      + '<polyline points="70,175 100,157.7 160,157.7 190,175" class="hd"/>' + hd(100,157.7,100,27.7) + hd(160,157.7,160,27.7); }
+};
+const SHAPE_VB = { silinder:'58 16 144 180', kon:'56 14 148 180', sfera:'42 24 176 176', hemisfera:'38 56 184 124', kubus:'32 32 162 156', kuboid:'48 54 190 128', piramid:'32 22 192 162', prisma:'22 62 236 126', heks:'62 20 136 180', piramid3:'32 20 192 164' };
+function shapeSVG(k, o){
+  o = o || {};
+  const vb = o.icon ? SHAPE_VB[k] : (o.vb || '0 0 300 220');
+  const a11y = o.deco ? 'aria-hidden="true"' : `role="img" aria-label="${o.aria || SHAPES[k].name}"`;
+  return `<svg viewBox="${vb}" class="shp" ${a11y}>${DRAW[k](o)}</svg>`;
+}
+const shapeIcon = k => shapeSVG(k, {icon:true, deco:true});
+
+/* ---------- nets (viewBox 0 0 240 210) ---------- */
+const KCOL = {sq:'f3', rect:'f5', tri:'f4', circ:'f2', curve:'f1', hex:'f2', rect6:'f6'};
+const pc = (tag, attrs, k, cx, cy) => `<${tag} ${attrs} class="pc" data-k="${k}" data-cx="${f1(cx)}" data-cy="${f1(cy)}" style="fill:var(--${KCOL[k]})"/>`;
+const rectP = (x,y,w,h,k) => pc('rect', `x="${x}" y="${y}" width="${w}" height="${h}"`, k, x+w/2, y+h/2);
+function polyP(pts, k){
+  const n = pts.trim().split(/\s+/).map(p => p.split(',').map(Number));
+  const cx = n.reduce((a,p)=>a+p[0],0)/n.length, cy = n.reduce((a,p)=>a+p[1],0)/n.length;
+  return pc('polygon', `points="${pts}"`, k, cx, cy);
+}
+const NETS = {
+  kubus(){ return [[32,83],[76,83],[120,83],[164,83],[76,39],[76,127]].map(([x,y]) => rectP(x,y,44,44,'sq')).join(''); },
+  kuboid(){ return [40,80,120,160].map(x => rectP(x,65,40,80,'rect')).join('') + rectP(80,25,40,40,'sq') + rectP(80,145,40,40,'sq'); },
+  silinder(o){ let s = rectP(40,70,170,70,'rect') + pc('circle','cx="90" cy="40" r="30"','circ',90,40) + pc('circle','cx="90" cy="170" r="30"','circ',90,170);
+    if (o && o.lab) s += tlab('j', 'panjang = 2π<tspan class="it">j</tspan>', 140, 111) + dim(26,70,26,140,'t','<tspan class="it">t</tspan>',14,111) + ray(90,40,120,40,'j','<tspan class="it">j</tspan>',104,33);
+    return s; },
+  kon(o){ let s = pc('path','d="M100,80 L135,140.6 A70,70 0 1 1 135,19.4 Z"','curve',68,80) + pc('circle','cx="125.4" cy="174.7" r="28"','circ',125.4,174.7);
+    if (o && o.lab) s += '<g class="dim d-s"><line x1="100" y1="80" x2="135" y2="19.4"/></g>' + tlab('s','<tspan class="it">s</tspan>',132,62,'start') + ray(125.4,174.7,153.4,174.7,'j','<tspan class="it">j</tspan>',139,168);
+    return s; },
+  piramid(){ return rectP(94,79,52,52,'sq') + ['94,79 146,79 120,33','94,131 146,131 120,177','94,79 94,131 48,105','146,79 146,131 192,105'].map(p => polyP(p,'tri')).join(''); },
+  prisma(){ return [42,94,146].map(x => rectP(x,70,52,70,'rect')).join('') + polyP('94,70 146,70 120,25','tri') + polyP('94,140 146,140 120,185','tri'); },
+  piramid3(){ return ['40,180 80,110.7 120,180','80,110.7 160,110.7 120,180','120,180 160,110.7 200,180','80,110.7 120,41.4 160,110.7'].map(p => polyP(p,'tri')).join(''); },
+  heks(){ return [30,60,90,120,150,180].map(x => rectP(x,70,30,70,'rect6')).join('') + polyP('60,70 90,70 105,44 90,18 60,18 45,44','hex') + polyP('60,140 90,140 105,166 90,192 60,192 45,166','hex'); }
+};
+const netSVG = (k, o) => `<svg viewBox="0 0 240 210" class="net${o&&o.tap?' tappable':''}" role="img" aria-label="Bentangan">${NETS[k](o)}</svg>`;
+
+/* ---------- small icons ---------- */
+const st = 'style="fill:none;stroke:var(--stroke);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"';
+const IC = {
+  back:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" style="fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"/></svg>',
+  lock:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" style="fill:currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" style="fill:none;stroke:currentColor;stroke-width:2.5"/></svg>',
+  bulb:`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3a9 9 0 0 0-5.5 16.1V23h11v-3.9A9 9 0 0 0 16 3z" style="fill:var(--f4);stroke:var(--stroke);stroke-width:2;stroke-linejoin:round"/><path d="M11.5 26.5h9M13 29.5h6" ${st}/></svg>`,
+  flame:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-6 0 2 1 3 2 3 0-3-1-6 1-9z" style="fill:var(--f1);stroke:var(--stroke);stroke-width:1.5;stroke-linejoin:round"/></svg>',
+  tap:`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="13" r="9" style="fill:var(--f2);stroke:var(--stroke);stroke-width:2"/><circle cx="16" cy="13" r="3.5" style="fill:var(--stroke)"/><path d="M16 22v8" ${st}/></svg>`,
+  card:`<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" style="fill:var(--f4);stroke:var(--stroke);stroke-width:2"/><path d="M7 10h10M7 14h6" ${st}/></svg>`,
+  x:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" style="stroke:currentColor;stroke-width:3;stroke-linecap:round"/></svg>',
+  arrow:'<svg class="arw" viewBox="0 0 40 24" aria-hidden="true"><path d="M2 12h30M24 4l10 8-10 8" style="fill:none;stroke:var(--ink);stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round"/></svg>'
+};
+const star = on => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" class="${on?'st-on':'st-off'}"/></svg>`;
+const PROP_IC = {
+  puncak:'<path d="M16 6 L28 27 H4 Z" class="pf"/><circle cx="16" cy="6" r="3.5" class="pd"/>',
+  bulatan:'<circle cx="16" cy="16" r="12" class="pf"/>',
+  lengkung:'<path d="M4 25 Q16 1 28 25" class="pl"/>',
+  poligon:'<polygon points="16,3 27,9.5 27,22.5 16,29 5,22.5 5,9.5" class="pf"/>',
+  segitiga:'<polygon points="16,4 28,27 4,27" class="pf"/><circle cx="16" cy="4" r="3" class="pd"/>',
+  kongruen:'<rect x="3" y="9" width="12" height="12" class="pf"/><rect x="17" y="9" width="12" height="12" class="pf"/>',
+  keratan:'<rect x="4" y="8" width="24" height="16" class="pf"/><path d="M12 8v16M20 8v16" class="pl"/>',
+  jarak:'<circle cx="16" cy="16" r="12" class="pf"/><path d="M16 16 L28 16 M16 16 L8 7 M16 16 L9 26" class="pl"/><circle cx="16" cy="16" r="2.5" class="pd"/>'
+};
+const propsFig = props => `<ul class="props">${props.map(([ic,t]) => `<li><svg viewBox="0 0 32 32" aria-hidden="true">${PROP_IC[ic]}</svg><span>${t}</span></li>`).join('')}</ul>`;
+const emoji = (e, label) => `<div class="emo" role="img" aria-label="${label}">${e}</div>`;
+
+/* ---------- object drawings ---------- */
+const OBJ_CONE = `<svg viewBox="0 0 300 220" role="img" aria-label="Kon trafik"><line x1="40" y1="198" x2="260" y2="198" class="ol thin"/>`
+  + solid([{p:'92,196 200,196 226,180 118,180',f:'ink-soft'}],'ink-soft')
+  + curved('M110,180 L146,32 L182,180 A36,9 0 0 1 110,180 Z','f1','<path d="M146,32 L182,180 A36,9 0 0 1 160,188.3 Z" class="dk"/>')
+  + '<polygon points="136.3,72 155.7,72 160.6,92 131.4,92" style="fill:var(--snow)"/><polygon points="124.6,120 167.4,120 172.3,140 119.7,140" style="fill:var(--snow)"/>'
+  + '<path d="M110,180 L146,32 L182,180 A36,9 0 0 1 110,180 Z" class="ol"/></svg>';
+const OBJ_PYR = `<svg viewBox="0 0 300 220" role="img" aria-label="Piramid batu"><circle cx="242" cy="54" r="20" class="fl" style="fill:var(--f4)"/><circle cx="242" cy="54" r="20" class="ol"/>`
+  + solid([{p:'40,192 190,192 130,48'},{p:'190,192 250,168 130,48',ov:'dk'}],'sand')
+  + '<path d="M100,96 H150 M70,144 H170 M115,96 V144 M95,144 V192 M140,144 V192" class="ol thin"/><line x1="16" y1="193" x2="284" y2="193" class="ol"/></svg>';
+
+/* ---------- lab scenes ---------- */
+function coinSVG(i){
+  const yb = 212 - 13*i, yt = yb - 10;
+  const band = `M48,${yt} L48,${yb} A62,15 0 0 0 172,${yb} L172,${yt} A62,15 0 0 1 48,${yt} Z`;
+  const top = `M48,${yt} A62,15 0 0 1 172,${yt} A62,15 0 0 1 48,${yt} Z`;
+  return `<g class="coin">${curved(band,'coin','<path d="'+band+'" class="dk"/>')}${curved(top,'coin','<path d="'+top+'" class="lt"/>')}<ellipse cx="110" cy="${yt}" rx="46" ry="10" class="ol thin"/></g>`;
+}
+const COIN_DIMS = dim(200,85,200,212,'t','<tspan class="it">t</tspan> = tinggi',208,152,'start') + tlab('j', 'luas tapak = π<tspan class="it">j</tspan>²', 110, 56);
+const POUR_SVG = `<svg viewBox="0 0 300 230" class="pour" role="img" aria-label="Kon dan silinder dengan tapak dan tinggi yang sama">
+<defs><clipPath id="cylClip"><path d="M175,50 L175,190 A45,12 0 0 0 265,190 L265,50 Z"/></clipPath></defs>
+<path d="M175,50 L175,190 A45,12 0 0 0 265,190 L265,50 Z" class="fl" style="fill:var(--panel)"/>
+<g clip-path="url(#cylClip)"><rect class="lvl" x="170" y="50" width="100" height="152" style="fill:var(--sand)"/></g>
+${hdP('M175,190 A45,12 0 0 1 265,190')}
+<path d="M175,50 L175,190 A45,12 0 0 0 265,190 L265,50" class="ol"/><ellipse cx="220" cy="50" rx="45" ry="12" class="ol"/>
+<path d="M35,50 L80,190 L125,50 A45,12 0 0 1 35,50 Z" class="fl" style="fill:var(--panel)"/>
+<path class="csand" d="M35,50 L80,190 L125,50 A45,12 0 0 1 35,50 Z" style="fill:var(--sand)"/>
+<path d="M35,50 L80,190 L125,50" class="ol"/><ellipse cx="80" cy="50" rx="45" ry="12" class="ol"/>
+<path class="stream" d="M118,44 C150,8 198,12 216,60 L224,60 C206,4 146,-2 112,38 Z" style="fill:var(--sand)"/>
+<line x1="14" y1="50" x2="290" y2="50" class="guide"/><line x1="14" y1="190" x2="290" y2="190" class="guide"/>
+${tlab('t','tinggi sama',150,215)}
+</svg>`;
+const ZIGZAG = (() => {
+  let up='', dn='';
+  for (let i=0;i<8;i++){ const x=20+26*i; up += `<polygon points="${x},90 ${x+26},90 ${x+13},20" class="fl" style="fill:var(--f1)"/><polygon points="${x},90 ${x+26},90 ${x+13},20" class="ol thin"/>`; if (i<7) dn += `<polygon points="${x+13},20 ${x+39},20 ${x+26},90" class="fl" style="fill:var(--f1)"/><polygon points="${x+13},20 ${x+39},20 ${x+26},90" class="dk"/><polygon points="${x+13},20 ${x+39},20 ${x+26},90" class="ol thin"/>`; }
+  return `<svg viewBox="0 0 270 128" role="img" aria-label="Sektor kecil disusun jadi segi empat">${up}${dn}${dim(20,104,228,104,'j','π<tspan class="it">j</tspan>',124,124)}${dim(246,20,246,90,'s','<tspan class="it">s</tspan>',256,60,'start')}</svg>`;
+})();
+const SPHERE4 = `<svg viewBox="0 0 300 200" role="img" aria-label="Kulit sfera sama dengan 4 bulatan">
+<circle cx="70" cy="100" r="55" class="fl" style="fill:var(--f5)"/><circle cx="52" cy="78" r="13" class="lt"/><circle cx="70" cy="100" r="55" class="ol"/><path d="M15,100 A55,14 0 0 0 125,100" class="ol"/>${hdP('M15,100 A55,14 0 0 1 125,100')}
+${ray(70,100,125,100,'j','<tspan class="it">j</tspan>',98,92)}
+<text x="150" y="100" class="bigeq">=</text>
+${[[200,60],[262,60],[200,140],[262,140]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="28" class="fl" style="fill:var(--f5)"/><circle cx="${x}" cy="${y}" r="28" class="ol"/><text x="${x}" y="${y}" class="ctext">π<tspan class="it">j</tspan>²</text>`).join('')}
+</svg>`;
+const PRISM_PYR = `<svg viewBox="0 0 300 220" role="img" aria-label="Kuboid dan piramid, tapak dan tinggi sama">`
+  + solid([{p:'25,95 105,95 105,185 25,185'},{p:'25,95 55,70 135,70 105,95',ov:'lt'},{p:'105,95 135,70 135,160 105,185',ov:'dk'}],'f2')
+  + hd(25,185,55,160) + hd(55,160,55,70) + hd(55,160,135,160)
+  + solid([{p:'220,82 165,185 245,185'},{p:'220,82 245,185 275,160',ov:'dk'}],'f4')
+  + hd(220,82,195,160) + hd(195,160,165,185) + hd(195,160,275,160)
+  + '<line x1="10" y1="82" x2="290" y2="82" class="guide"/><line x1="10" y1="185" x2="290" y2="185" class="guide"/></svg>';
+
+/* ---------- boss figures ---------- */
+const FIG_AISKRIM = `<svg viewBox="0 0 300 235" role="img" aria-label="Bekas aiskrim: silinder dengan kon di atas">`
+  + curved('M80,105 L80,195 A50,13 0 0 0 180,195 L180,105 Z','f2','<path d="M150,105 L150,207.4 A50,13 0 0 0 180,195 L180,105 Z" class="dk"/>')
+  + hdP('M80,195 A50,13 0 0 1 180,195')
+  + curved('M80,105 L130,30 L180,105 A50,13 0 0 1 80,105 Z','f4','<path d="M130,30 L180,105 A50,13 0 0 1 150,117 Z" class="dk"/>')
+  + hdP('M80,105 A50,13 0 0 1 180,105')
+  + ray(130,195,180,195,'j',labv('j','7 cm'),150,227)
+  + dim(206,105,206,195,'t',labv('t','6 cm'),214,155,'start') + dim(206,30,206,105,'t',labv('t','6 cm'),214,72,'start') + '</svg>';
+const FIG_KUBPIR = `<svg viewBox="0 0 300 235" role="img" aria-label="Kubus dengan piramid di atas">`
+  + solid([{p:'60,120 150,120 150,210 60,210'},{p:'150,120 190,86 190,176 150,210',ov:'dk'}],'f3')
+  + hd(60,210,100,176) + hd(100,176,100,86) + hd(100,176,190,176)
+  + solid([{p:'125,22 60,120 150,120'},{p:'125,22 150,120 190,86',ov:'dk'}],'f4')
+  + hd(125,22,100,86) + hd(100,86,60,120) + hd(100,86,190,86)
+  + '<g class="dim d-s"><line x1="125" y1="22" x2="105" y2="120"/></g>' + tlab('s', labv('s','5 cm'), 92, 66, 'end')
+  + dim(42,120,42,210,'n','6 cm',30,165,'middle',-90) + '</svg>';
+const FIG_ALI = `<svg viewBox="0 0 300 235" role="img" aria-label="Silinder berisi air dengan kon di dalamnya">`
+  + curved('M70,45 L70,195 A60,15 0 0 0 190,195 L190,45 Z','water','<path d="M70,45 A60,15 0 0 1 190,45 A60,15 0 0 1 70,45 Z" class="lt"/>')
+  + hdP('M70,195 A60,15 0 0 1 190,195')
+  + curved('M70,45 L130,135 L190,45 A60,15 0 0 1 70,45 Z','f1','<path d="M130,135 L190,45 A60,15 0 0 1 156,58.5 Z" class="dk"/>')
+  + '<ellipse cx="130" cy="45" rx="60" ry="15" class="ol"/>'
+  + ray(130,45,190,45,'j',labv('j','7 cm'),160,22)
+  + dim(214,45,214,195,'t',labv('t','15 cm'),222,124,'start') + dim(48,45,48,135,'t','kon 9 cm',34,90,'middle',-90) + '</svg>';
+const FIG_SILHEMI = `<svg viewBox="0 0 300 235" role="img" aria-label="Silinder dengan hemisfera di atas">`
+  + curved('M70,110 L70,205 A60,15 0 0 0 190,205 L190,110 Z','f2','<path d="M155,110 L155,218.3 A60,15 0 0 0 190,205 L190,110 Z" class="dk"/>')
+  + hdP('M70,205 A60,15 0 0 1 190,205')
+  + curved('M70,110 A60,60 0 0 1 190,110 A60,15 0 0 1 70,110 Z','f6','<circle cx="108" cy="76" r="13" class="lt"/>')
+  + hdP('M70,110 A60,15 0 0 1 190,110')
+  + ray(130,110,190,110,'j',labv('j','7 cm'),160,101)
+  + dim(214,110,214,205,'t',labv('t','10 cm'),222,162,'start') + '</svg>';
+
+/* ---------- robot ---------- */
+const ALLPARTS = ['badan','kepala','lengan','kaki','topi','kasut'];
+const SCATTER = { topi:'translate(66 22) rotate(18 112 20)', kepala:'translate(-58 8)', badan:'translate(14 6) rotate(6 116 135)', lengan:'translate(0 26) rotate(-8 116 135)', kaki:'translate(-26 -4) rotate(-10 112 210)', kasut:'translate(34 4) rotate(8 115 252)' };
+function robotSVG(on, opts){
+  opts = opts || {};
+  const P = (k, inner) => `<g${opts.scatter ? ` transform="${SCATTER[k]}"` : ''}><g class="rb-part${on.has(k)?' on':''}${opts.newPart===k?' new':''}" data-p="${k}">${inner}</g></g>`;
+  const kasut = solid([{p:'70,268 108,268 89,236'},{p:'108,268 118,258 89,236',ov:'dk'}],'f3') + solid([{p:'112,268 150,268 131,236'},{p:'150,268 160,258 131,236',ov:'dk'}],'f3');
+  const kaki = solid([{p:'80,180 98,180 98,240 80,240'},{p:'98,180 106,173 106,233 98,240',ov:'dk'}],'f6') + solid([{p:'122,180 140,180 140,240 122,240'},{p:'140,180 148,173 148,233 140,240',ov:'dk'}],'f6');
+  const arm = cx => curved(`M${cx-10},104 L${cx-10},166 A10,4 0 0 0 ${cx+10},166 L${cx+10},104 Z`,'f1') + curved(`M${cx-10},104 A10,4 0 0 1 ${cx+10},104 A10,4 0 0 1 ${cx-10},104 Z`,'f1','<ellipse cx="'+cx+'" cy="104" rx="10" ry="4" class="lt"/>');
+  const lengan = arm(46) + arm(186) + solid([{p:'56,112 60,112 60,120 56,120'},{p:'172,112 176,112 176,120 172,120'}],'f1');
+  const badan = solid([{p:'60,98 160,98 160,182 60,182'},{p:'60,98 72,88 172,88 160,98',ov:'lt'},{p:'160,98 172,88 172,172 160,182',ov:'dk'}],'f2')
+    + `<g class="rb-det"><rect x="76" y="110" width="68" height="36" rx="6" style="fill:var(--stroke)"/><polyline points="82,130 94,130 100,118 108,140 116,124 122,130 138,130" style="fill:none;stroke:var(--f3);stroke-width:2.5;stroke-linejoin:round"/><circle cx="88" cy="164" r="6" class="fl" style="fill:var(--f1)"/><circle cx="110" cy="164" r="6" class="fl" style="fill:var(--f4)"/><circle cx="132" cy="164" r="6" class="fl" style="fill:var(--f5)"/><circle cx="88" cy="164" r="6" class="ol"/><circle cx="110" cy="164" r="6" class="ol"/><circle cx="132" cy="164" r="6" class="ol"/></g>`;
+  const kepala = solid([{p:'104,82 120,82 120,90 104,90'}],'f4') + `<circle cx="112" cy="58" r="27" class="fl" style="fill:var(--f4)"/><circle cx="101" cy="47" r="8" class="lt"/><circle cx="112" cy="58" r="27" class="ol"/><g class="rb-det"><circle cx="102" cy="56" r="4.5" class="eye"/><circle cx="122" cy="56" r="4.5" class="eye"/><path d="M101,68 Q112,77 123,68" class="ol"/></g>`;
+  const topi = curved('M94,34 L112,6 L130,34 A18,5 0 0 1 94,34 Z','f5','<path d="M112,6 L130,34 A18,5 0 0 1 118,38.8 Z" class="dk"/>') + `<circle cx="112" cy="6" r="4.5" class="fl" style="fill:var(--f4)"/><circle cx="112" cy="6" r="4.5" class="ol"/>`;
+  const label = `Robo Geo: ${on.size} daripada 6 bahagian siap`;
+  return `<svg viewBox="${opts.scatter ? '-10 -10 250 300' : '0 0 220 280'}" class="robot${opts.scatter?' scatter':''}${opts.dance?' dance':''}" role="img" aria-label="${label}">${P('kasut',kasut)}${P('kaki',kaki)}${P('lengan',lengan)}${P('badan',badan)}${P('kepala',kepala)}${P('topi',topi)}</svg>`;
+}
+function faceSVG(){
+  return `<svg viewBox="0 0 60 60" class="face" aria-hidden="true"><path d="M30,9 V3" class="ol"/><circle cx="30" cy="3" r="2.5" style="fill:var(--f1)"/><circle cx="30" cy="33" r="24" class="fl" style="fill:var(--f4)"/><circle cx="22" cy="24" r="6" class="lt"/><circle cx="30" cy="33" r="24" class="ol"/>`
+    + `<circle cx="22" cy="31" r="3.6" class="ey n"/><circle cx="38" cy="31" r="3.6" class="ey n"/><path d="M18,33 q4,-6 8,0 M34,33 q4,-6 8,0" class="ey h"/><path d="M18,28 l7,6 M25,28 l-7,6 M35,28 l7,6 M42,28 l-7,6" class="ey o"/>`
+    + `<path d="M23,43 h14" class="mo n"/><path d="M21,41 q9,9 18,0" class="mo h"/><path d="M21,45 q4.5,-4 9,0 q4.5,4 9,0" class="mo o"/></svg>`;
+}
+function bossSVG(){
+  return `<svg viewBox="0 0 120 120" aria-hidden="true">${solid([{p:'15,40 82,40 82,108 15,108'},{p:'15,40 37,20 104,20 82,40',ov:'lt'},{p:'82,40 104,20 104,88 82,108',ov:'dk'}],'f6')}<path d="M26,55 l17,7 M71,55 l-17,7" class="ol"/><circle cx="36" cy="70" r="5" class="eye"/><circle cx="61" cy="70" r="5" class="eye"/><path d="M28,86 h42 v8 h-42 Z" class="fl" style="fill:var(--snow)"/><path d="M28,86 h42 v8 h-42 Z M35,86 v8 M42,86 v8 M49,86 v8 M56,86 v8 M63,86 v8" class="ol"/></svg>`;
+}
+
+/* =========================================================
+   LEVEL CONTENT
+   ========================================================= */
+const W = (...lines) => lines.filter(Boolean).map(l => `<div>${l}</div>`).join('');
+const fOpts = list => list.map(([html, ok, hint]) => ({html, ok:!!ok, hint}));
+function aOpts(correct, wrongs, unit, dp){
+  const out = [{html:`${fmt(correct,dp)} ${unit}`, ok:true}];
+  const seen = new Set([fmt(correct,dp)]);
+  for (const [v, hint] of wrongs){
+    if (!(v > 0)) continue;
+    const k = fmt(v,dp); if (seen.has(k)) continue;
+    seen.add(k); out.push({html:`${k} ${unit}`, ok:false, hint});
+    if (out.length === 4) break;
+  }
+  const mult = [2, 0.5, 1.5, 3, 4, 0.25]; let m = 0;
+  while (out.length < 4 && m < mult.length){
+    const v = correct * mult[m++]; const k = fmt(v,dp);
+    if (seen.has(k)) continue; seen.add(k);
+    out.push({html:`${k} ${unit}`, ok:false, hint:'Semak semula setiap langkah darab.'});
+  }
+  return out;
+}
+const U2 = 'cm²', U3 = 'cm³';
+const TAG_LP = {cls:'tag-lp', text:'Luas permukaan (cm²)'}, TAG_IP = {cls:'tag-ip', text:'Isi padu (cm³)'};
+const jLab = (useD, j) => useD ? {d:`${fmt(2*j)} cm`} : {j:`${fmt(j)} cm`};
+const jLine = (useD, j) => useD ? `${J} = ${fmt(2*j)} ÷ 2 = ${fmt(j)} cm` : '';
+const jHint = j => `${J} ialah jejari, iaitu separuh diameter. Di sini ${J} = ${fmt(j)} cm.`;
+const askLead = (what, shape) => `Kira ${what} ${shape} ini. (Guna ${PI_} = ${P227})`;
+const F13 = fr(1,3), F12 = fr(1,2);
+
+/* ---------- Misi 1: Kenal bentuk (6.1) ---------- */
+function optShapes(ans, d, names){
+  return [ans, ...d].map(k => {
+    const nm = (names && names[k]) || SHAPES[k].name;
+    return {icon:shapeIcon(k), html:nm, ok:k===ans, hint: k===ans ? '' : `Itu ${nm.toLowerCase()}: ${SHAPES[k].fact}.`};
+  });
+}
+const L1_OBJ = [
+  {fig:() => emoji('🎲','Dadu'), ans:'kubus', d:['kuboid','piramid','sfera']},
+  {fig:() => emoji('🥫','Tin makanan'), ans:'silinder', d:['kon','kuboid','sfera']},
+  {fig:() => emoji('⚽','Bola'), ans:'sfera', d:['silinder','kon','kubus']},
+  {fig:() => emoji('📦','Kotak bungkusan'), ans:'kuboid', d:['silinder','piramid','kon']},
+  {fig:() => emoji('🧀','Keju potong'), ans:'prisma', d:['piramid','kon','kuboid']},
+  {fig:() => OBJ_CONE, ans:'kon', d:['silinder','piramid','sfera']},
+  {fig:() => OBJ_PYR, ans:'piramid', d:['prisma','kon','kubus']}
+];
+const L1_PROP = [
+  {props:[['puncak','1 puncak'],['bulatan','1 tapak bulatan'],['lengkung','1 permukaan melengkung']], ans:'kon', d:['silinder','piramid','sfera']},
+  {props:[['bulatan','2 tapak bulatan'],['lengkung','1 permukaan melengkung']], ans:'silinder', d:['kon','sfera','prisma']},
+  {props:[['poligon','1 tapak poligon'],['segitiga','Muka segi tiga bertemu di puncak']], ans:'piramid', d:['prisma','kon','kubus']},
+  {props:[['kongruen','2 tapak poligon sama dan selari'],['keratan','Keratan rentas seragam']], ans:'prisma', d:['piramid','kon','sfera']},
+  {props:[['jarak','Semua titik sama jarak dari pusat']], ans:'sfera', d:['silinder','kon','hemisfera']}
+];
+const L1_TF = [
+  {q:'Kubus ialah sejenis prisma?', shape:'kubus', yes:true, why:'Kubus ada 2 tapak yang sama dan selari. Keratan rentasnya seragam. Jadi kubus ialah prisma.'},
+  {q:'Kuboid ialah sejenis prisma?', shape:'kuboid', yes:true, why:'Kuboid ada 2 tapak segi empat yang sama dan selari. Keratan rentasnya seragam. Jadi kuboid ialah prisma.'},
+  {q:'Silinder ialah polihedron?', shape:'silinder', yes:false, why:'Polihedron mesti ada muka rata sahaja. Silinder ada permukaan melengkung, jadi bukan polihedron.'},
+  {q:'Kon ada 2 tapak?', shape:'kon', yes:false, why:'Kon ada 1 tapak bulatan dan 1 puncak sahaja.'}
+];
+function buildL1(){
+  const obj = shuffle(L1_OBJ).slice(0,4).map(o => quizRound({figure:o.fig(), steps:[{prompt:'Objek ini bentuk 3D apa?', options:optShapes(o.ans, o.d)}]}));
+  const prop = shuffle(L1_PROP).slice(0,3).map(p => quizRound({figure:propsFig(p.props), steps:[{prompt:'Bentuk 3D apa ada ciri ini?', options:optShapes(p.ans, p.d)}]}));
+  const t = pick(L1_TF);
+  const tf = quizRound({figure:shapeSVG(t.shape), steps:[{prompt:t.q, cls:'yn', keepOrder:true, options:[
+    {html:'Ya', ok:t.yes, hint:t.why}, {html:'Tidak', ok:!t.yes, hint:t.why}]}], working:t.why, workingTitle:'Kenapa?'});
+  return shuffle([...obj, ...prop, tf]);
+}
+
+/* ---------- Misi 2: Bentangan (6.2) ---------- */
+const NAME2 = {prisma:'Prisma segi tiga', piramid:'Piramid segi empat'};
+const NET_FACT = {kubus:'6 segi empat sama', kuboid:'4 segi empat tepat dan 2 segi empat sama', silinder:'2 bulatan dan 1 segi empat tepat', kon:'1 sektor bulatan dan 1 bulatan', piramid:'1 segi empat sama dan 4 segi tiga', prisma:'2 segi tiga dan 3 segi empat', piramid3:'4 segi tiga', heks:'2 heksagon dan 6 segi empat', sfera:'tiada bentangan rata'};
+const L2_D = {kubus:['kuboid','prisma','piramid'], kuboid:['kubus','prisma','silinder'], silinder:['kon','prisma','sfera'], kon:['silinder','piramid','sfera'], piramid:['piramid3','prisma','kubus'], prisma:['piramid','kuboid','piramid3'], piramid3:['piramid','prisma','kon'], heks:['prisma','kuboid','piramid']};
+function buildL2(){
+  const rounds = shuffle(Object.keys(L2_D)).slice(0,6).map(k => {
+    const opts = [k, ...L2_D[k]].map(x => {
+      const nm = NAME2[x] || SHAPES[x].name;
+      return {icon:shapeIcon(x), html:nm, ok:x===k, hint: x===k ? '' : `Bentangan ${nm.toLowerCase()}: ${NET_FACT[x]}. Kira bentuk dalam gambar.`};
+    });
+    return quizRound({figure:netSVG(k), caption:'Bentangan', steps:[{prompt:'Bila dilipat, bentangan ini jadi bentuk apa?', options:opts}],
+      reveal:`<div class="reveal">${netSVG(k)}${IC.arrow}${shapeSVG(k,{icon:true})}</div>`});
+  });
+  rounds.splice(3, 0, quizRound({figure:shapeSVG('sfera'), steps:[{prompt:'Sfera boleh dibentang jadi rata?', keepOrder:true, options:[
+    {html:'Tidak boleh', ok:true},
+    {html:'Boleh, jadi 2 bulatan', hint:'Cuba kupas kulit oren. Kulit itu tidak boleh jadi rata sepenuhnya.'},
+    {html:'Boleh, jadi 1 segi empat', hint:'Permukaan sfera melengkung ke semua arah. Ia tidak boleh dibuka jadi rata.'}]}],
+    working:`Sfera tiada bentangan rata. Sebab itu kita ingat rumus luasnya terus: ${FX.lpSf}.`, workingTitle:'Fakta'}));
+  return rounds;
+}
+
+/* ---------- Misi 3: Kilang luas (6.3) ---------- */
+const KNAME = {sq:'luas segi empat sama', rect:'luas segi empat tepat', tri:'luas segi tiga', circ:'luas bulatan', curve:'luas permukaan melengkung'};
+const CTR = [
+  {key:'kubus', rows:[['sq',6]]},
+  {key:'kuboid', rows:[['rect',4],['sq',2]]},
+  {key:'piramid', rows:[['sq',1],['tri',4]]},
+  {key:'prisma', rows:[['tri',2],['rect',3]]}
+];
+const BLD = [
+  {key:'silinder', target:['bul2','lengkungSil'], tiles:['bul2','bul','lengkungSil','pjt','ipSil','lpSf'],
+    fig:() => `<div class="duo">${netSVG('silinder',{lab:true})}<p class="cap">2 bulatan + 1 segi empat tepat</p></div>`,
+    lead:`Bentangan silinder ada 2 bulatan dan 1 segi empat tepat. Panjang segi empat = lilitan bulatan = 2${PI_}${J}. Bina rumus.`,
+    hints:{bul:`Silinder ada 2 bulatan. Jadi 2 × ${FX.bul} = ${FX.bul2}.`, pjt:`Panjang segi empat ialah 2${PI_}${J}, bukan ${PI_}${J}. Luasnya 2${PI_}${J} × ${T}.`, ipSil:`${FX.ipSil} ialah isi padu, bukan luas.`, lpSf:`${FX.lpSf} ialah luas sfera.`}},
+  {key:'kon', target:['bul','pjs'], tiles:['bul','bul2','pjs','pjt','lengkungSil','ipKon'],
+    fig:() => `<div class="duo">${netSVG('kon',{lab:true})}${ZIGZAG}<p class="cap">Potong sektor kecil-kecil. Susun jadi segi empat ${PI_}${J} × ${S_}.</p></div>`,
+    lead:`Bentangan kon ada 1 bulatan dan 1 sektor. Sektor itu boleh disusun jadi segi empat ${PI_}${J} × ${S_}. Bina rumus.`,
+    hints:{bul2:'Kon ada 1 tapak bulatan sahaja.', pjt:`Permukaan melengkung kon guna tinggi sendeng ${S_}, bukan ${T}.`, lengkungSil:'Itu permukaan melengkung silinder.', ipKon:'Itu isi padu kon, bukan luas.'}},
+  {key:'sfera', target:['lpSf'], tiles:['lpSf','bul2','bul','ipSf'],
+    fig:() => `<div class="duo">${SPHERE4}<p class="cap">Kulit sfera = 4 bulatan yang sama besar</p></div>`,
+    lead:'Kulit sfera sama luas dengan 4 bulatan. Bina rumus luas permukaan sfera.',
+    hints:{bul2:`Kulit sfera = 4 bulatan, bukan 2. Jadi ${FX.lpSf}.`, bul:`Itu 1 bulatan sahaja. Kulit sfera = 4 bulatan.`, ipSf:'Itu isi padu (kuasa 3). Luas guna kuasa 2.'}}
+];
+function buildL3(){ return [...CTR.map(counterRound), ...BLD.map(builderRound)]; }
+
+/* ---------- Misi 4: Makmal isi padu (6.4) ---------- */
+const MEM_IP = [
+  {k:'kuboid', fx:`p × l × ${T}`},
+  {k:'prisma', fx:'luas keratan rentas × tinggi', sm:true},
+  {k:'silinder', fx:FX.ipSil},
+  {k:'piramid', fx:`${F13} × luas tapak × tinggi`, sm:true},
+  {k:'kon', fx:FX.ipKon},
+  {k:'sfera', fx:FX.ipSf}
+];
+function buildL4(){
+  return [
+    coinsRound(),
+    pourRound(),
+    quizRound({figure:PRISM_PYR, caption:'Tapak sama. Tinggi sama.', steps:[
+      {prompt:'Berapa piramid pasir untuk penuhkan kuboid ini?', cls:'n4', keepOrder:true, options:[
+        {html:'2', hint:'Ingat kon dan silinder tadi. Berapa kon yang diperlukan?'},
+        {html:'3', ok:true},
+        {html:'4', hint:'Piramid sama seperti kon. Bilangannya sama.'},
+        {html:'6', hint:`6 piramid muat dalam kubus hanya jika tinggi piramid = ${F12} tinggi kubus. Di sini tinggi sama.`}]},
+      {prompt:'Jadi, isi padu piramid = ?', cls:'fx sm', options:[
+        {html:`${F13} × luas tapak × tinggi`, ok:true},
+        {html:'luas tapak × tinggi', hint:`Itu isi padu kuboid atau prisma. Piramid perlu ${F13}.`},
+        {html:`${F12} × luas tapak × tinggi`, hint:`3 piramid = 1 kuboid. Jadi ${F13}, bukan ${F12}.`},
+        {html:'3 × luas tapak × tinggi', hint:'Piramid lebih kecil daripada kuboid, bukan lebih besar.'}]}],
+      working:W(`Isi padu piramid = ${F13} × luas tapak × tinggi`, `Sama seperti kon: ${FX.ipKon}`), workingTitle:'Rumus baru'}),
+    quizRound({figure:shapeSVG('sfera',{L:{j:'j'}}), steps:[{prompt:'Isi padu sfera = ?', cls:'fx', options:fOpts([
+      [FX.ipSf,1],
+      [FX.lpSf,0,`Itu luas permukaan (unit cm²). Isi padu guna ${J}³.`],
+      [FX.ipHemi,0,`${fr(2,3)} untuk hemisfera, iaitu separuh sfera.`],
+      [FX.ipSil,0,`Itu silinder. Sfera tiada tinggi ${T}.`]])}],
+      working:W(`Isi padu sfera = ${FX.ipSf}`, `Petua: <b>luas</b> guna kuasa 2 (${J}², cm²). <b>Isi padu</b> guna kuasa 3 (${J}³, cm³).`), workingTitle:'Ingat petua ini'}),
+    memoryRound(MEM_IP, 'Padankan setiap bentuk dengan rumus isi padunya.')
+  ];
+}
+
+/* ---------- Misi 5: Kira pantas (generators) ---------- */
+const GEN = {
+  silinderLP(){ const j=pick([7,7,14]), t=pick([5,6,8,10,12]), useD=Math.random()<.5;
+    const a=r2(2*PI*j*j), b=r2(2*PI*j*t), ans=r2(a+b);
+    return {meta:{type:'silinderLP', j, t, ans}, tag:TAG_LP, figure:shapeSVG('silinder',{L:{...jLab(useD,j), t:`${t} cm`}}), lead:askLead('luas permukaan','silinder tertutup'),
+      steps:[{prompt:'1. Pilih rumus', cls:'fx', options:fOpts([[FX.lpSil,1],[FX.lpSil1,0,`Silinder ada 2 bulatan, atas dan bawah. Jadi ${FX.bul2}.`],[FX.ipSil,0,`${FX.ipSil} ialah isi padu. Soalan ini minta luas.`],[FX.lpSf,0,`${FX.lpSf} ialah luas sfera.`]])},
+        {prompt:'2. Pilih jawapan', options:aOpts(ans, [[r2(r2(PI*j*j)+b),'Kamu kira 1 bulatan sahaja. Silinder ada 2 bulatan.'],[b,`Jangan lupa luas 2 bulatan, ${FX.bul2}.`],[r2(r2(8*PI*j*j)+r2(4*PI*j*t)), jHint(j)],[r2(PI*j*j*t),`Itu isi padu. Luas permukaan = ${FX.lpSil}.`]], U2)}],
+      working:W(jLine(useD,j), `Luas = ${FX.lpSil}`, `= (2 × ${P227} × ${fmt(j)} × ${fmt(j)}) + (2 × ${P227} × ${fmt(j)} × ${t})`, `= ${fmt(a)} + ${fmt(b)}`, `= <b>${fmt(ans)} cm²</b>`)};
+  },
+  silinderIP(){ const [j,t]=pick([[7,5],[7,6],[7,10],[3.5,12],[14,3],[3.5,8]]), useD=Math.random()<.5;
+    const ans=r2(PI*j*j*t);
+    return {meta:{type:'silinderIP', j, t, ans}, tag:TAG_IP, figure:shapeSVG('silinder',{L:{...jLab(useD,j), t:`${t} cm`}}), lead:askLead('isi padu','silinder'),
+      steps:[{prompt:'1. Pilih rumus', cls:'fx', options:fOpts([[FX.ipSil,1],[FX.ipKon,0,`${F13} hanya untuk kon dan piramid.`],[FX.lpSil,0,'Itu luas permukaan. Soalan ini minta isi padu.'],[FX.lengkungSil,0,`Itu luas melengkung. Isi padu = luas tapak × tinggi = ${FX.ipSil}.`]])},
+        {prompt:'2. Pilih jawapan', options:aOpts(ans, [[r2(ans/3),`${F13} hanya untuk kon. Silinder tiada ${F13}.`],[r2(2*PI*j*t),`Itu ${FX.lengkungSil}. Isi padu = ${FX.ipSil}.`],[r2(PI*4*j*j*t), jHint(j)]], U3)}],
+      working:W(jLine(useD,j), `Isi padu = ${FX.ipSil}`, `= ${P227} × ${fmt(j)} × ${fmt(j)} × ${t}`, `= <b>${fmt(ans)} cm³</b>`)};
+  },
+  konIP(){ const [j,t]=pick([[7,3],[7,6],[7,9],[7,12],[14,3],[14,6],[3.5,6],[3.5,12]]), useD=Math.random()<.5;
+    const ans=r2(PI*j*j*t/3);
+    return {meta:{type:'konIP', j, t, ans}, tag:TAG_IP, figure:shapeSVG('kon',{L:{...jLab(useD,j), t:`${t} cm`}}), lead:askLead('isi padu','kon'),
+      steps:[{prompt:'1. Pilih rumus', cls:'fx', options:fOpts([[FX.ipKon,1],[FX.ipSil,0,`Jangan lupa ${F13}. 3 kon = 1 silinder.`],[FX.lpKon,0,'Itu luas permukaan kon.'],[FX.ipSf,0,'Itu isi padu sfera.']])},
+        {prompt:'2. Pilih jawapan', options:aOpts(ans, [[r2(PI*j*j*t),`Jangan lupa darab ${F13}.`],[r2(PI*j*j*t/2),`Kon guna ${F13}, bukan ${F12}.`],[r2(PI*4*j*j*t/3), jHint(j)]], U3)}],
+      working:W(jLine(useD,j), `Isi padu = ${FX.ipKon}`, `= ${F13} × ${P227} × ${fmt(j)} × ${fmt(j)} × ${t}`, `= <b>${fmt(ans)} cm³</b>`)};
+  },
+  konLP(){ const [j,t,s]=pick([[7,24,25],[3,4,5],[6,8,10],[14,48,50]]);
+    const a=r2(PI*j*j), b=r2(PI*j*s), ans=r2(a+b);
+    return {meta:{type:'konLP', j, t, s, ans}, tag:TAG_LP, figure:shapeSVG('kon',{L:{j:`${j} cm`, t:`${t} cm`, s:`${s} cm`}}), lead:askLead('luas permukaan','kon tegak'),
+      steps:[{prompt:'1. Pilih rumus', cls:'fx', options:fOpts([[FX.lpKon,1],[FX.lpKonT,0,`Guna tinggi sendeng ${S_} (garis condong), bukan ${T}.`],[FX.lpSil,0,'Itu luas silinder.'],[FX.ipKon,0,'Itu isi padu kon.']])},
+        {prompt:'2. Pilih jawapan', options:aOpts(ans, [[r2(a+r2(PI*j*t)),`Guna ${S_} = ${s} cm, bukan ${T} = ${t} cm.`],[b,`Tambah luas tapak bulatan ${FX.bul}.`],[r2(r2(2*PI*j*j)+b),'Kon ada 1 tapak bulatan sahaja.'],[r2(PI*j*j*t/3),'Itu isi padu, bukan luas.']], U2)}],
+      working:W(`Luas = ${FX.lpKon}`, `= (${P227} × ${j} × ${j}) + (${P227} × ${j} × ${s})`, `= ${fmt(a)} + ${fmt(b)}`, `= <b>${fmt(ans)} cm²</b>`)};
+  },
+  sferaLP(){ const j=pick([7,14,3.5,21]), useD=Math.random()<.5; const ans=r2(4*PI*j*j);
+    return {meta:{type:'sferaLP', j, ans}, tag:TAG_LP, figure:shapeSVG('sfera',{L:jLab(useD,j)}), lead:askLead('luas permukaan','sfera'),
+      steps:[{prompt:'1. Pilih rumus', cls:'fx', options:fOpts([[FX.lpSf,1],[FX.ipSf,0,'Itu isi padu (kuasa 3). Luas guna kuasa 2.'],[FX.bul2,0,'Kulit sfera = 4 bulatan, bukan 2.'],[FX.bul,0,'Itu luas 1 bulatan. Kulit sfera = 4 bulatan.']])},
+        {prompt:'2. Pilih jawapan', options:aOpts(ans, [[r2(PI*j*j),'Darab 4. Kulit sfera = 4 bulatan.'],[r2(2*PI*j*j),'Darab 4, bukan 2.'],[r2(4*PI*j**3/3),'Itu isi padu, bukan luas.'],[r2(16*PI*j*j), jHint(j)]], U2)}],
+      working:W(jLine(useD,j), `Luas = ${FX.lpSf}`, `= 4 × ${P227} × ${fmt(j)} × ${fmt(j)}`, `= <b>${fmt(ans)} cm²</b>`)};
+  },
+  sferaIP(){ const j=pick([7,3.5,21]), useD=Math.random()<.5; const ans=r2(4/3*PI*j**3);
+    return {meta:{type:'sferaIP', j, ans}, tag:TAG_IP, figure:shapeSVG('sfera',{L:jLab(useD,j)}), lead:askLead('isi padu','sfera'),
+      steps:[{prompt:'1. Pilih rumus', cls:'fx', options:fOpts([[FX.ipSf,1],[FX.lpSf,0,`Itu luas permukaan. Isi padu guna ${J}³.`],[FX.ipHemi,0,`${fr(2,3)} untuk hemisfera (separuh sfera).`],[FX.ipSil,0,`Itu silinder. Sfera tiada ${T}.`]])},
+        {prompt:'2. Pilih jawapan', options:aOpts(ans, [[r2(4*PI*j*j),'Itu luas permukaan, bukan isi padu.'],[r2(2/3*PI*j**3),`${fr(2,3)} untuk hemisfera. Sfera penuh guna ${fr(4,3)}.`],[r2(PI*j**3),`Jangan lupa darab ${fr(4,3)}.`],[r2(4/3*PI*8*j**3), jHint(j)]], U3)}],
+      working:W(jLine(useD,j), `Isi padu = ${FX.ipSf}`, `= ${fr(4,3)} × ${P227} × ${fmt(j)} × ${fmt(j)} × ${fmt(j)}`, `= <b>${fmt(ans)} cm³</b>`)};
+  },
+  hemiIP(){ const j=pick([7,21,3.5]); const ans=r2(2/3*PI*j**3);
+    return {meta:{type:'hemiIP', j, ans}, tag:TAG_IP, figure:shapeSVG('hemisfera',{L:{j:`${fmt(j)} cm`}}), lead:askLead('isi padu','hemisfera'),
+      steps:[{prompt:'1. Pilih rumus', cls:'fx', options:fOpts([[FX.ipHemi,1],[FX.ipSf,0,`Itu sfera penuh. Hemisfera = ${F12} × ${fr(4,3)} = ${fr(2,3)}.`],[FX.bul2,0,'Itu luas melengkung hemisfera.'],[FX.ipKon,0,'Itu isi padu kon.']])},
+        {prompt:'2. Pilih jawapan', options:aOpts(ans, [[r2(4/3*PI*j**3),'Itu sfera penuh. Bahagi 2.'],[r2(PI*j**3/3),`Hemisfera = ${FX.ipHemi}.`],[r2(2*PI*j*j),'Itu luas, bukan isi padu.']], U3)}],
+      working:W(`Isi padu = ${F12} × ${FX.ipSf} = ${FX.ipHemi}`, `= ${fr(2,3)} × ${P227} × ${fmt(j)} × ${fmt(j)} × ${fmt(j)}`, `= <b>${fmt(ans)} cm³</b>`)};
+  },
+  kubusLP(){ const a=pick([3,4,5,7,8,9]); const ans=6*a*a;
+    return {meta:{type:'kubusLP', a, ans}, tag:TAG_LP, figure:shapeSVG('kubus',{L:{a:`${a} cm`}}), lead:'Kira luas permukaan kubus ini.',
+      steps:[{prompt:'1. Pilih rumus', cls:'fx sm', options:fOpts([['6 × sisi × sisi',1],['4 × sisi × sisi',0,'Kubus ada 6 muka, bukan 4.'],['sisi × sisi × sisi',0,'Itu isi padu (kuasa 3).'],['12 × sisi',0,'Itu jumlah panjang 12 tepi kubus.']])},
+        {prompt:'2. Pilih jawapan', options:aOpts(ans, [[4*a*a,'Kubus ada 6 muka, bukan 4.'],[a**3,'Itu isi padu, bukan luas.'],[6*a,'Luas 1 muka = sisi × sisi.']], U2)}],
+      working:W('Luas = 6 × luas segi empat sama', `= 6 × (${a} × ${a})`, `= 6 × ${a*a}`, `= <b>${fmt(ans)} cm²</b>`)};
+  },
+  kuboidIP(){ const p=pick([5,6,8,10]), l=pick([3,4]), t=pick([2,5,7]); const ans=p*l*t;
+    return {meta:{type:'kuboidIP', p, l, t, ans}, tag:TAG_IP, figure:shapeSVG('kuboid',{L:{p:`${p} cm`, l:`${l} cm`, t:`${t} cm`}}), lead:'Kira isi padu kuboid ini.',
+      steps:[{prompt:'1. Pilih rumus', cls:'fx sm', options:fOpts([[`p × l × ${T}`,1],[`${F13} × p × l × ${T}`,0,`${F13} hanya untuk piramid dan kon.`],[`p + l + ${T}`,0,'Isi padu guna darab, bukan tambah.'],[`2(pl + p${T} + l${T})`,0,'Itu luas permukaan kuboid.']])},
+        {prompt:'2. Pilih jawapan', options:aOpts(ans, [[2*(p*l+p*t+l*t),'Itu luas permukaan, bukan isi padu.'],[r2(ans/3),`Kuboid tiada ${F13}.`],[p+l+t,'Isi padu guna darab, bukan tambah.'],[ans/2,'Darab ketiga-tiga ukuran sahaja.']], U3)}],
+      working:W(`Isi padu = p × l × ${T}`, `= ${p} × ${l} × ${t}`, `= <b>${fmt(ans)} cm³</b>`)};
+  },
+  piramidIP(){ const a=pick([4,6,9,10]), t=pick([3,6,9,12]); const ans=a*a*t/3;
+    return {meta:{type:'piramidIP', a, t, ans}, tag:TAG_IP, figure:shapeSVG('piramid',{L:{a:`${a} cm`, t:`${t} cm`}}), lead:'Kira isi padu piramid tegak bertapak segi empat sama ini.',
+      steps:[{prompt:'1. Pilih rumus', cls:'fx sm', options:fOpts([[`${F13} × luas tapak × tinggi`,1],['luas tapak × tinggi',0,`Jangan lupa ${F13}. Itu rumus prisma.`],[`${F12} × luas tapak × tinggi`,0,`Piramid guna ${F13}, bukan ${F12}.`],['luas tapak + 4 × luas segi tiga',0,'Itu luas permukaan.']])},
+        {prompt:'2. Pilih jawapan', options:aOpts(ans, [[a*a*t,`Jangan lupa darab ${F13}.`],[a*a*t/2,`Piramid guna ${F13}, bukan ${F12}.`],[r2(a*t/3),'Luas tapak = sisi × sisi.']], U3)}],
+      working:W(`Luas tapak = ${a} × ${a} = ${a*a} cm²`, `Isi padu = ${F13} × ${a*a} × ${t}`, `= <b>${fmt(ans)} cm³</b>`)};
+  },
+  piramidLP(){ const a=pick([6,8,10]), s=pick([4,5,7,9]); const ans=a*a+2*a*s;
+    return {meta:{type:'piramidLP', a, s, ans}, tag:TAG_LP, figure:shapeSVG('piramid',{L:{a:`${a} cm`, s:`${s} cm`}}), lead:`Kira luas permukaan piramid tegak ini. ${S_} ialah tinggi segi tiga (tinggi sendeng).`,
+      steps:[{prompt:'1. Pilih rumus', cls:'fx sm', options:fOpts([['luas tapak + 4 × luas segi tiga',1],['luas tapak + 3 × luas segi tiga',0,'Tapak segi empat sama ada 4 sisi, jadi ada 4 segi tiga.'],['4 × luas segi tiga',0,'Tambah luas tapak juga.'],[`${F13} × luas tapak × tinggi`,0,'Itu isi padu.']])},
+        {prompt:'2. Pilih jawapan', options:aOpts(ans, [[a*a+4*a*s,`Luas segi tiga = ${F12} × tapak × tinggi.`],[2*a*s,'Tambah luas tapak segi empat sama.'],[a*a+a*s,'Ada 4 segi tiga, bukan 2.']], U2)}],
+      working:W(`Tapak: ${a} × ${a} = ${a*a} cm²`, `4 segi tiga: 4 × (${F12} × ${a} × ${s}) = ${2*a*s} cm²`, `Jumlah = <b>${fmt(ans)} cm²</b>`)};
+  },
+  prismaIP(){ const b=pick([4,6,8,10]), h=pick([3,5,6]), t=pick([10,12,15]); const xs=b*h/2, ans=xs*t;
+    return {meta:{type:'prismaIP', b, h, t, ans}, tag:TAG_IP, figure:shapeSVG('prisma',{xs:true, L:{b:`${b} cm`, h:`${h} cm`, t:`${t} cm`}}), lead:'Kira isi padu prisma tegak ini. Keratan rentas ialah segi tiga kuning.',
+      steps:[{prompt:'1. Pilih rumus', cls:'fx sm', options:fOpts([['luas keratan rentas × tinggi',1],[`${F13} × luas tapak × tinggi`,0,'Itu rumus piramid.'],['2 × luas segi tiga + 3 × luas segi empat',0,'Itu luas permukaan.'],['luas keratan rentas + tinggi',0,'Darab, bukan tambah.']])},
+        {prompt:'2. Pilih jawapan', options:aOpts(ans, [[b*h*t,`Luas segi tiga = ${F12} × tapak × tinggi.`],[r2(ans/3),`Prisma tiada ${F13}.`],[xs,`Darab dengan tinggi prisma ${T}.`]], U3)}],
+      working:W(`Keratan rentas = ${F12} × ${b} × ${h} = ${fmt(xs)} cm²`, `Isi padu = ${fmt(xs)} × ${t}`, `= <b>${fmt(ans)} cm³</b>`)};
+  }
+};
+const LP_T = ['silinderLP','konLP','sferaLP','kubusLP','piramidLP'];
+const IP_T = ['silinderIP','konIP','sferaIP','hemiIP','kuboidIP','piramidIP','prismaIP'];
+function buildL5(){
+  const types = shuffle([...shuffle(LP_T).slice(0,3), ...shuffle(IP_T).slice(0,3)]);
+  return types.map(k => quizRound(GEN[k]()));
+}
+
+/* ---------- Misi 6: Lawan Kiub Degil (penyelesaian masalah) ---------- */
+function buildL6(){
+  return [
+    quizRound({tag:TAG_IP, figure:FIG_AISKRIM, lead:`Salim jual aiskrim dalam bekas ini. (Guna ${PI_} = ${P227})`, steps:[
+      {prompt:'1. Bekas ini gabungan bentuk apa?', options:[{html:'Silinder + kon', ok:true},{html:'Silinder + sfera', hint:'Bahagian atas ada puncak. Itu kon.'},{html:'Kuboid + piramid', hint:'Tapaknya bulatan, bukan segi empat.'},{html:'Kon + hemisfera', hint:'Bahagian bawah ada 2 tapak bulatan. Itu silinder.'}]},
+      {prompt:'2. Isi padu silinder?', options:aOpts(924, [[308,`Itu isi padu kon. Silinder tiada ${F13}.`],[264,`Itu luas melengkung. Isi padu = ${FX.ipSil}.`],[3696,`${J} = 7 cm, bukan 14 cm.`]], U3)},
+      {prompt:'3. Isi padu kon?', options:aOpts(308, [[924,`Jangan lupa darab ${F13}.`],[462,`Kon guna ${F13}, bukan ${F12}.`],[1232,'Itu jumlah dua bentuk. Kira kon sahaja.']], U3)},
+      {prompt:'4. Isi padu 1 bekas?', options:aOpts(1232, [[616,'Tambah, bukan tolak. Aiskrim ada dalam kedua-dua bahagian.'],[1848,'Isi padu kon ialah 308 cm³, bukan 924 cm³.'],[924,'Tambah isi padu kon juga.']], U3)},
+      {prompt:'5. Salim jual 10 bekas. Berapa liter aiskrim? (1 liter = 1 000 cm³)', options:aOpts(12.32, [[123.2,'Bahagi dengan 1 000, bukan 100.'],[1.232,'10 bekas = 10 × 1 232 = 12 320 cm³. Kemudian bahagi 1 000.'],[12320,'Itu dalam cm³. Tukar ke liter: bahagi 1 000.']], 'liter', 3)}],
+      working:W(`Silinder: ${P227} × 7 × 7 × 6 = 924 cm³`, `Kon: ${F13} × ${P227} × 7 × 7 × 6 = 308 cm³`, '1 bekas: 924 + 308 = 1 232 cm³', '10 bekas: 12 320 cm³ = <b>12.32 liter</b>')}),
+    quizRound({tag:TAG_LP, figure:FIG_KUBPIR, lead:'Bongkah ini gabungan kubus (sisi 6 cm) dan piramid. Kira luas permukaan bongkah.', steps:[
+      {prompt:'1. Berapa muka kubus yang tidak ditutup?', cls:'n4', keepOrder:true, options:[{html:'3', hint:'Kira semula. Hanya muka atas yang ditutup.'},{html:'4', hint:'Kira semula. Hanya muka atas yang ditutup.'},{html:'5', ok:true},{html:'6', hint:'Muka atas kubus ditutup oleh piramid. Jangan kira muka itu.'}]},
+      {prompt:'2. Luas 5 muka kubus?', options:aOpts(180, [[216,'Itu luas 6 muka. Kira 5 muka sahaja.'],[150,'Luas 1 muka = 6 × 6 = 36 cm².'],[30,'Luas muka = sisi × sisi, bukan sisi sahaja.']], U2)},
+      {prompt:'3. Luas 4 segi tiga piramid?', options:aOpts(60, [[120,`Luas segi tiga = ${F12} × tapak × tinggi.`],[15,'Itu 1 segi tiga sahaja. Ada 4 segi tiga.'],[45,'Tapak segi empat sama, jadi ada 4 segi tiga.']], U2)},
+      {prompt:'4. Jumlah luas permukaan bongkah?', options:aOpts(240, [[276,'Muka atas kubus tidak dikira.'],[300,`Luas 4 segi tiga ialah 60 cm².`],[180,'Tambah luas 4 segi tiga piramid.']], U2)}],
+      working:W('5 muka kubus: 5 × (6 × 6) = 180 cm²', `4 segi tiga: 4 × (${F12} × 6 × 5) = 60 cm²`, 'Jumlah: <b>240 cm²</b>')}),
+    quizRound({tag:TAG_IP, figure:FIG_ALI, lead:`Ali isi silinder dengan air sampai penuh. Dia masukkan kon pepejal (${J} = 7 cm, tinggi 9 cm) sepenuhnya, kemudian keluarkan kon itu.`, steps:[
+      {prompt:'1. Isi padu air penuh dalam silinder?', options:aOpts(2310, [[770,`Silinder tiada ${F13}.`],[660,`Itu luas melengkung. Isi padu = ${FX.ipSil}.`],[9240,`${J} = 7 cm, bukan 14 cm.`]], U3)},
+      {prompt:'2. Isi padu kon?', options:aOpts(462, [[1386,`Jangan lupa darab ${F13}.`],[693,`Kon guna ${F13}, bukan ${F12}.`],[154,`Itu luas tapak sahaja. Darab tinggi dan ${F13}.`]], U3)},
+      {prompt:'3. Berapa air tinggal dalam silinder?', options:aOpts(1848, [[2772,'Kon menolak air keluar. Tolak, bukan tambah.'],[2310,'Air tumpah semasa kon masuk. Isi padu air tumpah = isi padu kon.'],[924,'Isi padu kon ialah 462 cm³.']], U3)}],
+      working:W(`Silinder: ${P227} × 7 × 7 × 15 = 2 310 cm³`, `Kon: ${F13} × ${P227} × 7 × 7 × 9 = 462 cm³`, 'Air tinggal: 2 310 − 462 = <b>1 848 cm³</b>')}),
+    quizRound({tag:TAG_IP, figure:FIG_SILHEMI, lead:`Kira isi padu bongkah ini. (Guna ${PI_} = ${P227})`, steps:[
+      {prompt:'1. Bongkah ini gabungan bentuk apa?', options:[{html:'Silinder + hemisfera', ok:true},{html:'Silinder + sfera', hint:'Bahagian atas cuma separuh sfera, iaitu hemisfera.'},{html:'Silinder + kon', hint:'Bahagian atas melengkung dan tiada puncak.'},{html:'Kuboid + hemisfera', hint:'Bahagian bawah ada tapak bulatan. Itu silinder.'}]},
+      {prompt:'2. Rumus isi padu hemisfera?', cls:'fx', options:fOpts([[FX.ipHemi,1],[FX.ipSf,0,`Itu sfera penuh. Hemisfera = ${F12} × ${fr(4,3)} = ${fr(2,3)}.`],[FX.bul2,0,'Itu luas, bukan isi padu.'],[FX.ipKon,0,'Itu rumus kon.']])},
+      {prompt:'3. Isi padu silinder?', options:aOpts(1540, [[440,`Itu luas melengkung. Isi padu = ${FX.ipSil}.`],[513.33,`Silinder tiada ${F13}.`],[6160,`${J} = 7 cm, bukan 14 cm.`]], U3)},
+      {prompt:'4. Jumlah isi padu bongkah?', options:aOpts(2258.67, [[2977.33,'Kamu guna sfera penuh. Bahagian atas cuma hemisfera.'],[1540,'Tambah isi padu hemisfera, 718.67 cm³.'],[1899.33,`Isi padu hemisfera = ${FX.ipHemi} = 718.67 cm³.`]], U3)}],
+      working:W(`Silinder: ${P227} × 7 × 7 × 10 = 1 540 cm³`, `Hemisfera: ${fr(2,3)} × ${P227} × 7 × 7 × 7 = 718.67 cm³`, 'Jumlah: <b>2 258.67 cm³</b>')})
+  ];
+}
+
+const LEVELS = [
+  {n:1, title:'Kenal Bentuk', sub:'6.1 Sifat geometri', part:'badan', partName:'badan kuboid', icon:'kuboid', th:[1,3], build:buildL1},
+  {n:2, title:'Bentangan', sub:'6.2 Buka dan lipat bentuk', part:'kepala', partName:'kepala sfera', icon:'sfera', th:[1,3], build:buildL2},
+  {n:3, title:'Kilang Luas', sub:'6.3 Bina rumus luas permukaan', part:'lengan', partName:'lengan silinder', icon:'silinder', th:[1,3], build:buildL3},
+  {n:4, title:'Makmal Isi Padu', sub:'6.4 Temui rumus isi padu', part:'kaki', partName:'kaki prisma', icon:'prisma', th:[1,3], build:buildL4},
+  {n:5, title:'Kira Pantas', sub:'Guna rumus, π = 22/7', part:'topi', partName:'topi kon', icon:'kon', th:[1,4], build:buildL5},
+  {n:6, title:'Lawan Kiub Degil', sub:'Penyelesaian masalah', part:'kasut', partName:'kasut piramid', icon:'piramid', th:[2,5], boss:true, build:buildL6}
+];
+
+/* =========================================================
+   ROUND RUNNERS (DOM only inside run)
+   ========================================================= */
+const CHEERS = ['Betul!','Hebat!','Tepat!','Bagus!','Mantap!'];
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+function el(html){ const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; }
+const motionOK = () => !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const hintHTML = t => `${IC.bulb}<span>${t}</span>`;
+function buzz(p){ try { if (navigator.vibrate) navigator.vibrate(p); } catch(e){} }
+function sr(t){ const s = $('#sr'); if (!s) return; s.textContent = ''; setTimeout(() => { s.textContent = t; }, 40); }
+function cheer(text){ const c = $('.cheer'); if (!c) return; c.textContent = text; c.classList.remove('show'); void c.offsetWidth; c.classList.add('show'); sr(text); }
+function setMood(m){ const f = $('#mascot'); if (!f) return; f.dataset.m = m; clearTimeout(setMood.t); setMood.t = setTimeout(() => { f.dataset.m = 'n'; }, 1300); }
+function burst(target, n){
+  if (!motionOK() || !target) return;
+  n = n || 14;
+  const r = target.getBoundingClientRect(), cx = r.left + r.width/2, cy = r.top + r.height/2;
+  for (let i=0;i<n;i++){
+    const b = document.createElement('span');
+    b.className = 'bit ' + pick(['sq','tri','cir']) + ' c' + (1 + Math.floor(Math.random()*6));
+    const a = Math.random()*Math.PI*2, d = 50 + Math.random()*100;
+    b.style.left = cx + 'px'; b.style.top = cy + 'px';
+    b.style.setProperty('--dx', (Math.cos(a)*d).toFixed(0) + 'px');
+    b.style.setProperty('--dy', (Math.sin(a)*d - 30).toFixed(0) + 'px');
+    b.style.setProperty('--rot', (Math.random()*540 - 270).toFixed(0) + 'deg');
+    document.body.append(b); setTimeout(() => b.remove(), 950);
+  }
+}
+function updateCombo(ctx){
+  const c = $('#combo'); if (!c) return;
+  if (ctx.combo >= 2){ c.hidden = false; c.querySelector('b').textContent = '×' + ctx.combo; c.classList.remove('bump'); void c.offsetWidth; c.classList.add('bump'); }
+  else c.hidden = true;
+}
+function praise(ctx, btn, clean){
+  if (clean) ctx.combo++;
+  updateCombo(ctx);
+  cheer(clean && ctx.combo >= 3 ? `${ctx.combo} berturut-turut!` : pick(CHEERS));
+  setMood('h'); burst(btn); buzz(30);
+}
+function scold(ctx){ ctx.mistakes++; ctx.combo = 0; updateCombo(ctx); setMood('o'); buzz([20,50,20]); }
+function goBtn(text, fn, cls){ const b = document.createElement('button'); b.type = 'button'; b.className = 'key ' + (cls || 'go'); b.textContent = text; b.addEventListener('click', fn, {once:true}); return b; }
+function showWorking(host, html, done, title){
+  const w = el(`<div class="working" role="status"><h4>${title || 'Jalan kira'}</h4><div class="wk">${html}</div></div>`);
+  const b = goBtn('Teruskan', done); w.append(b); host.append(w);
+  w.scrollIntoView({behavior: motionOK() ? 'smooth' : 'auto', block:'nearest'});
+  setTimeout(() => b.focus({preventScroll:true}), 350);
+}
+
+/* steps: one question after another inside the same round */
+function runSteps(host, steps, ctx, onDone){
+  let i = 0;
+  const next = () => {
+    if (i >= steps.length) return onDone();
+    const stp = steps[i];
+    const sec = el(`<section class="step">${stp.prompt ? `<h3 class="step-q">${stp.prompt}</h3>` : ''}<div class="opts ${stp.cls || ''}"></div><div class="hint" role="status" hidden></div></section>`);
+    host.append(sec);
+    const optsEl = $('.opts', sec), hintEl = $('.hint', sec);
+    let clean = true, closed = false;
+    (stp.keepOrder ? stp.options : shuffle(stp.options)).forEach(o => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'key opt';
+      b.innerHTML = (o.icon ? `<span class="opt-ic">${o.icon}</span>` : '') + `<span class="opt-tx">${o.html}</span>`;
+      b.addEventListener('click', () => {
+        if (closed || b.disabled) return;
+        if (stp.any){
+          closed = true; b.classList.add('is-pick');
+          $$('.opt', optsEl).forEach(x => { x.disabled = true; });
+          stp.onPick && stp.onPick(o.v);
+          i++; setTimeout(next, 350); return;
+        }
+        if (o.ok){
+          closed = true; b.classList.add('is-ok');
+          $$('.opt', optsEl).forEach(x => { x.disabled = true; });
+          hintEl.hidden = true;
+          praise(ctx, b, clean);
+          ctx.onStepOk && ctx.onStepOk();
+          i++; setTimeout(next, 650);
+        } else {
+          b.classList.add('is-bad'); b.disabled = true; clean = false;
+          scold(ctx);
+          hintEl.innerHTML = hintHTML(o.hint || 'Belum tepat. Cuba lagi.');
+          hintEl.hidden = false;
+          ctx.onStepBad && ctx.onStepBad();
+        }
+      });
+      optsEl.append(b);
+    });
+    if (i > 0) sec.scrollIntoView({behavior: motionOK() ? 'smooth' : 'auto', block:'nearest'});
+  };
+  next();
+}
+
+function quizRound(q){
+  return { q, run(stage, ctx, done){
+    stage.innerHTML = '';
+    const wrap = el(`<div class="q">${q.figure ? `<figure class="q-fig">${q.tag ? `<span class="tag ${q.tag.cls}">${q.tag.text}</span>` : ''}<div class="fig-in">${q.figure}</div>${q.caption ? `<figcaption>${q.caption}</figcaption>` : ''}</figure>` : ''}<div class="q-main">${q.lead ? `<p class="lead">${q.lead}</p>` : ''}<div class="q-steps"></div></div></div>`);
+    stage.append(wrap);
+    const host = $('.q-steps', wrap);
+    runSteps(host, q.steps, ctx, () => {
+      if (q.reveal){ const fi = $('.fig-in', wrap); fi.innerHTML = q.reveal; fi.classList.add('revealed'); const fc = $('figcaption', wrap); if (fc) fc.textContent = 'Bentangan → bentuk 3D'; }
+      if (q.working) showWorking(host, q.working, done, q.workingTitle);
+      else setTimeout(done, q.reveal ? 1600 : 1100);
+    });
+  }};
+}
+
+const SW = {
+  sq:'<rect x="5" y="3" width="24" height="24" class="pf" style="fill:var(--f3)"/>',
+  rect:'<rect x="1" y="7" width="32" height="16" class="pf" style="fill:var(--f5)"/>',
+  tri:'<polygon points="17,3 31,27 3,27" class="pf" style="fill:var(--f4)"/>'
+};
+function counterRound(def){
+  return { def, run(stage, ctx, done){
+    stage.innerHTML = '';
+    const name = SHAPES[def.key].name.toLowerCase();
+    const rows = def.rows.map(([k], i) => `${i ? '<div class="ctr-plus">+</div>' : ''}<div class="ctr-row" data-k="${k}"><span class="stp"><button type="button" class="key" data-d="-1" aria-label="Kurang">−</button><output aria-live="polite">0</output><button type="button" class="key" data-d="1" aria-label="Tambah">+</button></span><span class="times">×</span><svg class="sw" viewBox="0 0 34 30" aria-hidden="true">${SW[k]}</svg><span class="ctr-name">${KNAME[k]}</span></div>`).join('');
+    const wrap = el(`<div class="q"><figure class="q-fig"><div class="fig-in">${netSVG(def.key,{tap:true})}</div><figcaption>Tekan setiap muka untuk tanda semasa mengira</figcaption></figure><div class="q-main"><p class="lead">Ini bentangan <b>${name}</b>. Kira muka bagi setiap bentuk.</p><div class="ctr"><div class="ctr-eq">Luas permukaan ${name} =</div>${rows}</div><div class="hint" role="status" hidden></div><div class="act"></div></div></div>`);
+    stage.append(wrap);
+    const svg = $('svg.net', wrap), hint = $('.hint', wrap), act = $('.act', wrap);
+    svg.addEventListener('click', e => {
+      const p = e.target.closest('.pc'); if (!p) return;
+      if (p.classList.toggle('mark')){
+        const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+        t.setAttribute('x', p.dataset.cx); t.setAttribute('y', p.dataset.cy); t.setAttribute('class','tick'); t.textContent = '✓';
+        p.after(t); p._tick = t;
+      } else if (p._tick){ p._tick.remove(); p._tick = null; }
+    });
+    const vals = {};
+    $$('.ctr-row', wrap).forEach(r => {
+      const k = r.dataset.k, out = $('output', r); vals[k] = 0;
+      $$('button', r).forEach(b => b.addEventListener('click', () => {
+        vals[k] = Math.max(0, Math.min(9, vals[k] + Number(b.dataset.d)));
+        out.textContent = vals[k]; r.classList.remove('is-bad');
+      }));
+    });
+    let clean = true;
+    const check = document.createElement('button'); check.type = 'button'; check.className = 'key go'; check.textContent = 'Semak';
+    act.append(check);
+    check.addEventListener('click', () => {
+      const wrong = def.rows.filter(([k, n]) => vals[k] !== n);
+      $$('.ctr-row', wrap).forEach(r => r.classList.remove('is-bad'));
+      if (!wrong.length){
+        $$('.ctr-row', wrap).forEach(r => r.classList.add('is-ok'));
+        $$('button', $('.ctr', wrap)).forEach(b => { b.disabled = true; });
+        hint.hidden = true; check.remove();
+        praise(ctx, check.isConnected ? check : $('.ctr', wrap), clean);
+        const eq = def.rows.map(([k, n]) => `${n} × ${KNAME[k]}`).join(' + ');
+        showWorking($('.q-main', wrap), `Luas permukaan ${name} = <b>${eq}</b>`, done, 'Rumus siap');
+      } else {
+        clean = false; scold(ctx);
+        wrong.forEach(([k]) => { const r = $(`.ctr-row[data-k="${k}"]`, wrap); void r.offsetWidth; r.classList.add('is-bad'); });
+        hint.innerHTML = hintHTML(`Kira semula muka ${wrong.map(([k]) => `<b>${KNAME[k].replace('luas ','')}</b>`).join(' dan ')}. Tekan setiap muka pada bentangan untuk tanda.`);
+        hint.hidden = false;
+      }
+    });
+  }};
+}
+
+function builderRound(def){
+  return { def, run(stage, ctx, done){
+    stage.innerHTML = '';
+    const name = SHAPES[def.key].name.toLowerCase();
+    const slotsHTML = def.target.map((_, i) => `${i ? '<span>+</span>' : ''}<button type="button" class="slot" data-i="${i}" aria-label="Petak ${i+1}, kosong"></button>`).join('');
+    const wrap = el(`<div class="q"><figure class="q-fig"><div class="fig-in">${def.fig()}</div></figure><div class="q-main"><p class="lead">${def.lead}</p><div class="bld-eq"><span>Luas permukaan ${name} =</span>${slotsHTML}</div><p class="step-q" style="font-size:18px;margin:0 0 8px">Tekan kepingan rumus:</p><div class="tray"></div><div class="hint" role="status" hidden></div><div class="act"></div></div></div>`);
+    stage.append(wrap);
+    const slots = def.target.map(() => null), slotEls = $$('.slot', wrap), tray = $('.tray', wrap), hint = $('.hint', wrap), act = $('.act', wrap);
+    const tileEls = {};
+    shuffle(def.tiles).forEach(key => {
+      const t = document.createElement('button'); t.type = 'button'; t.className = 'key tile'; t.innerHTML = FX[key];
+      t.addEventListener('click', () => {
+        if (t.classList.contains('used')) return;
+        const idx = slots.indexOf(null); if (idx < 0) return;
+        slots[idx] = key; t.classList.add('used'); render();
+      });
+      tileEls[key] = t; tray.append(t);
+    });
+    slotEls.forEach((s, i) => s.addEventListener('click', () => {
+      if (!slots[i] || s.classList.contains('is-ok')) return;
+      tileEls[slots[i]].classList.remove('used'); slots[i] = null; render();
+    }));
+    function render(){
+      slotEls.forEach((s, i) => {
+        s.classList.remove('is-bad');
+        s.classList.toggle('full', !!slots[i]);
+        s.innerHTML = slots[i] ? FX[slots[i]] : '';
+        s.setAttribute('aria-label', `Petak ${i+1}, ${slots[i] ? 'berisi. Tekan untuk buang' : 'kosong'}`);
+      });
+    }
+    let clean = true;
+    const check = document.createElement('button'); check.type = 'button'; check.className = 'key go'; check.textContent = 'Semak';
+    act.append(check);
+    check.addEventListener('click', () => {
+      if (slots.includes(null)){ hint.innerHTML = hintHTML('Isi semua petak dulu.'); hint.hidden = false; return; }
+      const need = def.target.slice();
+      const bad = [];
+      slots.forEach((k, i) => { const at = need.indexOf(k); if (at >= 0) need.splice(at, 1); else bad.push(i); });
+      if (!bad.length){
+        slotEls.forEach(s => s.classList.add('is-ok'));
+        $$('.tile', tray).forEach(t => { t.disabled = true; });
+        hint.hidden = true; check.remove();
+        praise(ctx, slotEls[slotEls.length-1], clean);
+        showWorking($('.q-main', wrap), `Luas permukaan ${name} = <b>${def.target.map(k => FX[k]).join(' + ')}</b>`, done, 'Rumus siap');
+      } else {
+        clean = false; scold(ctx);
+        bad.forEach(i => { void slotEls[i].offsetWidth; slotEls[i].classList.add('is-bad'); });
+        hint.innerHTML = hintHTML((def.hints[slots[bad[0]]] || 'Lihat semula bentangan. Kira setiap bahagian.') + ' Tekan petak merah untuk buang.');
+        hint.hidden = false;
+      }
+    });
+  }};
+}
+
+function coinsRound(){
+  return { kind:'coins', run(stage, ctx, done){
+    stage.innerHTML = '';
+    const wrap = el(`<div class="q"><figure class="q-fig"><div class="fig-in"><svg viewBox="0 0 300 240" class="coins" role="img" aria-label="Timbunan syiling"><g class="stack"></g><g class="cdims" hidden="">${COIN_DIMS}</g></svg></div><figcaption>Syiling: <b class="cn">0</b> / 10</figcaption></figure><div class="q-main"><p class="lead">Satu syiling ialah satu bulatan yang nipis. Susun 10 syiling. Apa yang terbentuk?</p><div class="act"></div><div class="q-steps"></div></div></div>`);
+    stage.append(wrap);
+    const stack = $('.stack', wrap), cn = $('.cn', wrap), act = $('.act', wrap), host = $('.q-steps', wrap), lead = $('.lead', wrap);
+    let n = 0;
+    const add = document.createElement('button'); add.type = 'button'; add.className = 'key go'; add.textContent = 'Tambah syiling';
+    act.append(add);
+    add.addEventListener('click', () => {
+      if (n >= 10) return;
+      stack.insertAdjacentHTML('beforeend', coinSVG(n)); n++; cn.textContent = n; buzz(10);
+      if (n === 10){
+        add.remove();
+        $('.cdims', wrap).removeAttribute('hidden');
+        lead.innerHTML = '10 syiling bertindan jadi <b>silinder</b>. Isi padu = luas tapak × tinggi.';
+        cheer('Silinder!'); setMood('h');
+        runSteps(host, [{prompt:'Jadi, isi padu silinder = ?', cls:'fx', options:fOpts([
+          [FX.ipSil,1],
+          [FX.lengkungSil,0,`${FX.lengkungSil} ialah luas melengkung. Isi padu = luas tapak × tinggi.`],
+          [FX.bul,0,`${FX.bul} ialah luas tapak sahaja. Darab dengan tinggi ${T}.`],
+          [FX.lpSil,0,'Itu luas permukaan silinder.']])}], ctx,
+          () => showWorking(host, W('Isi padu silinder = luas tapak × tinggi', `= ${FX.bul} × ${T}`, `= <b>${FX.ipSil}</b>`), done, 'Rumus baru'));
+      }
+    });
+  }};
+}
+
+function pourRound(){
+  return { kind:'pour', run(stage, ctx, done){
+    stage.innerHTML = '';
+    const wrap = el(`<div class="q"><figure class="q-fig"><div class="fig-in">${POUR_SVG}</div><figcaption>Tapak sama. Tinggi sama.</figcaption><div class="tally" aria-hidden="true"><span></span><span></span><span></span></div></figure><div class="q-main"><p class="lead">Kon dan silinder ini ada tapak yang sama dan tinggi yang sama. Kita isi kon dengan pasir, kemudian tuang ke dalam silinder.</p><div class="q-steps"></div></div></div>`);
+    stage.append(wrap);
+    const host = $('.q-steps', wrap), svg = $('svg.pour', wrap), lvl = $('.lvl', wrap), tally = $$('.tally span', wrap);
+    let guess = null;
+    runSteps(host, [{prompt:'Teka dulu: berapa kon pasir untuk penuhkan silinder?', any:true, keepOrder:true, cls:'n4', options:[1,2,3,4].map(v => ({html:String(v), v})), onPick:v => { guess = v; }}], ctx, () => {
+      const box = el('<section class="step"><div class="act"></div><p class="pour-msg" role="status">Tekan butang untuk tuang.</p></section>');
+      host.append(box);
+      const msg = $('.pour-msg', box);
+      const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'key go'; btn.textContent = 'Tuang 1 kon';
+      $('.act', box).append(btn);
+      box.scrollIntoView({behavior: motionOK() ? 'smooth' : 'auto', block:'nearest'});
+      let poured = 0, busy = false;
+      btn.addEventListener('click', () => {
+        if (busy || poured >= 3) return;
+        busy = true; poured++; svg.classList.add('pouring'); buzz(15);
+        setTimeout(() => { lvl.style.transform = `scaleY(${poured/3})`; tally[poured-1].classList.add('on'); msg.textContent = `Kon dituang: ${poured}`; }, 300);
+        setTimeout(() => { svg.classList.remove('pouring'); busy = false; if (poured === 3) finish(); }, 1050);
+      });
+      function finish(){
+        btn.remove(); cheer('Penuh!'); setMood('h');
+        msg.innerHTML = `Penuh! <b>3 kon = 1 silinder.</b> ${guess === 3 ? 'Tekaan kamu tepat.' : `Kamu teka ${guess}. Jawapan sebenar ialah 3.`}`;
+        runSteps(host, [{prompt:'Jadi, isi padu kon = ? × isi padu silinder', cls:'n4', keepOrder:true, options:[
+          {html:F13, ok:true},
+          {html:F12, hint:'Silinder perlu 3 kon untuk penuh, bukan 2.'},
+          {html:'2', hint:'Kon lebih kecil daripada silinder.'},
+          {html:'3', hint:`3 kon = 1 silinder. Jadi 1 kon = ${F13} silinder.`}]}], ctx,
+          () => showWorking(host, W(`Isi padu kon = ${F13} × isi padu silinder`, `= ${F13} × ${FX.ipSil}`, `= <b>${FX.ipKon}</b>`), done, 'Rumus baru'));
+      }
+    });
+  }};
+}
+
+function memoryRound(pairs, title){
+  return { kind:'memory', pairs, run(stage, ctx, done){
+    stage.innerHTML = '';
+    const wrap = el(`<div><p class="lead">${title}</p><div class="mem-grid"></div><p class="mem-stat">Cubaan: <b class="mv">0</b></p><div class="act"></div></div>`);
+    stage.append(wrap);
+    const grid = $('.mem-grid', wrap), mv = $('.mv', wrap);
+    const cards = shuffle(pairs.flatMap((p, i) => [
+      {id:i, html:`<span class="mc-ic">${shapeIcon(p.k)}</span><span>${SHAPES[p.k].name}</span>`, cls:''},
+      {id:i, html:p.fx, cls:'fx' + (p.sm ? ' sm' : '')}]));
+    let open = [], lock = false, moves = 0, matched = 0, misses = 0;
+    cards.forEach(c => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'mc'; b.setAttribute('aria-label','Kad tertutup');
+      b.innerHTML = `<span class="mc-in"><span class="mc-back" aria-hidden="true">?</span><span class="mc-front ${c.cls}">${c.html}</span></span>`;
+      b.addEventListener('click', () => {
+        if (lock || b.classList.contains('up')) return;
+        b.classList.add('up'); b.setAttribute('aria-label', $('.mc-front', b).textContent.trim());
+        open.push([b, c]);
+        if (open.length < 2) return;
+        moves++; mv.textContent = moves; lock = true;
+        const [[b1, c1], [b2, c2]] = open;
+        if (c1.id === c2.id){
+          setTimeout(() => {
+            b1.classList.add('match'); b2.classList.add('match'); b1.disabled = b2.disabled = true;
+            cheer('Padan!'); setMood('h'); burst(b2, 10); buzz(30);
+            open = []; lock = false; matched++;
+            if (matched === pairs.length) finish();
+          }, 380);
+        } else {
+          misses++;
+          b1.classList.add('nope'); b2.classList.add('nope');
+          setTimeout(() => { [b1, b2].forEach(x => { x.classList.remove('up','nope'); x.setAttribute('aria-label','Kad tertutup'); }); open = []; lock = false; }, 1150);
+        }
+      });
+      grid.append(b);
+    });
+    function finish(){
+      ctx.mistakes += Math.max(0, Math.floor((misses - 3) / 2));
+      const a = $('.act', wrap);
+      a.append(el(`<p class="done-p" style="margin:0">Semua padan dalam <b>${moves}</b> cubaan.</p>`));
+      const b = goBtn('Teruskan', done); a.append(b); setTimeout(() => b.focus({preventScroll:true}), 300);
+    }
+  }};
+}
+
+/* =========================================================
+   STATE + SCREENS
+   ========================================================= */
+const S = {name:'', stars:{}, teacher:false};
+let SID = 0;
+function load(){ try { const d = JSON.parse(localStorage.getItem(KEY) || 'null'); if (d && typeof d === 'object'){ S.name = d.name || ''; S.stars = d.stars || {}; S.teacher = !!d.teacher; } } catch(e){} }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+const earned = () => new Set(LEVELS.filter(L => S.stars[L.n] > 0).map(L => L.part));
+const unlocked = n => S.teacher || n === 1 || S.stars[n-1] > 0;
+const totalStars = () => LEVELS.reduce((a, L) => a + (S.stars[L.n] || 0), 0);
+
+function renderTop(){
+  const sc = $('#starTotal'); if (sc) sc.textContent = totalStars();
+}
+function screen(html){ SID++; const m = $('#main'); m.innerHTML = html; window.scrollTo(0, 0); return m; }
+
+function showStart(){
+  const m = screen(`<section class="start">
+    <div class="start-art">${robotSVG(new Set(ALLPARTS), {scatter:true})}</div>
+    <div class="start-tx">
+      <h1 class="title">Misi Robo Geo</h1>
+      <p class="story">Robo Geo jatuh dan badannya terburai jadi 6 bentuk 3D. Selesaikan 6 misi untuk bina semula Robo.</p>
+      <ul class="howto"><li>${IC.tap}<span>Tekan jawapan</span></li><li>${star(true)}<span>Kumpul bintang</span></li><li>${faceSVG()}<span>Bina semula Robo</span></li></ul>
+      <div class="start-form" id="startForm">
+        <label for="nm">Nama kamu</label>
+        <div class="row"><input id="nm" name="nm" maxlength="24" autocomplete="off" placeholder="Contoh: Aina" value="${esc(S.name)}"><button class="key go" type="button" id="btnMula">Mula misi</button></div>
+      </div>
+      <p class="src">Bab 6 Bentuk Geometri Tiga Dimensi, Matematik Tingkatan 2</p>
+    </div></section>`);
+  const go = () => { S.name = $('#nm', m).value.trim().slice(0,24); save(); showMap(); };
+  $('#btnMula', m).addEventListener('click', go);
+  $('#nm', m).addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); go(); } });
+}
+
+function misRow(L){
+  const open = unlocked(L.n), st = S.stars[L.n] || 0;
+  return `<li><button type="button" class="key mis" data-n="${L.n}" ${open ? '' : 'disabled'} aria-label="Misi ${L.n}: ${L.title}. ${open ? st + ' bintang' : 'Berkunci'}">
+    <span class="mis-n">${open ? L.n : IC.lock}</span>
+    <span class="mis-ic">${shapeSVG(L.icon, {icon:true, deco:true})}</span>
+    <span class="mis-tx"><b>${L.title}</b><small>${L.sub}</small></span>
+    <span class="mis-st">${[1,2,3].map(i => star(i <= st)).join('')}</span></button></li>`;
+}
+function showMap(){
+  renderTop();
+  const on = earned();
+  const m = screen(`<section class="map">
+    <aside class="bay">
+      <h2>${S.name ? esc(S.name) + ' dan ' : ''}Robo Geo</h2>
+      ${robotSVG(on)}
+      <p class="bay-n"><b>${on.size}</b> / 6 bahagian siap</p>
+      <button type="button" class="key sm" id="btnKad">${IC.card}<span>Kad Rumus</span></button>
+    </aside>
+    <div>
+      <h2 class="col-h">Pilih misi</h2>
+      <ol class="missions">${LEVELS.map(misRow).join('')}</ol>
+      <details class="guru"><summary>Untuk guru</summary><div class="guru-in">
+        <label class="chk"><input type="checkbox" id="tUnlock" ${S.teacher ? 'checked' : ''}> Buka semua misi</label>
+        <button type="button" class="key sm" id="tReset">Padam kemajuan</button>
+        <span id="tConfirm" hidden>Padam semua bintang dan nama? <button type="button" class="key sm danger" id="tYes">Ya, padam</button> <button type="button" class="key sm" id="tNo">Batal</button></span>
+        <p class="guru-note">Kemajuan disimpan dalam pelayar peranti ini sahaja. Padam kemajuan sebelum murid lain guna peranti yang sama.</p>
+      </div></details>
+    </div></section>`);
+  $$('.mis', m).forEach(b => b.addEventListener('click', () => playLevel(Number(b.dataset.n))));
+  $('#btnKad', m).addEventListener('click', e => showKad(e.currentTarget));
+  $('#tUnlock', m).addEventListener('change', e => { S.teacher = e.target.checked; save(); showMap(); const d = $('.guru'); if (d) d.open = true; });
+  $('#tReset', m).addEventListener('click', () => { $('#tConfirm', m).hidden = false; });
+  $('#tNo', m).addEventListener('click', () => { $('#tConfirm', m).hidden = true; });
+  $('#tYes', m).addEventListener('click', () => { S.stars = {}; S.name = ''; S.teacher = false; save(); renderTop(); showStart(); });
+}
+
+function playLevel(n){
+  const L = LEVELS[n-1];
+  const rounds = L.build();
+  const ctx = {n, mistakes:0, combo:0};
+  const m = screen(`<section class="level">
+    <header class="lv-head">
+      <button type="button" class="key sm back" id="btnBack">${IC.back}<span>Peta</span></button>
+      <div class="lv-title"><small>Misi ${n} daripada 6</small><b>${L.title}</b></div>
+      <div class="lv-side"><span class="combo" id="combo" hidden>${IC.flame}<b></b></span><span class="mascot" id="mascot" data-m="n">${faceSVG()}</span></div>
+      <div class="lv-prog" role="progressbar" aria-label="Kemajuan misi" aria-valuemin="0" aria-valuemax="${rounds.length}" aria-valuenow="0"><span></span></div>
+    </header>
+    ${L.boss ? `<div class="boss"><div class="boss-face" id="bossFace">${bossSVG()}</div><div class="boss-info"><b>Kiub Degil</b><div class="hp" role="progressbar" aria-label="Tenaga Kiub Degil" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><span></span></div><span class="boss-n">Masalah <span id="bossN">1</span> / ${rounds.length}. Setiap jawapan betul melemahkan Kiub Degil.</span></div></div>` : ''}
+    <div class="stage" id="stage"></div></section>`);
+  const sid = SID;
+  const back = $('#btnBack', m);
+  back.addEventListener('click', () => {
+    if (back.classList.contains('warn')) return showMap();
+    back.classList.add('warn'); $('span', back).textContent = 'Keluar? Tekan lagi';
+    setTimeout(() => { if (back.isConnected){ back.classList.remove('warn'); $('span', back).textContent = 'Peta'; } }, 3000);
+  });
+  if (L.boss){
+    const total = rounds.reduce((a, r) => a + r.q.steps.length, 0);
+    let hp = total;
+    const bar = $('.hp span', m), hpEl = $('.hp', m), face = $('#bossFace', m);
+    ctx.onStepOk = () => { hp = Math.max(0, hp-1); const pct = Math.round(hp/total*100); bar.style.width = pct + '%'; hpEl.setAttribute('aria-valuenow', pct); face.classList.remove('hit','laugh'); void face.offsetWidth; face.classList.add('hit'); };
+    ctx.onStepBad = () => { face.classList.remove('hit','laugh'); void face.offsetWidth; face.classList.add('laugh'); };
+  }
+  const stage = $('#stage', m), prog = $('.lv-prog', m);
+  let idx = 0;
+  const advance = () => {
+    if (sid !== SID) return;
+    $('span', prog).style.width = (idx / rounds.length * 100) + '%';
+    prog.setAttribute('aria-valuenow', idx);
+    if (L.boss && idx < rounds.length) $('#bossN', m).textContent = idx + 1;
+    if (idx >= rounds.length) return endLevel();
+    stage.classList.remove('enter'); void stage.offsetWidth; stage.classList.add('enter');
+    rounds[idx].run(stage, ctx, () => { if (sid !== SID) return; idx++; advance(); });
+    if (idx > 0) m.querySelector('.level').scrollIntoView({block:'start', behavior: motionOK() ? 'smooth' : 'auto'});
+  };
+  const endLevel = () => {
+    if (L.boss){
+      const face = $('#bossFace', m); face.classList.remove('hit','laugh'); face.classList.add('ko');
+      cheer('Kiub Degil kalah!'); burst(face, 24);
+      setTimeout(() => { if (sid === SID) finishLevel(n, ctx); }, 1400);
+    } else finishLevel(n, ctx);
+  };
+  advance();
+}
+
+function finishLevel(n, ctx){
+  const L = LEVELS[n-1];
+  const stars = ctx.mistakes <= L.th[0] ? 3 : ctx.mistakes <= L.th[1] ? 2 : 1;
+  const first = !(S.stars[n] > 0);
+  S.stars[n] = Math.max(S.stars[n] || 0, stars); save(); renderTop();
+  if (first && earned().size === 6) return showFinal();
+  showDone(n, stars, first, ctx);
+}
+
+function showDone(n, stars, first, ctx){
+  const L = LEVELS[n-1];
+  const m = screen(`<section class="done">
+    <div class="done-art">${robotSVG(earned(), {newPart: first ? L.part : null})}</div>
+    <div class="done-tx">
+      <p class="done-k">Misi ${n} selesai</p>
+      <h2 class="title">${stars === 3 ? 'Cemerlang!' : stars === 2 ? 'Bagus!' : 'Siap!'}</h2>
+      <div class="stars-big" role="img" aria-label="${stars} bintang">${[1,2,3].map(i => `<span style="--i:${i}">${star(i <= stars)}</span>`).join('')}</div>
+      <p class="done-p">${first ? `Robo dapat semula <b>${L.partName}</b>.` : `Rekod terbaik kamu: <b>${S.stars[n]}</b> bintang.`}</p>
+      <p class="done-m">Jawapan salah: <b>${ctx.mistakes}</b>.${stars < 3 ? ' Main lagi untuk dapat 3 bintang.' : ''}</p>
+      <div class="done-act">${n < 6 ? `<button type="button" class="key go" id="dNext">Misi ${n+1}</button>` : ''}<button type="button" class="key" id="dAgain">Main lagi</button><button type="button" class="key" id="dMap">Peta misi</button></div>
+    </div></section>`);
+  const nx = $('#dNext', m); if (nx) nx.addEventListener('click', () => playLevel(n+1));
+  $('#dAgain', m).addEventListener('click', () => playLevel(n));
+  $('#dMap', m).addEventListener('click', showMap);
+  buzz([30,60,30]);
+  setTimeout(() => burst($('.stars-big', m), 26), 500);
+  setTimeout(() => (nx || $('#dMap', m)).focus({preventScroll:true}), 200);
+}
+
+function showFinal(){
+  const today = new Date().toLocaleDateString('ms-MY', {day:'numeric', month:'long', year:'numeric'});
+  const m = screen(`<section class="final">
+    <div class="cert">
+      <div class="cert-art">${robotSVG(earned(), {dance:true, newPart:'kasut'})}</div>
+      <div class="cert-tx">
+        <p class="done-k">Robo Geo sudah siap dibina semula</p>
+        <h2 class="title" style="font-size:clamp(34px,6vw,54px)">Sijil Jurutera Bentuk 3D</h2>
+        <p class="cert-name">${esc(S.name) || 'Jurutera Muda'}</p>
+        <p>berjaya menamatkan 6 misi Bab 6 dengan <b>${totalStars()} / 18</b> bintang.</p>
+        <p>Cabaran seterusnya: bina Robo Geo sebenar daripada kad manila (Projek Mini, halaman 119).</p>
+        <p class="cert-date">${today}</p>
+      </div>
+    </div>
+    <div class="done-act"><button type="button" class="key go" id="fMap">Peta misi</button></div></section>`);
+  $('#fMap', m).addEventListener('click', showMap);
+  buzz([40,60,40,60,80]);
+  setTimeout(() => burst($('.cert-name', m), 30), 400);
+  setTimeout(() => burst($('.cert-art', m), 30), 900);
+}
+
+function showKad(opener){
+  const rows = [
+    ['kubus','6 × luas segi empat sama','sisi × sisi × sisi'],
+    ['kuboid','jumlah luas 6 muka',`p × l × ${T}`],
+    ['prisma','(2 × luas segi tiga) + (3 × luas segi empat)','luas keratan rentas × tinggi'],
+    ['piramid','luas tapak + (4 × luas segi tiga)',`${F13} × luas tapak × tinggi`],
+    ['silinder',FX.lpSil,FX.ipSil],
+    ['kon',FX.lpKon,FX.ipKon],
+    ['sfera',FX.lpSf,FX.ipSf]
+  ].map(([k, lp, ip]) => `<tr><td><span class="nm">${shapeIcon(k)}${SHAPES[k].name}</span></td><td class="${lp.length > 60 && lp.indexOf('<var') >= 0 ? 'f' : ''}">${lp}</td><td class="${ip.indexOf('<var') >= 0 ? 'f' : ''}">${ip}</td></tr>`).join('');
+  const ov = el(`<div class="modal" role="dialog" aria-modal="true" aria-labelledby="krH"><div class="modal-card">
+    <div class="modal-top"><h2 id="krH" class="title-sm">Kad Rumus</h2><button type="button" class="key sm" id="krX" aria-label="Tutup">${IC.x}</button></div>
+    <div class="legend"><span>${J} jejari</span><span>${T} tinggi</span><span>${S_} tinggi sendeng</span><span>${PI_} = ${P227}</span></div>
+    <div class="tbl-wrap"><table class="kr"><thead><tr><th>Bentuk</th><th>Luas permukaan</th><th>Isi padu</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p class="tip">${IC.bulb}<span>Luas guna kuasa 2, unit cm². Isi padu guna kuasa 3, unit cm³.</span></p>
+  </div></div>`);
+  document.body.append(ov);
+  const close = () => { ov.remove(); document.removeEventListener('keydown', onKey); if (opener) opener.focus(); };
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onKey);
+  ov.addEventListener('click', e => { if (e.target === ov) close(); });
+  $('#krX', ov).addEventListener('click', close);
+  $('#krX', ov).focus();
+}
+
+/* ---------- boot ---------- */
+if (HAS_DOM){
+  const start = data => {
+    if (data && data.S){ Object.assign(S, data.S); } else load();
+    renderTop();
+    if (S.name || Object.keys(S.stars).length) showMap(); else showStart();
+  };
+  try { if (window.claude && window.claude.hot && window.claude.hot.snapshot) window.claude.hot.snapshot(() => ({S: JSON.parse(JSON.stringify(S))})); } catch(e){}
+  const hot = window.claude && window.claude.hot;
+  if (hot && hot.ready) hot.ready(start); else start(hot && hot.data ? hot.data : {});
+} else {
+  globalThis.__RG = {GEN, LEVELS, buildL1, buildL2, buildL3, buildL4, buildL5, buildL6, fmt, r2, PI};
+}
+})();
+</script>
+</body></html>
